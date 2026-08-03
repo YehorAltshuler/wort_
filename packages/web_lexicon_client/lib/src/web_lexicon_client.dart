@@ -72,12 +72,14 @@ class WebLexiconClient implements LexiconClient {
   }
 
   static int _shardId(String value) {
-    var hash = 2166136261;
+    const shardCount = 128;
+    const fnvPrime = 16777619;
+    var hash = 2166136261 % shardCount;
     for (final codeUnit in value.codeUnits) {
       hash ^= codeUnit;
-      hash = (hash * 16777619) & 0xFFFFFFFF;
+      hash = (hash * fnvPrime) % shardCount;
     }
-    return hash % 128;
+    return hash;
   }
 
   static int _compare(

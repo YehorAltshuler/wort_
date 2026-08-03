@@ -46,6 +46,7 @@ void main() {
         requestedPaths.where((path) => path.contains('/details/')),
         hasLength(1),
       );
+      expect(requestedPaths, contains('/app/lexicon/details/082.json'));
     },
   );
 }

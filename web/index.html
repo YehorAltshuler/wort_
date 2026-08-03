@@ -18,18 +18,21 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Немецкий словарь, лексика из учебников и осмысленные тренировки в одном приложении.">
   <meta name="theme-color" content="#171318">
+  <link rel="canonical" href="https://wort-five.vercel.app/">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wort-five.vercel.app/">
   <meta property="og:title" content="wort_ — немецкие слова, которые запоминаются">
   <meta property="og:description" content="Немецкий словарь, лексика из учебников и осмысленные тренировки в одном приложении.">
-  <meta property="og:image" content="og-wort.png">
+  <meta property="og:image" content="https://wort-five.vercel.app/og-wort.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="wort_ — немецкие слова, которые запоминаются">
   <meta name="twitter:description" content="Немецкий словарь, лексика из учебников и осмысленные тренировки в одном приложении.">
-  <meta name="twitter:image" content="og-wort.png">
+  <meta name="twitter:image" content="https://wort-five.vercel.app/og-wort.png">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -42,8 +45,132 @@
 
   <title>wort_ — немецкие слова, которые запоминаются</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    (function () {
+      let preference = 'system';
+      try {
+        const stored = window.localStorage.getItem('flutter.themePreference');
+        if (stored) {
+          try {
+            preference = JSON.parse(stored);
+          } catch (_) {
+            preference = stored;
+          }
+        }
+      } catch (_) {
+        preference = 'system';
+      }
+      const useDarkTheme = preference === 'dark' ||
+        (preference === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.loadingTheme =
+        useDarkTheme ? 'dark' : 'light';
+      document.querySelector('meta[name="theme-color"]').content =
+        useDarkTheme ? '#171318' : '#fff7fa';
+    })();
+  </script>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #fff7fa;
+    }
+
+    #app-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff7fa;
+      opacity: 1;
+      transition: opacity 800ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    #app-loading.is-hidden {
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      opacity: 1;
+      transform: scale(1);
+      transition:
+        opacity 600ms cubic-bezier(0.2, 0, 0, 1),
+        transform 800ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    #app-loading.is-hidden .loading-content {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+
+    .loading-logo {
+      flex: 0 0 112px;
+      width: 112px;
+      height: 112px;
+      display: block;
+      border-radius: 26px;
+      box-shadow: 0 18px 48px rgb(38 22 30 / 18%);
+    }
+
+    .loading-indicator {
+      box-sizing: border-box;
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgb(234 76 137 / 22%);
+      border-top-color: #ea4c89;
+      border-radius: 50%;
+      animation: loading-spin 800ms linear infinite;
+    }
+
+    @keyframes loading-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    html[data-loading-theme="dark"],
+    html[data-loading-theme="dark"] body,
+    html[data-loading-theme="dark"] #app-loading {
+      background: #171318;
+    }
+
+    html[data-loading-theme="dark"] .loading-logo {
+      box-shadow: 0 18px 48px rgb(0 0 0 / 40%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #app-loading { transition: none; }
+      .loading-indicator { animation-duration: 1.6s; }
+    }
+  </style>
 </head>
 <body>
+  <div id="app-loading" role="status" aria-label="Loading wort_">
+    <div class="loading-content">
+      <img class="loading-logo" src="icons/Icon-192.png" alt="wort_">
+      <div class="loading-indicator" aria-hidden="true"></div>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('app-loading');
+      if (!loading) return;
+      const removeLoading = function () {
+        if (loading.isConnected) loading.remove();
+      };
+      loading.classList.add('is-hidden');
+      loading.addEventListener('transitionend', removeLoading, { once: true });
+      window.setTimeout(removeLoading, 950);
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

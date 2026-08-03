@@ -4,6 +4,9 @@
   # wort_
 
   **Немецкий словарь, учебники и осмысленные тренировки**
+
+  [![Web](https://img.shields.io/badge/Открыть_Web-EA4C89?style=for-the-badge&logo=vercel&logoColor=white)](https://wort-five.vercel.app)
+  [![APK](https://img.shields.io/badge/Скачать_APK-242424?style=for-the-badge&logo=android&logoColor=white)](https://github.com/YehorAltshuler/wort_/releases/latest/download/wort.apk)
 </div>
 
 ## Возможности
