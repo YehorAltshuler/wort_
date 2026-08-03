@@ -1,0 +1,10 @@
+name: collections_client
+description: User word collections data contract for wort_.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.7
+
+dev_dependencies:
+  very_good_analysis: ^10.3.0

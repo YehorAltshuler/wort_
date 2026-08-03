@@ -1,0 +1,491 @@
+[
+  {"dictionaryId":null,
+    "type": "verb",
+    "infinitive": "duzen",
+    "praeteritum": "duzte",
+    "perfekt": "hat geduzt",
+    "translation": {
+      "ru": ["обращаться на «ты»"],
+      "en": ["to address someone with du"],
+      "ar": ["يخاطب بصيغة du"]
+    }
+  },
+  {"dictionaryId":"erleichtern",
+    "type": "verb",
+    "infinitive": "erleichtern",
+    "praeteritum": "erleichterte",
+    "perfekt": "hat erleichtert",
+    "translation": {
+      "ru": ["облегчать"],
+      "en": ["to make easier", "to facilitate"],
+      "ar": ["يُسهّل"]
+    }
+  },
+  {"dictionaryId":"behörde",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Behörde",
+    "plural": "Behörden",
+    "translation": {
+      "ru": ["ведомство", "государственный орган"],
+      "en": ["authority", "government agency"],
+      "ar": ["هيئة", "سلطة"]
+    }
+  },
+  {"dictionaryId":"vergleich",
+    "type": "noun",
+    "article": ["der"],
+    "word": "Vergleich",
+    "plural": "Vergleiche",
+    "translation": {
+      "ru": ["сравнение"],
+      "en": ["comparison"],
+      "ar": ["مقارنة"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "noun",
+    "article": ["der", "die"],
+    "word": "Bekannte",
+    "plural": "Bekannten",
+    "translation": {
+      "ru": ["знакомый", "знакомая"],
+      "en": ["acquaintance"],
+      "ar": ["معارف", "شخص معروف"]
+    }
+  },
+  {"dictionaryId":"regional",
+    "type": "other",
+    "word": "regional",
+    "translation": {
+      "ru": ["региональный", "местный"],
+      "en": ["regional", "local"],
+      "ar": ["إقليمي", "محلي"]
+    }
+  },
+  {"dictionaryId":"großstadt",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Großstadt",
+    "plural": "Großstädte",
+    "translation": {
+      "ru": ["крупный город", "мегаполис"],
+      "en": ["large city", "metropolis"],
+      "ar": ["مدينة كبيرة"]
+    }
+  },
+  {"dictionaryId":"form",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Form",
+    "plural": "Formen",
+    "translation": {
+      "ru": ["форма"],
+      "en": ["form", "shape"],
+      "ar": ["شكل"]
+    }
+  },
+  {"dictionaryId":"innerhalb",
+    "type": "other",
+    "word": "innerhalb",
+    "translation": {
+      "ru": ["в пределах", "в течение"],
+      "en": ["within", "inside"],
+      "ar": ["داخل", "خلال"]
+    }
+  },
+  {"dictionaryId":"reiten",
+    "type": "verb",
+    "infinitive": "reiten",
+    "praeteritum": "ritt",
+    "perfekt": "ist geritten",
+    "translation": {
+      "ru": ["ездить верхом"],
+      "en": ["to ride a horse"],
+      "ar": ["يركب حصانًا"]
+    }
+  },
+  {"dictionaryId":"pferd",
+    "type": "noun",
+    "article": ["das"],
+    "word": "Pferd",
+    "plural": "Pferde",
+    "translation": {
+      "ru": ["лошадь"],
+      "en": ["horse"],
+      "ar": ["حصان"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "verb",
+    "infinitive": "pensioniert sein",
+    "praeteritum": "war pensioniert",
+    "perfekt": "ist pensioniert worden",
+    "translation": {
+      "ru": ["быть на пенсии"],
+      "en": ["to be retired"],
+      "ar": ["يكون متقاعدًا"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "noun",
+    "article": ["der"],
+    "word": "Elternabend",
+    "plural": "Elternabende",
+    "translation": {
+      "ru": ["родительское собрание"],
+      "en": ["parents' evening"],
+      "ar": ["اجتماع أولياء الأمور"]
+    }
+  },
+  {"dictionaryId":"klima",
+    "type": "noun",
+    "article": ["das"],
+    "word": "Klima",
+    "plural": "",
+    "comment": "Sg.",
+    "translation": {
+      "ru": ["климат"],
+      "en": ["climate"],
+      "ar": ["مناخ"]
+    }
+  },
+  {"dictionaryId":"arbeitgeber",
+    "type": "noun",
+    "article": ["der"],
+    "word": "Arbeitgeber",
+    "plural": "Arbeitgeber",
+    "translation": {
+      "ru": ["работодатель"],
+      "en": ["employer"],
+      "ar": ["صاحب العمل"]
+    }
+  },
+  {"dictionaryId":"arbeitgeberin",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Arbeitgeberin",
+    "plural": "Arbeitgeberinnen",
+    "translation": {
+      "ru": ["работодательница"],
+      "en": ["female employer"],
+      "ar": ["صاحبة العمل"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "other",
+    "word": "je … desto",
+    "translation": {
+      "ru": ["чем … тем"],
+      "en": ["the ... the ..."],
+      "ar": ["كلما ... كلما"]
+    }
+  },
+  {"dictionaryId":"verstehen",
+    "type": "verb",
+    "infinitive": "sich verstehen",
+    "praeteritum": "verstand sich",
+    "perfekt": "hat sich verstanden",
+    "translation": {
+      "ru": ["ладить друг с другом"],
+      "en": ["to get along"],
+      "ar": ["يتفاهم مع"]
+    }
+  },
+  {"dictionaryId":"gering",
+    "type": "other",
+    "word": "gering",
+    "translation": {
+      "ru": ["небольшой", "незначительный"],
+      "en": ["low", "small"],
+      "ar": ["ضئيل"]
+    }
+  },
+  {"dictionaryId":"atmosphäre",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Atmosphäre",
+    "plural": "",
+    "comment": "Sg.",
+    "translation": {
+      "ru": ["атмосфера"],
+      "en": ["atmosphere"],
+      "ar": ["جو", "أجواء"]
+    }
+  },
+  {"dictionaryId":"reichen",
+    "type": "verb",
+    "infinitive": "reichen",
+    "praeteritum": "reichte",
+    "perfekt": "hat gereicht",
+    "translation": {
+      "ru": ["хватать", "быть достаточным"],
+      "en": ["to be enough"],
+      "ar": ["يكفي"]
+    }
+  },
+  {"dictionaryId":"genügen",
+    "type": "verb",
+    "infinitive": "genügen",
+    "praeteritum": "genügte",
+    "perfekt": "hat genügt",
+    "translation": {
+      "ru": ["быть достаточным"],
+      "en": ["to suffice"],
+      "ar": ["يكفي"]
+    }
+  },
+  {"dictionaryId":"selbstverständlich",
+    "type": "other",
+    "word": "selbstverständlich",
+    "translation": {
+      "ru": ["само собой", "разумеется"],
+      "en": ["of course", "naturally"],
+      "ar": ["بالطبع"]
+    }
+  },
+  {"dictionaryId":"laune",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Laune",
+    "plural": "Launen",
+    "translation": {
+      "ru": ["настроение"],
+      "en": ["mood"],
+      "ar": ["مزاج"]
+    }
+  },
+  {"dictionaryId":"reaktion",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Reaktion",
+    "plural": "Reaktionen",
+    "translation": {
+      "ru": ["реакция"],
+      "en": ["reaction"],
+      "ar": ["رد فعل"]
+    }
+  },
+  {"dictionaryId":"überstunde",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Überstunde",
+    "plural": "Überstunden",
+    "translation": {
+      "ru": ["сверхурочный час"],
+      "en": ["overtime hour"],
+      "ar": ["ساعة عمل إضافية"]
+    }
+  },
+  {"dictionaryId":"feierabend",
+    "type": "noun",
+    "article": ["der"],
+    "word": "Feierabend",
+    "plural": "Feierabende",
+    "translation": {
+      "ru": ["конец рабочего дня"],
+      "en": ["end of the working day"],
+      "ar": ["نهاية الدوام"]
+    }
+  },
+  {"dictionaryId":"liste",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Liste",
+    "plural": "Listen",
+    "translation": {
+      "ru": ["список"],
+      "en": ["list"],
+      "ar": ["قائمة"]
+    }
+  },
+  {"dictionaryId":"jederzeit",
+    "type": "other",
+    "word": "jederzeit",
+    "translation": {
+      "ru": ["в любое время"],
+      "en": ["at any time"],
+      "ar": ["في أي وقت"]
+    }
+  },
+  {"dictionaryId":"verrückt",
+    "type": "other",
+    "word": "verrückt",
+    "translation": {
+      "ru": ["сумасшедший", "безумный"],
+      "en": ["crazy"],
+      "ar": ["مجنون"]
+    }
+  },
+  {"dictionaryId":"monatelang",
+    "type": "other",
+    "word": "monatelang",
+    "translation": {
+      "ru": ["месяцами"],
+      "en": ["for months"],
+      "ar": ["لعدة أشهر"]
+    }
+  },
+  {"dictionaryId":"treu",
+    "type": "other",
+    "word": "treu",
+    "translation": {
+      "ru": ["верный", "преданный"],
+      "en": ["faithful", "loyal"],
+      "ar": ["مخلص", "وفي"]
+    }
+  },
+  {"dictionaryId":"verlangen",
+    "type": "verb",
+    "infinitive": "verlangen",
+    "praeteritum": "verlangte",
+    "perfekt": "hat verlangt",
+    "translation": {
+      "ru": ["требовать"],
+      "en": ["to demand", "to require"],
+      "ar": ["يطالب", "يتطلب"]
+    }
+  },
+  {"dictionaryId":"möglichst",
+    "type": "other",
+    "word": "möglichst",
+    "translation": {
+      "ru": ["по возможности", "как можно"],
+      "en": ["if possible", "as ... as possible"],
+      "ar": ["قدر الإمكان"]
+    }
+  },
+  {"dictionaryId":"notwendig",
+    "type": "other",
+    "word": "notwendig",
+    "translation": {
+      "ru": ["необходимый"],
+      "en": ["necessary"],
+      "ar": ["ضروري"]
+    }
+  },
+  {"dictionaryId":"grenze",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Grenze",
+    "plural": "Grenzen",
+    "translation": {
+      "ru": ["граница"],
+      "en": ["border", "boundary"],
+      "ar": ["حدود"]
+    }
+  },
+  {"dictionaryId":"enttäuschen",
+    "type": "verb",
+    "infinitive": "enttäuschen",
+    "praeteritum": "enttäuschte",
+    "perfekt": "hat enttäuscht",
+    "translation": {
+      "ru": ["разочаровывать"],
+      "en": ["to disappoint"],
+      "ar": ["يُخيّب الأمل"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "other",
+    "word": "falls",
+    "translation": {
+      "ru": ["если", "в случае если"],
+      "en": ["if", "in case"],
+      "ar": ["إذا", "في حال"]
+    }
+  },
+  {"dictionaryId":"zusagen",
+    "type": "verb",
+    "infinitive": "zusagen",
+    "praeteritum": "sagte zu",
+    "perfekt": "hat zugesagt",
+    "translation": {
+      "ru": ["соглашаться", "давать согласие"],
+      "en": ["to agree", "to accept"],
+      "ar": ["يوافق"]
+    }
+  },
+  {"dictionaryId":"hinterher",
+    "type": "other",
+    "word": "hinterher",
+    "translation": {
+      "ru": ["потом", "вслед за"],
+      "en": ["afterwards", "after"],
+      "ar": ["بعد ذلك"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "verb",
+    "infinitive": "sich einigen (mit)",
+    "praeteritum": "einigte sich",
+    "perfekt": "hat sich geeinigt",
+    "translation": {
+      "ru": ["договариваться (с кем-то)"],
+      "en": ["to come to an agreement (with)"],
+      "ar": ["يتفق مع"]
+    }
+  },
+  {"dictionaryId":null,
+    "type": "other",
+    "word": "irgendein(e)",
+    "translation": {
+      "ru": ["какой-нибудь", "какой-либо"],
+      "en": ["some", "any"],
+      "ar": ["أي", "بعض"]
+    }
+  },
+  {"dictionaryId":"enttäuschung",
+    "type": "noun",
+    "article": ["die"],
+    "word": "Enttäuschung",
+    "plural": "Enttäuschungen",
+    "translation": {
+      "ru": ["разочарование"],
+      "en": ["disappointment"],
+      "ar": ["خيبة أمل"]
+    }
+  },
+  {"dictionaryId":"zeichen",
+    "type": "noun",
+    "article": ["das"],
+    "word": "Zeichen",
+    "plural": "Zeichen",
+    "translation": {
+      "ru": ["знак", "символ"],
+      "en": ["sign", "symbol"],
+      "ar": ["علامة", "رمز"]
+    }
+  },
+  {"dictionaryId":"schwach",
+    "type": "other",
+    "word": "schwach",
+    "translation": {
+      "ru": ["слабый"],
+      "en": ["weak"],
+      "ar": ["ضعيف"]
+    }
+  },
+  {"dictionaryId":"übernachten",
+    "type": "verb",
+    "infinitive": "übernachten",
+    "praeteritum": "übernachtete",
+    "perfekt": "hat übernachtet",
+    "translation": {
+      "ru": ["ночевать"],
+      "en": ["to stay overnight"],
+      "ar": ["يقضي الليل"]
+    }
+  },
+  {"dictionaryId":"treffpunkt",
+    "type": "noun",
+    "article": ["der"],
+    "word": "Treffpunkt",
+    "plural": "Treffpunkte",
+    "translation": {
+      "ru": ["место встречи"],
+      "en": ["meeting point"],
+      "ar": ["مكان اللقاء"]
+    }
+  }
+]

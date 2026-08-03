@@ -1,0 +1,40 @@
+name: Publish Android APK
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build apk --release --flavor native
+      - name: Prepare APK
+        run: cp build/app/outputs/flutter-apk/app-native-release.apk wort.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wort-android
+          path: wort.apk
+          if-no-files-found: error
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" wort.apk --generate-notes --title "wort_ $GITHUB_REF_NAME"
+

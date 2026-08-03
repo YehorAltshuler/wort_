@@ -1,0 +1,19 @@
+name: preferences_collections_client
+description: Expo-compatible Web collections client for wort_.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  collections_client:
+    path: ../collections_client
+  preferences_client:
+    path: ../preferences_client
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.5
+  very_good_analysis: ^10.3.0

@@ -1,0 +1,14 @@
+name: citizenship_test_client
+description: Data contracts for the Leben in Deutschland feature.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  meta: ^1.17.0
+
+dev_dependencies:
+  test: ^1.29.0
+  very_good_analysis: ^10.3.0
