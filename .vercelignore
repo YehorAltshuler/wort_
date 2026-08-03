@@ -1,0 +1,11 @@
+.dart_tool/
+build/
+coverage/
+.idea/
+.vscode/
+**/build/
+**/.dart_tool/
+**/.pub/
+android/.gradle/
+ios/Pods/
+*.iml
