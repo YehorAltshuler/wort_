@@ -80,11 +80,17 @@ void main() {
         WordCollection(
           id: WordCollection.favoritesId,
           name: 'Favorites',
-          wordIds: [],
+          wordIds: ['book:module1.json:0'],
           isFavorites: true,
         ),
       ],
     );
+    when(
+      () => collectionsRepository.toggleWord(any(), any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => collectionsRepository.createList(any()),
+    ).thenAnswer((_) async => 'new-list');
     when(
       () => courseRepository.getModuleWords(
         bookId: any(named: 'bookId'),
@@ -162,9 +168,53 @@ void main() {
     expect(find.text('Упражнения'), findsOneWidget);
     expect(find.text('Leben in Deutschland'), findsOneWidget);
 
+    await tester.tap(find.text('Мои слова'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Избранное').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Слова'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.folder_special));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Избранное').last);
+    await tester.pumpAndSettle();
+    verify(
+      () => collectionsRepository.toggleWord(
+        WordCollection.favoritesId,
+        'book:module1.json:0',
+      ),
+    ).called(1);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Новый список'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Test list');
+    await tester.tap(find.text('Создать'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    verify(() => collectionsRepository.createList('Test list')).called(1);
+
+    await tester.tap(find.text('Учёба'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Упражнения'));
     await tester.pumpAndSettle();
     expect(find.text('Verben mit festen Präpositionen'), findsOneWidget);
+    await tester.tap(find.text('Verben mit festen Präpositionen'));
+    await tester.pumpAndSettle();
+    expect(find.text('Прогресс обучения'), findsOneWidget);
+    expect(find.text('Все слова'), findsOneWidget);
+    expect(find.text('Правильные ответы'), findsOneWidget);
+    expect(find.text('Неправильно'), findsOneWidget);
+    expect(find.text('Akkusativ'), findsNothing);
+    expect(find.text('Dativ'), findsNothing);
+    expect(find.text('Настроить тренировку'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
@@ -190,11 +240,11 @@ void main() {
     await tester.tap(find.text('Существительные'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Слова модуля'),
+      find.text('Слова'),
       200,
       scrollable: find.byType(Scrollable).last,
     );
-    await tester.tap(find.text('Слова модуля'));
+    await tester.tap(find.text('Слова'));
     await tester.pumpAndSettle();
     expect(find.text('Существительные'), findsOneWidget);
     expect(find.text('Haus'), findsOneWidget);

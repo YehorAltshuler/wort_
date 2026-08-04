@@ -284,7 +284,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otherWords => 'Other';
 
   @override
-  String get viewWords => 'Module words';
+  String get viewWords => 'Words';
 
   @override
   String get configureSession => 'Configure session';

@@ -607,7 +607,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewWords.
   ///
   /// In ru, this message translates to:
-  /// **'Слова модуля'**
+  /// **'Слова'**
   String get viewWords;
 
   /// No description provided for @configureSession.

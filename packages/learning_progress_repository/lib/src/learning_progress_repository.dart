@@ -18,6 +18,9 @@ class LearningProgressRepository {
       testedWordIds: (json['testedWordIds'] as List<Object?>? ?? const [])
           .cast<String>()
           .toSet(),
+      incorrectWordIds: (json['incorrectWordIds'] as List<Object?>? ?? const [])
+          .cast<String>()
+          .toSet(),
       lastActivityByModule:
           (json['lastActivityByModule'] as Map<String, Object?>? ?? const {})
               .map(
@@ -33,14 +36,18 @@ class LearningProgressRepository {
     DateTime? recordedAt,
   }) async {
     final tested = {...current.testedWordIds};
+    final incorrect = {...current.incorrectWordIds};
     if (correct) {
       tested.add(wordId);
+      incorrect.remove(wordId);
     } else {
       tested.remove(wordId);
+      incorrect.add(wordId);
     }
     final moduleKey = wordId.split(':').take(2).join(':');
     final next = LearningProgress(
       testedWordIds: tested,
+      incorrectWordIds: incorrect,
       lastActivityByModule: {
         ...current.lastActivityByModule,
         moduleKey: recordedAt ?? DateTime.now(),
@@ -50,6 +57,7 @@ class LearningProgressRepository {
       _storageKey,
       jsonEncode({
         'testedWordIds': next.testedWordIds.toList(),
+        'incorrectWordIds': next.incorrectWordIds.toList(),
         'lastActivityByModule': next.lastActivityByModule.map(
           (key, value) => MapEntry(key, value.toIso8601String()),
         ),

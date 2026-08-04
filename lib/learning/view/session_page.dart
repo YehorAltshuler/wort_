@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
+import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/collections/widgets/collection_actions.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/domain/training_exercise.dart';
@@ -26,11 +27,21 @@ class SessionPage extends ConsumerStatefulWidget {
     required this.moduleFile,
     required this.type,
     required this.difficulty,
+    this.collectionId,
     super.key,
   });
 
-  final String bookId;
-  final String moduleFile;
+  const SessionPage.collection({
+    required this.collectionId,
+    required this.type,
+    required this.difficulty,
+    super.key,
+  }) : bookId = null,
+       moduleFile = null;
+
+  final String? bookId;
+  final String? moduleFile;
+  final String? collectionId;
   final String type;
   final String difficulty;
 
@@ -57,11 +68,13 @@ class _SessionPageState extends ConsumerState<SessionPage> {
   }
 
   Future<void> _initializeQueue() async {
-    final words = await ref.read(
-      moduleWordsProvider(
-        (bookId: widget.bookId, moduleFile: widget.moduleFile),
-      ).future,
-    );
+    final words = widget.collectionId == null
+        ? await ref.read(
+            moduleWordsProvider(
+              (bookId: widget.bookId!, moduleFile: widget.moduleFile!),
+            ).future,
+          )
+        : await ref.read(collectionWordsProvider(widget.collectionId!).future);
     if (mounted) setState(() => _queue = _createQueue(words));
   }
 
@@ -73,11 +86,13 @@ class _SessionPageState extends ConsumerState<SessionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final words = ref.watch(
-      moduleWordsProvider(
-        (bookId: widget.bookId, moduleFile: widget.moduleFile),
-      ),
-    );
+    final words = widget.collectionId == null
+        ? ref.watch(
+            moduleWordsProvider(
+              (bookId: widget.bookId!, moduleFile: widget.moduleFile!),
+            ),
+          )
+        : ref.watch(collectionWordsProvider(widget.collectionId!));
     final session = words.maybeWhen(
       data: (items) {
         final total = _queue?.length ?? 0;

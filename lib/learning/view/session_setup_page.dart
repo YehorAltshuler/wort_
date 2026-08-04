@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
+import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/domain/training_exercise.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
@@ -16,11 +17,20 @@ class SessionSetupPage extends ConsumerStatefulWidget {
     required this.bookId,
     required this.moduleFile,
     required this.initialFilter,
+    this.collectionId,
     super.key,
   });
 
-  final String bookId;
-  final String moduleFile;
+  const SessionSetupPage.collection({
+    required this.collectionId,
+    required this.initialFilter,
+    super.key,
+  }) : bookId = null,
+       moduleFile = null;
+
+  final String? bookId;
+  final String? moduleFile;
+  final String? collectionId;
   final String initialFilter;
 
   @override
@@ -39,11 +49,13 @@ class _SessionSetupPageState extends ConsumerState<SessionSetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    final words = ref.watch(
-      moduleWordsProvider(
-        (bookId: widget.bookId, moduleFile: widget.moduleFile),
-      ),
-    );
+    final words = widget.collectionId == null
+        ? ref.watch(
+            moduleWordsProvider(
+              (bookId: widget.bookId!, moduleFile: widget.moduleFile!),
+            ),
+          )
+        : ref.watch(collectionWordsProvider(widget.collectionId!));
     final hasWords = words.maybeWhen(
       data: (items) => _filter.apply(items).isNotEmpty,
       orElse: () => false,
@@ -115,12 +127,18 @@ class _SessionSetupPageState extends ConsumerState<SessionSetupPage> {
         label: context.l10n.startTraining,
         onPressed: hasWords
             ? () => context.pushReplacement(
-                AppRoute.session(
-                  widget.bookId,
-                  widget.moduleFile,
-                  type: _filter.name,
-                  difficulty: _difficulty.name,
-                ),
+                widget.collectionId == null
+                    ? AppRoute.session(
+                        widget.bookId!,
+                        widget.moduleFile!,
+                        type: _filter.name,
+                        difficulty: _difficulty.name,
+                      )
+                    : AppRoute.collectionSession(
+                        widget.collectionId!,
+                        type: _filter.name,
+                        difficulty: _difficulty.name,
+                      ),
               )
             : null,
       ),

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_chip_group.dart';
@@ -17,11 +18,13 @@ class ExerciseTrainingPage extends ConsumerStatefulWidget {
   const ExerciseTrainingPage({
     required this.exerciseId,
     required this.difficulty,
+    required this.filter,
     super.key,
   });
 
   final String exerciseId;
   final String difficulty;
+  final String filter;
 
   @override
   ConsumerState<ExerciseTrainingPage> createState() =>
@@ -47,8 +50,21 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
 
   Future<void> _initializeQueue() async {
     final exercise = await ref.read(fixedPrepositionExerciseProvider.future);
+    final progress = await ref.read(learningProgressProvider.future);
     if (mounted) {
-      setState(() => _queue = [...exercise.words]..shuffle(Random()));
+      final filter = FixedPrepositionFilterX.fromName(widget.filter);
+      final words = switch (filter) {
+        FixedPrepositionFilter.all => exercise.words,
+        FixedPrepositionFilter.correct =>
+          exercise.words
+              .where((word) => progress.isTested(word.progressId))
+              .toList(),
+        FixedPrepositionFilter.incorrect =>
+          exercise.words
+              .where((word) => progress.isIncorrect(word.progressId))
+              .toList(),
+      };
+      setState(() => _queue = [...words]..shuffle(Random()));
     }
   }
 
@@ -126,6 +142,11 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
         _wrong++;
       }
     });
+    unawaited(
+      ref
+          .read(learningProgressProvider.notifier)
+          .recordResult(word.progressId, correct: _result!),
+    );
   }
 
   TrainingAnswerState? _answerState({

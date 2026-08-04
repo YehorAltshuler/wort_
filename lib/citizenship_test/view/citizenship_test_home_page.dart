@@ -10,6 +10,7 @@ import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/adaptive_stat_card_row.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
+import 'package:wort_flutter/widgets/overall_progress_card.dart';
 import 'package:wort_flutter/widgets/progress_stat_card.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 
@@ -120,9 +121,12 @@ class _StatisticsOverview extends StatelessWidget {
     return ListView(
       padding: AppSpacing.pageInsets,
       children: [
-        _OverallProgressCard(
-          answered: answered,
-          total: available.length,
+        OverallProgressCard(
+          title: context.l10n.lidTitle,
+          progressLabel: context.l10n.lidAnsweredProgress(
+            answered,
+            available.length,
+          ),
           progress: ratio,
         ),
         const SizedBox(height: 12),
@@ -132,7 +136,7 @@ class _StatisticsOverview extends StatelessWidget {
             icon: Icons.check_circle_outline,
             label: context.l10n.lidCorrectAnswers,
             progress: correctRatio,
-            progressLabel: '$correct / ${available.length}',
+            progressLabel: '$correct',
             fillHeight: fillHeight,
           ),
           secondBuilder: (context, {required fillHeight}) => ProgressStatCard(
@@ -140,52 +144,11 @@ class _StatisticsOverview extends StatelessWidget {
             icon: Icons.cancel_outlined,
             label: context.l10n.lidIncorrect,
             progress: incorrectRatio,
-            progressLabel: '$incorrect / ${available.length}',
+            progressLabel: '$incorrect',
             fillHeight: fillHeight,
           ),
         ),
       ],
     );
   }
-}
-
-class _OverallProgressCard extends StatelessWidget {
-  const _OverallProgressCard({
-    required this.answered,
-    required this.total,
-    required this.progress,
-  });
-
-  final int answered;
-  final int total;
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.zero,
-    color: Theme.of(context).colorScheme.primaryContainer,
-    elevation: 0,
-    child: Padding(
-      padding: AppSpacing.pageInsets,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            context.l10n.lidTitle,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(context.l10n.lidAnsweredProgress(answered, total)),
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: progress,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ],
-      ),
-    ),
-  );
 }

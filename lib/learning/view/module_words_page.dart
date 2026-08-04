@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
+import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/collections/widgets/collection_actions.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
@@ -17,20 +18,31 @@ class ModuleWordsPage extends ConsumerWidget {
     required this.bookId,
     required this.moduleFile,
     required this.initialFilter,
+    this.collectionId,
     super.key,
   });
 
-  final String bookId;
-  final String moduleFile;
+  const ModuleWordsPage.collection({
+    required this.collectionId,
+    required this.initialFilter,
+    super.key,
+  }) : bookId = null,
+       moduleFile = null;
+
+  final String? bookId;
+  final String? moduleFile;
+  final String? collectionId;
   final String initialFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final words = ref.watch(
-      moduleWordsProvider(
-        (bookId: bookId, moduleFile: moduleFile),
-      ),
-    );
+    final words = collectionId == null
+        ? ref.watch(
+            moduleWordsProvider(
+              (bookId: bookId!, moduleFile: moduleFile!),
+            ),
+          )
+        : ref.watch(collectionWordsProvider(collectionId!));
     final filter = CourseWordFilterX.fromName(initialFilter);
     return Scaffold(
       appBar: AppBar(title: Text(_filterLabel(context, filter))),

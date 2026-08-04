@@ -43,6 +43,7 @@ final appRouter = GoRouter(
       path: AppRoute.exerciseSetupPattern,
       builder: (context, state) => ExerciseSetupPage(
         exerciseId: state.pathParameters['exerciseId']!,
+        initialFilter: state.uri.queryParameters['filter'] ?? 'all',
       ),
     ),
     GoRoute(
@@ -50,6 +51,13 @@ final appRouter = GoRouter(
       builder: (context, state) => ExerciseTrainingPage(
         exerciseId: state.pathParameters['exerciseId']!,
         difficulty: state.uri.queryParameters['difficulty'] ?? 'easy',
+        filter: state.uri.queryParameters['filter'] ?? 'all',
+      ),
+    ),
+    GoRoute(
+      path: AppRoute.exerciseWordListPattern,
+      builder: (context, state) => ExerciseWordListPage(
+        filter: state.uri.queryParameters['filter'] ?? 'all',
       ),
     ),
     GoRoute(
@@ -84,24 +92,46 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoute.moduleWordsPattern,
       builder: (context, state) => ModuleWordsPage(
-        bookId: state.pathParameters['bookId']!,
-        moduleFile: state.pathParameters['moduleFile']!,
+        bookId: state.pathParameters['bookId'],
+        moduleFile: state.pathParameters['moduleFile'],
         initialFilter: state.uri.queryParameters['type'] ?? 'all',
       ),
     ),
     GoRoute(
       path: AppRoute.sessionSetupPattern,
       builder: (context, state) => SessionSetupPage(
-        bookId: state.pathParameters['bookId']!,
-        moduleFile: state.pathParameters['moduleFile']!,
+        bookId: state.pathParameters['bookId'],
+        moduleFile: state.pathParameters['moduleFile'],
         initialFilter: state.uri.queryParameters['type'] ?? 'all',
       ),
     ),
     GoRoute(
       path: AppRoute.sessionPattern,
       builder: (context, state) => SessionPage(
-        bookId: state.pathParameters['bookId']!,
-        moduleFile: state.pathParameters['moduleFile']!,
+        bookId: state.pathParameters['bookId'],
+        moduleFile: state.pathParameters['moduleFile'],
+        type: state.uri.queryParameters['type'] ?? 'all',
+        difficulty: state.uri.queryParameters['difficulty'] ?? 'easy',
+      ),
+    ),
+    GoRoute(
+      path: AppRoute.collectionWordsPattern,
+      builder: (context, state) => ModuleWordsPage.collection(
+        collectionId: state.pathParameters['collectionId'],
+        initialFilter: state.uri.queryParameters['type'] ?? 'all',
+      ),
+    ),
+    GoRoute(
+      path: AppRoute.collectionSetupPattern,
+      builder: (context, state) => SessionSetupPage.collection(
+        collectionId: state.pathParameters['collectionId'],
+        initialFilter: state.uri.queryParameters['type'] ?? 'all',
+      ),
+    ),
+    GoRoute(
+      path: AppRoute.collectionSessionPattern,
+      builder: (context, state) => SessionPage.collection(
+        collectionId: state.pathParameters['collectionId'],
         type: state.uri.queryParameters['type'] ?? 'all',
         difficulty: state.uri.queryParameters['difficulty'] ?? 'easy',
       ),

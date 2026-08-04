@@ -3,6 +3,8 @@ abstract final class AppRoute {
   static const coursebooks = '/learning/coursebooks';
   static const exercises = '/learning/exercises';
   static const exerciseWordsPattern = '/learning/exercises/:exerciseId';
+  static const exerciseWordListPattern =
+      '/learning/exercises/:exerciseId/words';
   static const exerciseSetupPattern = '/learning/exercises/:exerciseId/setup';
   static const exerciseTrainingPattern =
       '/learning/exercises/:exerciseId/training';
@@ -24,6 +26,9 @@ abstract final class AppRoute {
   static const sessionPattern =
       '/learning/book/:bookId/module/:moduleFile/session';
   static const collectionPattern = '/collections/:collectionId';
+  static const collectionWordsPattern = '/collections/:collectionId/words';
+  static const collectionSetupPattern = '/collections/:collectionId/setup';
+  static const collectionSessionPattern = '/collections/:collectionId/session';
 
   static const List<String> paths = [
     learning,
@@ -39,15 +44,20 @@ abstract final class AppRoute {
   static String exerciseWords(String exerciseId) =>
       '/learning/exercises/${Uri.encodeComponent(exerciseId)}';
 
-  static String exerciseSetup(String exerciseId) =>
-      '${exerciseWords(exerciseId)}/setup';
+  static String exerciseWordList(String exerciseId, {required String filter}) =>
+      '${exerciseWords(exerciseId)}/words?filter=$filter';
+
+  static String exerciseSetup(String exerciseId, {String filter = 'all'}) =>
+      '${exerciseWords(exerciseId)}/setup?filter=$filter';
 
   static String exerciseTraining(
     String exerciseId, {
     required String difficulty,
+    String filter = 'all',
   }) =>
       '${exerciseWords(exerciseId)}/training'
-      '?difficulty=${Uri.encodeQueryComponent(difficulty)}';
+      '?difficulty=${Uri.encodeQueryComponent(difficulty)}'
+      '&filter=${Uri.encodeQueryComponent(filter)}';
 
   static String modules(String bookId) =>
       '/learning/book/${Uri.encodeComponent(bookId)}';
@@ -83,6 +93,22 @@ abstract final class AppRoute {
 
   static String collection(String id) =>
       '/collections/${Uri.encodeComponent(id)}';
+
+  static String collectionWords(String id, {String? type}) {
+    final path = '${collection(id)}/words';
+    return type == null ? path : '$path?type=${Uri.encodeQueryComponent(type)}';
+  }
+
+  static String collectionSetup(String id, {String? type}) {
+    final path = '${collection(id)}/setup';
+    return type == null ? path : '$path?type=${Uri.encodeQueryComponent(type)}';
+  }
+
+  static String collectionSession(
+    String id, {
+    required String type,
+    required String difficulty,
+  }) => '${collection(id)}/session?type=$type&difficulty=$difficulty';
 
   static String citizenshipResult(String sessionId) =>
       '/citizenship-test/result/${Uri.encodeComponent(sessionId)}';

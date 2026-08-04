@@ -10,6 +10,7 @@ import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/dashboard_block.dart';
 import 'package:wort_flutter/widgets/section_header.dart';
+import 'package:wort_flutter/widgets/text_input_dialog.dart';
 
 class CollectionsPage extends ConsumerWidget {
   const CollectionsPage({super.key});
@@ -36,29 +37,13 @@ class CollectionsPage extends ConsumerWidget {
   }
 
   Future<void> _createList(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController();
-    final name = await showDialog<String>(
+    final name = await showTextInputDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.newList),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: context.l10n.listName),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => context.pop(controller.text),
-            child: Text(context.l10n.create),
-          ),
-        ],
-      ),
+      title: context.l10n.newList,
+      hintText: context.l10n.listName,
+      cancelLabel: context.l10n.cancel,
+      actionLabel: context.l10n.create,
     );
-    controller.dispose();
     if (name != null) {
       await ref.read(collectionsProvider.notifier).createList(name);
     }

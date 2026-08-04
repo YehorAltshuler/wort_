@@ -12,6 +12,7 @@ void main() {
     when(() => client.readString('learningProgress')).thenAnswer(
       (_) async => jsonEncode({
         'testedWordIds': ['book:module1.json:0'],
+        'incorrectWordIds': ['book:module1.json:2'],
         'lastActivityByModule': {
           'book:module1.json': '2026-08-01T12:00:00.000Z',
         },
@@ -33,6 +34,7 @@ void main() {
       next.testedWordIds,
       containsAll(['book:module1.json:0', 'book:module1.json:1']),
     );
+    expect(next.incorrectWordIds, contains('book:module1.json:2'));
     final saved =
         verify(
               () => client.writeString('learningProgress', captureAny()),
@@ -42,6 +44,31 @@ void main() {
       (jsonDecode(saved)! as Map<String, Object?>)['testedWordIds'],
       hasLength(2),
     );
+    expect(
+      (jsonDecode(saved) as Map<String, Object?>)['incorrectWordIds'],
+      ['book:module1.json:2'],
+    );
+  });
+
+  test('keeps correct and incorrect word sets mutually exclusive', () async {
+    final client = _MockPreferencesClient();
+    final repository = LearningProgressRepository(client: client);
+    when(() => client.writeString(any(), any())).thenAnswer((_) async {});
+
+    final incorrect = await repository.recordResult(
+      current: const LearningProgress(),
+      wordId: 'exercise:word',
+      correct: false,
+    );
+    final corrected = await repository.recordResult(
+      current: incorrect,
+      wordId: 'exercise:word',
+      correct: true,
+    );
+
+    expect(incorrect.isIncorrect('exercise:word'), isTrue);
+    expect(corrected.isTested('exercise:word'), isTrue);
+    expect(corrected.isIncorrect('exercise:word'), isFalse);
   });
 }
 

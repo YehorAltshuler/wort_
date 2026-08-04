@@ -36,6 +36,9 @@ class FixedPrepositionVerb {
       '';
 
   String get pattern => '$verb $preposition + $grammaticalCase';
+
+  String get progressId =>
+      'exercise:fixed-preposition-verbs:$verb:$preposition:$grammaticalCase';
 }
 
 class FixedPrepositionExercise {
@@ -43,4 +46,14 @@ class FixedPrepositionExercise {
 
   final ExerciseCatalogItem catalog;
   final List<FixedPrepositionVerb> words;
+}
+
+enum FixedPrepositionFilter { all, correct, incorrect }
+
+extension FixedPrepositionFilterX on FixedPrepositionFilter {
+  static FixedPrepositionFilter fromName(String value) => switch (value) {
+    'correct' => FixedPrepositionFilter.correct,
+    'incorrect' => FixedPrepositionFilter.incorrect,
+    _ => FixedPrepositionFilter.all,
+  };
 }

@@ -282,7 +282,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get otherWords => 'Другие';
 
   @override
-  String get viewWords => 'Слова модуля';
+  String get viewWords => 'Слова';
 
   @override
   String get configureSession => 'Настроить занятие';

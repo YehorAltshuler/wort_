@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 
 void main() {
@@ -17,5 +18,13 @@ void main() {
     expect(exercise.catalog.title, 'Verben mit festen Präpositionen');
     expect(exercise.words, hasLength(39));
     expect(exercise.words.first.pattern, 'warten auf + Akkusativ');
+    expect(
+      FixedPrepositionFilterX.fromName('incorrect'),
+      FixedPrepositionFilter.incorrect,
+    );
+    expect(
+      exercise.words.first.progressId,
+      'exercise:fixed-preposition-verbs:warten:auf:Akkusativ',
+    );
   });
 }

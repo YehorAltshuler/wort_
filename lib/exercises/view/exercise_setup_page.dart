@@ -8,9 +8,14 @@ import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/selection_card.dart';
 
 class ExerciseSetupPage extends StatefulWidget {
-  const ExerciseSetupPage({required this.exerciseId, super.key});
+  const ExerciseSetupPage({
+    required this.exerciseId,
+    required this.initialFilter,
+    super.key,
+  });
 
   final String exerciseId;
+  final String initialFilter;
 
   @override
   State<ExerciseSetupPage> createState() => _ExerciseSetupPageState();
@@ -32,24 +37,20 @@ class _ExerciseSetupPageState extends State<ExerciseSetupPage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            Column(
-              children: [
-                SelectionCard(
-                  title: context.l10n.difficultyEasy,
-                  subtitle: context.l10n.fixedPrepositionEasyDescription,
-                  selected: _difficulty == 'easy',
-                  onTap: () => setState(() => _difficulty = 'easy'),
-                  leading: Icons.sentiment_satisfied_alt_outlined,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                SelectionCard(
-                  title: context.l10n.difficultyHard,
-                  subtitle: context.l10n.fixedPrepositionHardDescription,
-                  selected: _difficulty == 'hard',
-                  onTap: () => setState(() => _difficulty = 'hard'),
-                  leading: Icons.local_fire_department_outlined,
-                ),
-              ],
+            SelectionCard(
+              title: context.l10n.difficultyEasy,
+              subtitle: context.l10n.fixedPrepositionEasyDescription,
+              selected: _difficulty == 'easy',
+              onTap: () => setState(() => _difficulty = 'easy'),
+              leading: Icons.sentiment_satisfied_alt_outlined,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SelectionCard(
+              title: context.l10n.difficultyHard,
+              subtitle: context.l10n.fixedPrepositionHardDescription,
+              selected: _difficulty == 'hard',
+              onTap: () => setState(() => _difficulty = 'hard'),
+              leading: Icons.local_fire_department_outlined,
             ),
           ],
         ),
@@ -60,6 +61,7 @@ class _ExerciseSetupPageState extends State<ExerciseSetupPage> {
           AppRoute.exerciseTraining(
             widget.exerciseId,
             difficulty: _difficulty,
+            filter: widget.initialFilter,
           ),
         ),
       ),

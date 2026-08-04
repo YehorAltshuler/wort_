@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class DashboardBlockGrid extends StatelessWidget {
@@ -10,14 +12,36 @@ class DashboardBlockGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const spacing = 12.0;
-        final width = constraints.maxWidth < 620
-            ? constraints.maxWidth
-            : (constraints.maxWidth - spacing) / 2;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
+        if (constraints.maxWidth < 620) {
+          return Column(
+            children: [
+              for (var index = 0; index < children.length; index++) ...[
+                SizedBox(width: double.infinity, child: children[index]),
+                if (index != children.length - 1)
+                  const SizedBox(height: spacing),
+              ],
+            ],
+          );
+        }
+        return Column(
           children: [
-            for (final child in children) SizedBox(width: width, child: child),
+            for (var index = 0; index < children.length; index += 2) ...[
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: children[index]),
+                    const SizedBox(width: spacing),
+                    Expanded(
+                      child: index + 1 < children.length
+                          ? children[index + 1]
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+              if (index + 2 < children.length) const SizedBox(height: spacing),
+            ],
           ],
         );
       },
@@ -117,35 +141,77 @@ class DashboardAddBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colors.outlineVariant),
+    return CustomPaint(
+      foregroundPainter: _DashedRoundedBorderPainter(
+        color: colors.outlineVariant,
+        radius: 16,
       ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 154),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircleAvatar(child: Icon(Icons.add, color: colors.primary)),
-                const SizedBox(height: 12),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w700,
+      child: Material(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 154),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(child: Icon(Icons.add, color: colors.primary)),
+                  const SizedBox(height: 12),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+class _DashedRoundedBorderPainter extends CustomPainter {
+  const _DashedRoundedBorderPainter({
+    required this.color,
+    required this.radius,
+  });
+
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          Radius.circular(radius),
+        ),
+      );
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(distance, math.min(distance + 7, metric.length)),
+          paint,
+        );
+        distance += 12;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedRoundedBorderPainter oldDelegate) =>
+      color != oldDelegate.color || radius != oldDelegate.radius;
 }

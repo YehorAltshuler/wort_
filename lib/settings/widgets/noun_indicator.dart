@@ -14,16 +14,19 @@ class NounIndicator extends ConsumerWidget {
     final version =
         ref.watch(settingsProvider).value?.nounIndicator ??
         NounIndicatorVersion.v2;
-    return Wrap(
-      spacing: 6,
-      runSpacing: 4,
-      children: [
-        for (final article in articles)
-          if (version == NounIndicatorVersion.v1)
-            _VerticalIndicator(article: article)
-          else
-            _BadgeIndicator(article: article),
-      ],
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        children: [
+          for (final article in articles)
+            if (version == NounIndicatorVersion.v1)
+              _VerticalIndicator(article: article)
+            else
+              _BadgeIndicator(article: article),
+        ],
+      ),
     );
   }
 }

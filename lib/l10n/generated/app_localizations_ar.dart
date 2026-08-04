@@ -277,7 +277,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otherWords => 'أخرى';
 
   @override
-  String get viewWords => 'كلمات الوحدة';
+  String get viewWords => 'الكلمات';
 
   @override
   String get configureSession => 'إعداد الجلسة';
