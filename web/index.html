@@ -84,10 +84,15 @@
     })();
   </script>
   <style>
-    html,
-    body {
+    html {
       --loading-background: #f8f7f9;
       --loading-primary: #9c2679;
+      width: 100%;
+      height: 100%;
+      background: var(--loading-background);
+    }
+
+    body {
       width: 100%;
       height: 100%;
       margin: 0;
@@ -152,9 +157,7 @@
       to { transform: rotate(360deg); }
     }
 
-    html[data-loading-theme="dark"],
-    html[data-loading-theme="dark"] body,
-    html[data-loading-theme="dark"] #app-loading {
+    html[data-loading-theme="dark"] {
       --loading-background: #0d0d0d;
       --loading-primary: #ffadd7;
     }
