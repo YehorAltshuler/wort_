@@ -73,6 +73,7 @@ class CitizenshipQuestionExercise extends StatelessWidget {
           const SizedBox(height: 12),
           if (!imageAnswers && imageBeforeQuestion) questionImage,
           Card(
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Text(

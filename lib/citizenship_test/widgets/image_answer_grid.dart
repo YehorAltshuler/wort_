@@ -4,6 +4,7 @@ import 'package:citizenship_test_repository/citizenship_test_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
+import 'package:wort_flutter/citizenship_test/widgets/adaptive_image_grid.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 
 class CitizenshipImageAnswerGrid extends ConsumerWidget {
@@ -83,16 +84,9 @@ class _ImageGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 0.9,
-      ),
+    return CitizenshipAdaptiveImageGrid(
       itemCount: answers.length,
+      childAspectRatio: 0.9,
       itemBuilder: (context, index) {
         final image = images
             .where((item) => item.position == index)
