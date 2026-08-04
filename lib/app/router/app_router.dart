@@ -123,11 +123,14 @@ final appRouter = GoRouter(
         filter: state.uri.queryParameters['filter'] ?? 'all',
         randomOrder: state.uri.queryParameters['random'] == 'true',
         sessionId: state.uri.queryParameters['sessionId'],
+        startNew: state.uri.queryParameters['startNew'] == 'true',
       ),
     ),
     GoRoute(
       path: AppRoute.citizenshipExam,
-      builder: (context, state) => const CitizenshipExamPage(),
+      builder: (context, state) => CitizenshipExamPage(
+        startNew: state.uri.queryParameters['startNew'] == 'true',
+      ),
     ),
     GoRoute(
       path: AppRoute.citizenshipResultPattern,

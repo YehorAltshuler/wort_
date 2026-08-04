@@ -48,13 +48,24 @@
   <script>
     (function () {
       let preference = 'system';
+      let palette = 'pink';
       try {
-        const stored = window.localStorage.getItem('flutter.themePreference');
-        if (stored) {
+        const storedTheme = window.localStorage.getItem('themePreference') ||
+          window.localStorage.getItem('flutter.themePreference');
+        const storedPalette = window.localStorage.getItem('colorPalette') ||
+          window.localStorage.getItem('flutter.colorPalette');
+        if (storedTheme) {
           try {
-            preference = JSON.parse(stored);
+            preference = JSON.parse(storedTheme);
           } catch (_) {
-            preference = stored;
+            preference = storedTheme;
+          }
+        }
+        if (storedPalette) {
+          try {
+            palette = JSON.parse(storedPalette);
+          } catch (_) {
+            palette = storedPalette;
           }
         }
       } catch (_) {
@@ -65,17 +76,22 @@
           window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.dataset.loadingTheme =
         useDarkTheme ? 'dark' : 'light';
+      document.documentElement.dataset.loadingPalette = palette;
       document.querySelector('meta[name="theme-color"]').content =
-        useDarkTheme ? '#171318' : '#fff7fa';
+        palette === 'monochrome'
+          ? (useDarkTheme ? '#111111' : '#f9f9f9')
+          : (useDarkTheme ? '#0d0d0d' : '#f8f7f9');
     })();
   </script>
   <style>
     html,
     body {
+      --loading-background: #f8f7f9;
+      --loading-primary: #9c2679;
       width: 100%;
       height: 100%;
       margin: 0;
-      background: #fff7fa;
+      background: var(--loading-background);
     }
 
     #app-loading {
@@ -85,7 +101,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #fff7fa;
+      background: var(--loading-background);
       opacity: 1;
       transition: opacity 800ms cubic-bezier(0.2, 0, 0, 1);
     }
@@ -126,8 +142,8 @@
       flex: 0 0 34px;
       width: 34px;
       height: 34px;
-      border: 3px solid rgb(234 76 137 / 22%);
-      border-top-color: #ea4c89;
+      border: 3px solid color-mix(in srgb, var(--loading-primary) 24%, transparent);
+      border-top-color: var(--loading-primary);
       border-radius: 50%;
       animation: loading-spin 800ms linear infinite;
     }
@@ -139,7 +155,34 @@
     html[data-loading-theme="dark"],
     html[data-loading-theme="dark"] body,
     html[data-loading-theme="dark"] #app-loading {
-      background: #171318;
+      --loading-background: #0d0d0d;
+      --loading-primary: #ffadd7;
+    }
+
+    html[data-loading-palette="azure"] {
+      --loading-primary: #0066ab;
+    }
+
+    html[data-loading-palette="lime"] {
+      --loading-primary: #3d6800;
+    }
+
+    html[data-loading-palette="monochrome"] {
+      --loading-background: #f9f9f9;
+      --loading-primary: #2c2c2c;
+    }
+
+    html[data-loading-theme="dark"][data-loading-palette="azure"] {
+      --loading-primary: #9dcbff;
+    }
+
+    html[data-loading-theme="dark"][data-loading-palette="lime"] {
+      --loading-primary: #c0ef6d;
+    }
+
+    html[data-loading-theme="dark"][data-loading-palette="monochrome"] {
+      --loading-background: #111111;
+      --loading-primary: #e1e1e1;
     }
 
     html[data-loading-theme="dark"] .loading-logo {

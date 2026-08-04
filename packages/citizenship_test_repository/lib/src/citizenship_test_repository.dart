@@ -471,6 +471,15 @@ class CitizenshipTestRepository {
         .firstOrNull;
   }
 
+  Future<void> discardActiveSessions(CitizenshipSessionMode mode) async {
+    final sessions = await _local.loadExamSessions();
+    await Future.wait([
+      for (final session in sessions)
+        if (session.mode == mode && session.completedAt == null)
+          _local.deleteExamSession(session.id),
+    ]);
+  }
+
   Future<void> saveSessionPosition(ExamSessionRecord session, int index) =>
       _local.saveExamSession(
         ExamSessionRecord(

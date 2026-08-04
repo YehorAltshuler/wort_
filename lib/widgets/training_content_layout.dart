@@ -6,15 +6,47 @@ class TrainingContentLayout extends StatelessWidget {
     required this.header,
     required this.answers,
     this.answersBottomPadding = 24,
+    this.scrollTogether = false,
     super.key,
   });
 
   final Widget header;
   final Widget answers;
   final double answersBottomPadding;
+  final bool scrollTogether;
 
   @override
   Widget build(BuildContext context) {
+    if (scrollTogether) {
+      return SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: AppSpacing.horizontalPageInsets,
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: AppSpacing.xl,
+                    bottom: answersBottomPadding,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      header,
+                      const SizedBox(height: 20),
+                      answers,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return SafeArea(
       bottom: false,
       child: Padding(

@@ -1,172 +1,159 @@
-# Разработка
+# Разработка и релизы wort_
 
 ## Требования
 
-- Flutter SDK, совместимый с `pubspec.yaml`;
-- Xcode для iOS;
-- Android SDK и Java для Android;
-- Chrome для Web.
+- Flutter stable с Dart, совместимый с SDK из `pubspec.yaml`;
+- Android Studio и Android SDK для Android-эмулятора/устройства;
+- Xcode и CocoaPods для iOS;
+- Chrome для Web;
+- Git.
 
-Проверка окружения:
+Проверьте окружение:
 
 ```bash
-flutter doctor -v
+flutter doctor
+flutter --version
 ```
 
-## Установка
+## Первичный запуск
 
 ```bash
-cd flutter_app
+git clone https://github.com/YehorAltshuler/wort_.git
+cd wort_
 flutter pub get
 ```
 
-Локальные packages подключаются через path dependencies и не требуют
-публикации в Pub.
-
-## Запуск
+Нативная конфигурация использует flavor `native`, поскольку в неё входит
+локальная SQLite-база словаря:
 
 ```bash
-# Web
+flutter run --flavor native
+flutter run --flavor native -d <android-device-id>
+flutter run --flavor native -d <ios-device-id>
+```
+
+Для VS Code: выберите Android-эмулятор или iOS Simulator в статусной строке,
+откройте `lib/main.dart` и нажмите **Run and Debug**. При необходимости сначала
+запустите эмулятор из Device Manager/Simulator.
+
+Web не использует flavor:
+
+```bash
 flutter run -d chrome
-
-# Android
-flutter run --flavor native -d android
-
-# iOS
-flutter run --flavor native -d ios
 ```
 
-Для Android определён product flavor `native`. Для iOS существуют shared scheme
-`native` и конфигурации `Debug-native`, `Profile-native`, `Release-native`.
-
-## Маршруты и deep links
-
-Для проверки маршрутов Web можно открыть URL напрямую:
-
-```text
-/dictionary
-/dictionary/word/haus
-```
-
-Статический hosting должен перенаправлять неизвестные application routes на
-`index.html`, но не должен перенаправлять `/lexicon/*`.
-
-## Анализ и форматирование
-
-Проект использует Very Good Analysis.
+## Проверки перед изменением и перед push
 
 ```bash
-dart format lib test packages
+dart format .
+dart format --output=none --set-exit-if-changed .
 flutter analyze
-```
-
-Публичная документация для каждого widget не обязательна, остальные VGV rules
-остаются включёнными.
-
-## Тесты
-
-```bash
-# UI и providers приложения
 flutter test
-
-# Web HTTP client
-(cd packages/web_lexicon_client && dart test)
-
-# Repository mapping
-(cd packages/lexicon_repository && dart test)
-
-# Course repository mapping
-(cd packages/course_repository && dart test)
-
-# Expo-compatible learning progress
-(cd packages/learning_progress_repository && flutter test)
-
-# Settings persistence rules
-(cd packages/settings_repository && flutter test)
-
-# Native Drift client с настоящей SQLite
-(cd packages/sqlite_lexicon_client && flutter test)
-
-# Leben in Deutschland repositories, HTTP и Drift
-(cd packages/citizenship_test_repository && dart test)
-(cd packages/http_citizenship_test_client && dart test)
-(cd packages/drift_citizenship_test_client && flutter test)
-
-# Web Cache Storage
-(cd packages/drift_citizenship_test_client && \
-  flutter test --platform chrome test/web_media_store_test.dart)
 ```
 
-UI-тесты подменяют repositories через `ProviderScope.overrides`. Data clients
-тестируются отдельно с настоящей базой или mock HTTP client.
-
-Исходные учебные JSON находятся в `assets/coursebooks`. Их `bookId`,
-`moduleFile` и позиция слова образуют стабильный Expo-совместимый ID вида
-`bookId:moduleFile:index`.
-
-## Code generation
-
-Drift-код генерируется внутри native client package:
+Проверяйте изменённую feature точечно во время разработки, а полный `flutter
+test` запускайте перед публикацией. Для изменений Web дополнительно соберите
+release-версию:
 
 ```bash
-cd packages/sqlite_lexicon_client
-dart run build_runner build
+flutter build web --release
 ```
 
-Для LiD-схемы генерация запускается аналогично в
-`packages/drift_citizenship_test_client`.
-
-После изменения таблиц или Drift annotations generated-файлы необходимо
-обновить и проверить анализатором.
-
-Локализации находятся в `lib/l10n/*.arb`. После их изменения выполните:
+Для нативной проверки LiD и словаря запускайте как минимум Android и iOS:
 
 ```bash
-flutter gen-l10n
+flutter run --flavor native -d <android-device-id>
+flutter run --flavor native -d <ios-device-id>
 ```
 
-## Сборка
+## Сборки
+
+### Web
 
 ```bash
-# Web release
-flutter build web
-
-# Android
-flutter build apk --flavor native
-flutter build appbundle --flavor native
-
-# iOS без подписи для CI-проверки
-flutter build ios --flavor native --no-codesign
-
-# iOS archive с настроенной подписью
-flutter build ipa --flavor native
+flutter build web --release \
+  --dart-define=APK_DOWNLOAD_URL=https://github.com/YehorAltshuler/wort_/releases/latest/download/wort.apk
 ```
 
-## Проверка platform assets
+Результат находится в `build/web`. Vercel выполняет этот шаг сам через
+`scripts/build-web.sh`; конфигурация находится в `vercel.json`.
 
-Web не должен содержать SQLite:
+После изменения `web/index.html` или PWA-ресурсов делайте hard reload в
+браузере либо очистите site data: service worker и HTTP cache могут показывать
+старую загрузочную страницу.
+
+### Android APK
 
 ```bash
-find build/web -name lexicon.db
+flutter build apk --release --flavor native
 ```
 
-Android должен содержать SQLite, но не Web shards:
+APK: `build/app/outputs/flutter-apk/app-native-release.apk`.
+
+GitHub Actions автоматически строит APK при push тега `v*` и прикрепляет его
+как `wort.apk` к GitHub Release. До публичного распространения нужно заменить
+debug signing на отдельный release keystore и GitHub Secrets.
+
+### iOS
 
 ```bash
-unzip -l build/app/outputs/flutter-apk/app-native-release.apk \
-  | grep assets/native/lexicon.db
+flutter build ios --release --flavor native
 ```
 
-iOS native build должен содержать SQLite:
+Для подписи и распространения требуется настроенная команда Apple Developer в
+Xcode.
+
+## Правильный push
+
+Обычные изменения публикуйте линейной историей:
 
 ```bash
-find build/ios/iphoneos/Runner.app -name lexicon.db
+git status
+git fetch origin
+git pull --rebase origin main
+dart format .
+flutter analyze
+flutter test
+git add <files>
+git commit -m "Describe the change"
+git push origin main
 ```
 
-## Перед pull request
+Не добавляйте в коммит `build/`, `.dart_tool/`, IDE-файлы, ключи подписи или
+локальные базы с пользовательскими данными. Перед `git add` всегда смотрите
+`git diff` и `git status`.
 
-1. Запустить formatter.
-2. Запустить `flutter analyze`.
-3. Запустить app и package tests.
-4. Для platform changes собрать затронутые targets.
-5. Обновить документацию при изменении архитектуры, маршрутов или команд.
+### Когда допустим `--force-with-lease`
+
+`git push --force-with-lease` нужен только после осознанного переписывания
+своих ещё не согласованных коммитов: например, после `git commit --amend` или
+интерактивного rebase. Он безопаснее `--force`, потому что отклонит push, если
+удалённая ветка изменилась после последнего `git fetch`.
+
+```bash
+git fetch origin
+git log --oneline origin/main..HEAD
+git push --force-with-lease origin main
+```
+
+Никогда не используйте `--force` и не применяйте `--force-with-lease`, пока не
+проверили, что чужие commits не будут удалены. Для production-проектов
+предпочтительны pull request и обычный push; `main` этого проекта допускает
+`--force-with-lease` только по явному согласованию.
+
+## CI и публикация
+
+- `.github/workflows/flutter-ci.yml` запускается на push в `main` и pull
+  request: форматирование, analyzer, тесты и Web build.
+- `.github/workflows/publish-android-apk.yml` запускается на теге `v*` и
+  публикует APK в GitHub Release.
+- Vercel реагирует на репозиторий и собирает `build/web` согласно
+  `vercel.json`.
+
+Перед релизным тегом убедитесь, что версия в `pubspec.yaml` обновлена и все
+проверки прошли. Пример:
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```

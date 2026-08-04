@@ -22,12 +22,14 @@ class CitizenshipTrainingPage extends ConsumerStatefulWidget {
     required this.filter,
     required this.randomOrder,
     this.sessionId,
+    this.startNew = false,
     super.key,
   });
 
   final String filter;
   final bool randomOrder;
   final String? sessionId;
+  final bool startNew;
 
   @override
   ConsumerState<CitizenshipTrainingPage> createState() =>
@@ -133,6 +135,7 @@ class _CitizenshipTrainingPageState
         .firstOrNull;
     return TrainingContentLayout(
       answersBottomPadding: 8,
+      scrollTogether: true,
       header: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -158,6 +161,11 @@ class _CitizenshipTrainingPageState
             ],
           ),
           const SizedBox(height: 12),
+          if (!usesImageAnswers)
+            CitizenshipQuestionImage(
+              questionId: question.id,
+              hasImage: question.hasImage,
+            ),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -182,10 +190,6 @@ class _CitizenshipTrainingPageState
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CitizenshipQuestionImage(
-                  questionId: question.id,
-                  hasImage: question.hasImage,
-                ),
                 for (var answer = 0; answer < question.answers.length; answer++)
                   Padding(
                     key: _answerKeys[answer],
@@ -274,12 +278,15 @@ class _CitizenshipTrainingPageState
         _mistakes.add(question);
       }
     });
-    unawaited(
-      ref
-          .read(citizenshipTestRepositoryProvider)
-          .recordAnswer(question: question, selectedAnswer: answer),
-    );
+    unawaited(_recordAnswer(question, answer));
     unawaited(_keepAnswerVisible(answer));
+  }
+
+  Future<void> _recordAnswer(CitizenshipQuestion question, int answer) async {
+    await ref
+        .read(citizenshipTestRepositoryProvider)
+        .recordAnswer(question: question, selectedAnswer: answer);
+    ref.invalidate(citizenshipProgressProvider);
   }
 
   Future<void> _keepAnswerVisible(int answer) async {
@@ -323,9 +330,16 @@ class _CitizenshipTrainingPageState
     List<QuestionProgressRecord> progress,
   ) async {
     final repository = ref.read(citizenshipTestRepositoryProvider);
-    final existing = await repository.loadActiveSession(
-      CitizenshipSessionMode.allQuestions,
-    );
+    if (widget.startNew) {
+      await repository.discardActiveSessions(
+        CitizenshipSessionMode.allQuestions,
+      );
+    }
+    final existing = widget.startNew
+        ? null
+        : await repository.loadActiveSession(
+            CitizenshipSessionMode.allQuestions,
+          );
     final byId = {for (final question in all) question.id: question};
     final state = ref.read(settingsProvider).value?.bundesland ?? 'BE';
     final queue = existing == null
@@ -372,45 +386,54 @@ class _CitizenshipTrainingPageState
   Future<void> _showQuestionList() async {
     final queue = _queue;
     if (queue == null || queue.isEmpty) return;
-    final progress = ref.read(citizenshipProgressProvider).value ?? const [];
-    final progressById = {
-      for (final item in progress) item.questionId: item,
-    };
     final selected = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
-          child: ListView.builder(
-            itemCount: queue.length,
-            itemBuilder: (context, index) {
-              final status = progressById[queue[index].id];
-              final answered = status?.lastSelectedAnswer != null;
-              final color = !answered
-                  ? Theme.of(context).colorScheme.surfaceContainerHighest
-                  : status!.isMastered
-                  ? TrainingAnswerChip.correctColor(context)
-                  : Theme.of(context).colorScheme.error;
-              return ListTile(
-                selected: index == _index,
-                leading: CircleAvatar(
-                  backgroundColor: color.withValues(alpha: 0.16),
-                  foregroundColor: color,
-                  child: Text('${index + 1}'),
-                ),
-                title: Text(queue[index].text, maxLines: 2),
-                trailing: answered
-                    ? Icon(
-                        status!.isMastered ? Icons.check_circle : Icons.cancel,
-                        color: color,
-                      )
-                    : const Icon(Icons.radio_button_unchecked),
-                onTap: () => Navigator.pop(context, index),
-              );
-            },
-          ),
-        ),
+      useRootNavigator: true,
+      showDragHandle: true,
+      builder: (sheetContext) => Consumer(
+        builder: (context, ref, _) {
+          final progress =
+              ref.watch(citizenshipProgressProvider).value ?? const [];
+          final progressById = {
+            for (final item in progress) item.questionId: item,
+          };
+          return SafeArea(
+            child: SizedBox(
+              height: MediaQuery.sizeOf(context).height * 0.75,
+              child: ListView.builder(
+                itemCount: queue.length,
+                itemBuilder: (context, index) {
+                  final status = progressById[queue[index].id];
+                  final answered = status?.lastSelectedAnswer != null;
+                  final color = !answered
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
+                      : status!.isMastered
+                      ? TrainingAnswerChip.correctColor(context)
+                      : Theme.of(context).colorScheme.error;
+                  return ListTile(
+                    selected: index == _index,
+                    leading: CircleAvatar(
+                      backgroundColor: color.withValues(alpha: 0.16),
+                      foregroundColor: color,
+                      child: Text('${index + 1}'),
+                    ),
+                    title: Text(queue[index].text, maxLines: 2),
+                    trailing: answered
+                        ? Icon(
+                            status!.isMastered
+                                ? Icons.check_circle
+                                : Icons.cancel,
+                            color: color,
+                          )
+                        : const Icon(Icons.radio_button_unchecked),
+                    onTap: () => Navigator.pop(sheetContext, index),
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
     if (selected == null || !mounted) return;

@@ -113,13 +113,14 @@ class _CitizenshipTrainingSetupPageState
             ? null
             : () => context.pushReplacement(
                 switch (_mode) {
-                  _TrainingMode.exam => AppRoute.citizenshipExam,
+                  _TrainingMode.exam =>
+                    '${AppRoute.citizenshipExam}?startNew=true',
                   _TrainingMode.favorites =>
                     '${AppRoute.citizenshipTraining}'
                         '?filter=favorites&random=false',
                   _TrainingMode.sequential =>
                     '${AppRoute.citizenshipTraining}'
-                        '?filter=all&random=false',
+                        '?filter=all&random=false&startNew=true',
                 },
               ),
       ),

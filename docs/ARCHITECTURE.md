@@ -1,136 +1,133 @@
-# Архитектура
+# Архитектура wort_
 
-## Основа
+## Обзор
 
-Проект следует layered architecture от Very Good Ventures. Вместо Bloc в
-business logic layer используется Riverpod.
-
-```text
-Presentation → Business logic → Repository → Data client
-Flutter UI      Riverpod          Pure Dart    SQLite / HTTP / plugins
-```
-
-Каждый слой может обращаться только к соседнему нижнему слою. Детали SQLite,
-HTTP и платформенных API не должны попадать в provider или widget.
-
-## Структура
+`wort_` — Flutter-приложение для немецкой лексики, обучения по учебникам,
+упражнений и теста **Leben in Deutschland**. Проект использует package-based
+структуру, Riverpod для состояния, GoRouter для навигации, Drift для
+offline-first данных теста и `http` для его обновления.
 
 ```text
-lib/
-├── app/
-│   ├── provider/       # composition root и repository providers
-│   ├── router/         # go_router и пути
-│   └── view/           # MaterialApp
-├── <feature>/
-│   ├── provider/       # Riverpod state и feature logic
-│   └── view/           # страницы и widgets
-├── theme/
-└── widgets/
-
-packages/
-├── asset_course_client/    # JSON assets учебников для всех платформ
-├── course_client/          # абстрактный contract учебных данных
-├── course_repository/      # модели учебников, модулей и слов
-├── citizenship_test_client/ # local/remote/media контракты LiD
-├── citizenship_test_repository/ # offline-first, экзамен и прогресс LiD
-├── drift_citizenship_test_client/ # Drift + native/Web media
-├── http_citizenship_test_client/ # remote JSON и изображения
-├── lexicon_client/         # абстрактный data contract
-├── lexicon_repository/     # модели и правила словаря
-├── learning_progress_repository/ # Expo-compatible progress persistence
-├── preferences_client/     # SharedPreferences data client
-├── settings_repository/    # язык и тема приложения
-├── sqlite_lexicon_client/  # Drift/SQLite для Android и iOS
-└── web_lexicon_client/     # HTTP JSON для Web
+lib/                         Flutter UI и feature-слой
+  app/                       composition root, providers и маршруты
+  learning/                  учебники, модули и тренировка слов
+  dictionary/                поиск словаря
+  word_details/              карточка слова
+  collections/               «Мои слова» и пользовательские списки
+  exercises/                 упражнения
+  citizenship_test/          Leben in Deutschland
+  settings/                  настройки приложения
+  widgets/                   общие UI-компоненты
+packages/                    независимые data/domain-пакеты
+assets/                      словарь, учебники, упражнения, LiD snapshot и бренд
+web/                         HTML loader, PWA-метаданные и иконки
 ```
 
-Новый package создаётся только для самостоятельного data или repository слоя.
-Небольшие presentation-компоненты остаются в основном приложении.
+## Слои и зависимости
 
-## Ответственность слоёв
+### UI и состояние
 
-### Presentation
+Feature-папки в `lib/` организованы по назначению:
 
-- содержит Flutter widgets и управление их lifecycle;
-- читает состояние Riverpod;
-- передаёт пользовательские события provider;
-- может содержать layout, animation и простую routing logic;
-- не выполняет SQL, HTTP и преобразование domain data.
+- `view/` содержит экраны и feature-specific виджеты;
+- `provider/` содержит Riverpod providers, `Notifier` и `AsyncNotifier`;
+- `domain/` содержит небольшие UI-модели и правила feature-слоя;
+- `lib/widgets/` хранит визуально переиспользуемые компоненты.
 
-### Business logic
+Виджеты получают состояние через Riverpod и не обращаются к хранилищу или сети
+напрямую. Провайдеры используют репозитории из
+`lib/app/provider/repository_providers.dart`.
 
-- реализована через `Notifier`, `AsyncNotifier` и другие Riverpod providers;
-- хранит feature state;
-- вызывает repositories;
-- обрабатывает loading, success и error;
-- не зависит от конкретного data client.
+### Репозитории и клиенты
 
-### Repository
+Каждый пакет имеет одну ответственность:
 
-- является источником domain data;
-- преобразует raw records в domain models;
-- применяет правила продукта;
-- не импортирует Flutter;
-- не зависит от других repositories.
+| Пакет | Ответственность |
+| --- | --- |
+| `asset_course_client` | читает учебники и модули из Flutter assets |
+| `course_repository` | предоставляет учебники и слова модулей |
+| `lexicon_client`, `lexicon_repository` | контракт и API словаря |
+| `sqlite_lexicon_client` | нативный SQLite-словарь |
+| `web_lexicon_client` | словарь из разделённых JSON-shards для Web |
+| `collections_client`, `collections_repository` | пользовательские списки и избранное |
+| `drift_collections_client` | постоянное хранилище списков |
+| `preferences_client`, `settings_repository` | настройки через `SharedPreferencesAsync` |
+| `learning_progress_repository` | прогресс учебных модулей |
+| `citizenship_test_client` | контракт локального хранилища LiD |
+| `drift_citizenship_test_client` | Drift-реализация вопросов, сессий, прогресса и media metadata |
+| `http_citizenship_test_client` | загрузка manifest и вопросов LiD через `http` |
+| `citizenship_test_repository` | offline-first синхронизация, сессии и прогресс LiD |
 
-### Data client
-
-- получает сырые данные из SQLite, HTTP, файлов или platform plugins;
-- не содержит feature logic;
-- может зависеть от Flutter, если оборачивает Flutter platform API.
-
-## Dependency injection
-
-Composition root находится в `lib/app/provider`. Например, UI получает
-`LexiconRepository`, не зная выбранный client:
-
-```text
-lexiconRepositoryProvider
-  → createLexiconClient()
-    → SqliteLexiconClient на native
-    → WebLexiconClient на Web
-```
-
-Conditional imports находятся только в factory. Это не позволяет `dart:io`
-попасть в Web-компиляцию.
-
-Настройки проходят тот же путь: `PreferencesClient` изолирует platform plugin,
-`SettingsRepository` хранит ключи и преобразует значения, а
-`settingsProvider` предоставляет UI асинхронное состояние языка и темы.
+Правило зависимостей: UI зависит от repository API, repository — от client API,
+а конкретные реализации подключаются только в composition root. Не добавляйте
+сеть, Drift или platform checks в `view/`.
 
 ## Навигация
 
-`go_router` является единственным источником routing state. Корневые маршруты:
+`go_router` настроен в `lib/app/router/app_router.dart`.
+
+- корневые вкладки открывают `NavigationPage` без анимации;
+- feature routes передают только простые path/query параметры;
+- маршрут — источник состояния навигации, а не ручные `Navigator.push` внутри
+  бизнес-логики.
+
+Все новые маршруты сначала добавляйте в `lib/app/router/app_routes.dart`, затем
+в конфигурацию `GoRouter`.
+
+## Хранение данных
+
+### Словарь, учебники и пользовательские данные
+
+- Android/iOS используют поставляемую SQLite-базу словаря;
+- Web загружает словарь по shards и кэширует запросы на уровне клиента;
+- учебники и упражнения поставляются как assets;
+- настройки и лёгкий прогресс хранятся через shared preferences;
+- пользовательские списки имеют отдельное Drift-хранилище.
+
+### Leben in Deutschland
+
+LiD всегда читает вопросы из локальной Drift-базы. При первом запуске в базу
+импортируется bundled snapshot. После этого repository может неблокирующе
+сверить данные с опубликованным dataset `bamf-lid-dataset`.
+
+Синхронизация использует manifest/questions endpoint, conditional HTTP
+(`ETag`/`Last-Modified`, если доступны), ограничение повторных попыток и
+поколения dataset:
 
 ```text
-/learning
-/dictionary
-/collections
-/citizenship-test
-/settings
-/dictionary/word/:id
+staging -> active -> previous -> obsolete
 ```
 
-Пять корневых разделов отображаются через `PageView`. Нажатие на нижнее меню
-меняет URL, а свайп `PageView` синхронизирует URL с текущей страницей.
+Новая версия полностью валидируется до одной транзакции активации. Ошибка сети,
+парсинга или одной картинки не заменяет активный текстовый набор. Прогресс,
+избранное, экзаменационные сессии и ответы хранятся отдельно и ссылаются на
+upstream `questionId`; очистка каталога не удаляет их каскадно.
 
-Навигационное состояние не дублируется в Riverpod.
+Изображения не являются BLOB в Drift. На native они лежат в versioned файловом
+хранилище, на Web — в эквивалентном persistent media store; Drift хранит только
+метаданные и локальный ключ. Активное и предыдущее поколения сохраняются до
+отдельной cleanup-операции.
 
-Учебный поток использует вложенные deep links `/learning/book/:bookId` и
-`/learning/book/:bookId/module/:moduleFile`. Настройки занятия передаются query
-parameters, а сами слова повторно берутся из repository provider.
+## Тема, локализация и адаптивность
 
-Результат каждого ответа записывается через `learningProgressProvider` в ключ
-`learningProgress`. Правильный ответ отмечает слово проверенным, неправильный
-снимает отметку; module overview агрегирует эти ID по категориям слов.
+- тема Material 3 задаётся в `lib/theme/wort_theme.dart`;
+- палитры `pink`, `azure`, `lime` строятся из seed, monochrome определена
+  вручную;
+- HTML loading screen в `web/index.html` читает сохранённые тему и палитру,
+  чтобы не мигать противоположным фоном до первого Flutter frame;
+- строки генерируются из `lib/l10n/`, поддерживаются русский, английский и
+  арабский;
+- адаптивная компоновка использует Flutter layout widgets и breakpoints,
+  а не отдельную Web-ветку UI.
 
-## Правила для нового функционала
+## Как добавлять feature
 
-1. Начинать с domain model и repository API.
-2. Изолировать источник данных в client package.
-3. Предоставлять repository через Riverpod composition root.
-4. Хранить feature state в provider.
-5. Оставлять view декларативной.
-6. Добавлять use case только для сложной переиспользуемой логики, объединяющей
-   несколько repositories.
-7. Тестировать каждый слой отдельно.
+1. Создайте feature-папку в `lib/<feature>/` с `view/`, `provider/` и при
+   необходимости `domain/`.
+2. Если нужен доступ к данным, сначала определите интерфейс client/repository в
+   `packages/`, затем подключите реализацию в repository providers.
+3. Держите виджеты декларативными: асинхронная работа и мутации — в notifier
+   или repository.
+4. Добавьте route, локализованные строки и тесты рядом с изменённым слоем.
+5. Не добавляйте глобальный state manager, HTTP-клиент или database package,
+   если текущие Riverpod, `http` и Drift покрывают задачу.

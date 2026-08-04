@@ -18,7 +18,9 @@ import 'package:wort_flutter/widgets/training_bottom_bar.dart';
 import 'package:wort_flutter/widgets/training_content_layout.dart';
 
 class CitizenshipExamPage extends ConsumerStatefulWidget {
-  const CitizenshipExamPage({super.key});
+  const CitizenshipExamPage({this.startNew = false, super.key});
+
+  final bool startNew;
 
   @override
   ConsumerState<CitizenshipExamPage> createState() =>
@@ -225,9 +227,12 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
   Future<void> _initializeExam(List<CitizenshipQuestion> all) async {
     final repository = ref.read(citizenshipTestRepositoryProvider);
     final state = ref.read(settingsProvider).value?.bundesland ?? 'BE';
-    final existing = await repository.loadActiveSession(
-      CitizenshipSessionMode.exam,
-    );
+    if (widget.startNew) {
+      await repository.discardActiveSessions(CitizenshipSessionMode.exam);
+    }
+    final existing = widget.startNew
+        ? null
+        : await repository.loadActiveSession(CitizenshipSessionMode.exam);
     final byId = {for (final question in all) question.id: question};
     final questions = existing == null
         ? repository.createExamQuestions(all, state)

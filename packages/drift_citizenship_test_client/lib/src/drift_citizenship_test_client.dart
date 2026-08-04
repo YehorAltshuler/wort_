@@ -463,4 +463,16 @@ class DriftCitizenshipTestClient implements CitizenshipTestLocalClient {
             ),
           )
           .toList(growable: false);
+
+  @override
+  Future<void> deleteExamSession(String sessionId) => _database.transaction(
+    () async {
+      await (_database.delete(
+        _database.citizenshipExamAnswers,
+      )..where((row) => row.sessionId.equals(sessionId))).go();
+      await (_database.delete(
+        _database.citizenshipExamSessions,
+      )..where((row) => row.id.equals(sessionId))).go();
+    },
+  );
 }

@@ -91,14 +91,10 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            _ExerciseSectionLabel(
               hard
                   ? context.l10n.fixedPrepositionPrompt
                   : context.l10n.chooseTranslationAndCase,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w700,
-              ),
             ),
             const SizedBox(height: 12),
             Card(
@@ -116,9 +112,8 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            _ExerciseSectionLabel(
               hard ? context.l10n.preposition : context.l10n.translationTitle,
-              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             TrainingAnswerChipGroup(
@@ -133,9 +128,8 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
               onSelected: (option) => setState(() => _firstAnswer = option),
             ),
             const SizedBox(height: 20),
-            Text(
+            _ExerciseSectionLabel(
               context.l10n.grammaticalCase,
-              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             TrainingAnswerChipGroup(
@@ -243,6 +237,23 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
     return word.example.replaceFirst(
       RegExp('\\b${RegExp.escape(word.preposition)}\\b', caseSensitive: false),
       '...',
+    );
+  }
+}
+
+class _ExerciseSectionLabel extends StatelessWidget {
+  const _ExerciseSectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w700,
+      ),
     );
   }
 }

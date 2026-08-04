@@ -22,6 +22,7 @@ abstract interface class CitizenshipTestLocalClient {
   Future<void> saveExamAnswer(ExamAnswerRecord answer);
   Future<List<ExamSessionRecord>> loadExamSessions();
   Future<List<ExamAnswerRecord>> loadExamAnswers(String sessionId);
+  Future<void> deleteExamSession(String sessionId);
 }
 
 abstract interface class CitizenshipTestRemoteClient {
