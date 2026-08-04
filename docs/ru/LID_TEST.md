@@ -1,5 +1,7 @@
 # Leben in Deutschland
 
+[English](../en/LID_TEST.md) · [Deutsch](../de/LID_TEST.md)
+
 ## Архитектура
 
 UI читает каталог только из локальной Drift-базы. Remote JSON и изображения
@@ -32,6 +34,11 @@ Drift хранит поколения `staging`, `active`, `previous`, `obsolete
 media metadata, sync metadata, прогресс и экзаменационные сессии. Прогресс не
 имеет внешнего ключа с каскадным удалением на каталог.
 
+Экзаменационные и «все вопросы» сессии сохраняют очередь и текущую позицию.
+Экзамен дополнительно сохраняет выбранные ответы, поэтому его можно продолжить
+после закрытия и повторного открытия приложения. Явный запуск с `startNew`
+заменяет предыдущую активную сессию.
+
 На Android и iOS изображения находятся в versioned-папках Application Support.
 На Web они хранятся в browser Cache Storage. В Drift нет BLOB изображений.
 
@@ -49,6 +56,7 @@ Bundled snapshot находится в `assets/citizenship_test` и импорт
   `questions.json`, SHA-256 которого обязательно проверяется;
 - новый набор активируется одной Drift-транзакцией;
 - отдельные ошибки изображений дают partial update и persistent retry;
+- размер одного изображения ограничен 4 MiB;
 - cleanup удаляет только `obsolete`, сохраняя `active` и `previous`.
 
 ## Экзамен

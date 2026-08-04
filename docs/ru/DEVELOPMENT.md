@@ -1,5 +1,7 @@
 # Разработка и релизы wort_
 
+[English](../en/DEVELOPMENT.md) · [Deutsch](../de/DEVELOPMENT.md)
+
 ## Требования
 
 - Flutter stable с Dart, совместимый с SDK из `pubspec.yaml`;
