@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_chip_group.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
@@ -56,10 +57,12 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
     if (_index >= _queue!.length) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(
-          child: Text(
-            context.l10n.knowledgeCheckComplete,
-            style: Theme.of(context).textTheme.headlineSmall,
+        body: ResponsiveContent(
+          child: Center(
+            child: Text(
+              context.l10n.knowledgeCheckComplete,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
           ),
         ),
       );
@@ -86,64 +89,66 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
           ),
         ),
       ),
-      body: TrainingContentLayout(
-        header: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _ExerciseSectionLabel(
-              hard
-                  ? context.l10n.fixedPrepositionPrompt
-                  : context.l10n.chooseTranslationAndCase,
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  hard ? _cloze(word) : word.example,
-                  style: Theme.of(context).textTheme.headlineSmall,
+      body: ResponsiveContent(
+        child: TrainingContentLayout(
+          header: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ExerciseSectionLabel(
+                hard
+                    ? context.l10n.fixedPrepositionPrompt
+                    : context.l10n.chooseTranslationAndCase,
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    hard ? _cloze(word) : word.example,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        answers: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _ExerciseSectionLabel(
-              hard ? context.l10n.preposition : context.l10n.translationTitle,
-            ),
-            const SizedBox(height: 8),
-            TrainingAnswerChipGroup(
-              options: firstOptions,
-              selectedValue: _firstAnswer,
-              enabled: _result == null,
-              answerStateFor: (option) => _answerState(
-                selectedAnswer: _firstAnswer,
-                option: option,
-                correctAnswer: correctFirst,
+            ],
+          ),
+          answers: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ExerciseSectionLabel(
+                hard ? context.l10n.preposition : context.l10n.translationTitle,
               ),
-              onSelected: (option) => setState(() => _firstAnswer = option),
-            ),
-            const SizedBox(height: 20),
-            _ExerciseSectionLabel(
-              context.l10n.grammaticalCase,
-            ),
-            const SizedBox(height: 8),
-            TrainingAnswerChipGroup(
-              options: const ['Akkusativ', 'Dativ'],
-              selectedValue: _caseAnswer,
-              enabled: _result == null,
-              answerStateFor: (option) => _answerState(
-                selectedAnswer: _caseAnswer,
-                option: option,
-                correctAnswer: word.grammaticalCase,
+              const SizedBox(height: 8),
+              TrainingAnswerChipGroup(
+                options: firstOptions,
+                selectedValue: _firstAnswer,
+                enabled: _result == null,
+                answerStateFor: (option) => _answerState(
+                  selectedAnswer: _firstAnswer,
+                  option: option,
+                  correctAnswer: correctFirst,
+                ),
+                onSelected: (option) => setState(() => _firstAnswer = option),
               ),
-              onSelected: (option) => setState(() => _caseAnswer = option),
-            ),
-          ],
+              const SizedBox(height: 20),
+              _ExerciseSectionLabel(
+                context.l10n.grammaticalCase,
+              ),
+              const SizedBox(height: 8),
+              TrainingAnswerChipGroup(
+                options: const ['Akkusativ', 'Dativ'],
+                selectedValue: _caseAnswer,
+                enabled: _result == null,
+                answerStateFor: (option) => _answerState(
+                  selectedAnswer: _caseAnswer,
+                  option: option,
+                  correctAnswer: word.grammaticalCase,
+                ),
+                onSelected: (option) => setState(() => _caseAnswer = option),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: TrainingBottomBar(

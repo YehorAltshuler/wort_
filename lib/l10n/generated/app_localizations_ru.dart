@@ -157,6 +157,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get etymologyTitle => 'Этимология';
 
   @override
+  String get dictionarySources => 'Словарные источники';
+
+  @override
+  String get wiktionaryAttribution =>
+      'Материалы Wiktionary/Kaikki доступны по лицензии CC BY-SA.';
+
+  @override
+  String get externalLinkError => 'Не удалось открыть внешний словарь.';
+
+  @override
   String get coursebooksTitle => 'Учебники';
 
   @override
@@ -397,6 +407,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get continueAction => 'Продолжить';
+
+  @override
+  String get nextQuestion => 'Следующий вопрос';
+
+  @override
+  String get finishAction => 'Завершить';
 
   @override
   String get correctAnswerLabel => 'Правильный ответ';

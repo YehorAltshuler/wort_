@@ -8,6 +8,7 @@ import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class SessionSetupPage extends ConsumerStatefulWidget {
   const SessionSetupPage({
@@ -48,64 +49,66 @@ class _SessionSetupPageState extends ConsumerState<SessionSetupPage> {
     );
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.sessionSetupTitle)),
-      body: words.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
-        ),
-        data: (items) {
-          final availableFilters = CourseWordFilter.values.where(
-            (filter) =>
-                filter == CourseWordFilter.all ||
-                filter.apply(items).isNotEmpty,
-          );
-          return ListView(
-            padding: AppSpacing.pageInsets,
-            children: [
-              Text(
-                context.l10n.viewWords,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              RadioGroup<CourseWordFilter>(
-                groupValue: _filter,
-                onChanged: (value) => setState(() => _filter = value!),
-                child: Column(
-                  children: [
-                    for (final filter in availableFilters)
-                      RadioListTile<CourseWordFilter>(
-                        value: filter,
-                        title: Text(_filterLabel(context, filter)),
-                        secondary: Text('${filter.apply(items).length}'),
-                      ),
-                  ],
+      body: ResponsiveContent(
+        child: words.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (items) {
+            final availableFilters = CourseWordFilter.values.where(
+              (filter) =>
+                  filter == CourseWordFilter.all ||
+                  filter.apply(items).isNotEmpty,
+            );
+            return ListView(
+              padding: AppSpacing.pageInsets,
+              children: [
+                Text(
+                  context.l10n.viewWords,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              ),
-              const SizedBox(height: 28),
-              Text(
-                context.l10n.difficultyTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              RadioGroup<TrainingDifficulty>(
-                groupValue: _difficulty,
-                onChanged: (value) => setState(() => _difficulty = value!),
-                child: Column(
-                  children: [
-                    for (final difficulty in TrainingDifficulty.values)
-                      RadioListTile<TrainingDifficulty>(
-                        value: difficulty,
-                        title: Text(_difficultyLabel(context, difficulty)),
-                        subtitle: Text(
-                          _difficultyDescription(context, difficulty),
+                const SizedBox(height: 8),
+                RadioGroup<CourseWordFilter>(
+                  groupValue: _filter,
+                  onChanged: (value) => setState(() => _filter = value!),
+                  child: Column(
+                    children: [
+                      for (final filter in availableFilters)
+                        RadioListTile<CourseWordFilter>(
+                          value: filter,
+                          title: Text(_filterLabel(context, filter)),
+                          secondary: Text('${filter.apply(items).length}'),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+                const SizedBox(height: 28),
+                Text(
+                  context.l10n.difficultyTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                RadioGroup<TrainingDifficulty>(
+                  groupValue: _difficulty,
+                  onChanged: (value) => setState(() => _difficulty = value!),
+                  child: Column(
+                    children: [
+                      for (final difficulty in TrainingDifficulty.values)
+                        RadioListTile<TrainingDifficulty>(
+                          value: difficulty,
+                          title: Text(_difficultyLabel(context, difficulty)),
+                          subtitle: Text(
+                            _difficultyDescription(context, difficulty),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       bottomNavigationBar: BottomActionButton(
         label: context.l10n.startTraining,

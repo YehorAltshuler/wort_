@@ -6,6 +6,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class CoursebooksPage extends ConsumerWidget {
   const CoursebooksPage({super.key});
@@ -15,21 +16,23 @@ class CoursebooksPage extends ConsumerWidget {
     final books = ref.watch(booksProvider);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.coursebooksTitle)),
-      body: books.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
-        ),
-        data: (items) => ListView.separated(
-          padding: AppSpacing.pageInsets,
-          itemCount: items.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 14),
-          itemBuilder: (context, index) => SizedBox(
-            height: 184,
-            child: _BookCard(
-              book: items[index],
-              index: index,
-              onTap: () => context.push(AppRoute.modules(items[index].id)),
+      body: ResponsiveContent(
+        child: books.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (items) => ListView.separated(
+            padding: AppSpacing.pageInsets,
+            itemCount: items.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 14),
+            itemBuilder: (context, index) => SizedBox(
+              height: 184,
+              child: _BookCard(
+                book: items[index],
+                index: index,
+                onTap: () => context.push(AppRoute.modules(items[index].id)),
+              ),
             ),
           ),
         ),

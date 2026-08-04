@@ -9,6 +9,7 @@ import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider
 import 'package:wort_flutter/citizenship_test/widgets/question_image.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 FutureProvider<({ExamSessionRecord session, List<ExamAnswerRecord> answers})>
 _examResultProvider(String sessionId) => FutureProvider((ref) async {
@@ -31,16 +32,18 @@ class CitizenshipResultPage extends ConsumerWidget {
     final questions = ref.watch(citizenshipQuestionsProvider);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.lidExamResult)),
-      body: result.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('$error')),
-        data: (data) => questions.when(
+      body: ResponsiveContent(
+        child: result.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('$error')),
-          data: (items) => _ResultContent(
-            session: data.session,
-            answers: data.answers,
-            questions: items,
+          data: (data) => questions.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(child: Text('$error')),
+            data: (items) => _ResultContent(
+              session: data.session,
+              answers: data.answers,
+              questions: items,
+            ),
           ),
         ),
       ),

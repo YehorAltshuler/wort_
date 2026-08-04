@@ -13,6 +13,7 @@ import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_chip_group.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
@@ -100,12 +101,14 @@ class _SessionPageState extends ConsumerState<SessionPage> {
           ),
         ),
       ),
-      body: words.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
+      body: ResponsiveContent(
+        child: words.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: _buildTraining,
         ),
-        data: _buildTraining,
       ),
       bottomNavigationBar: words.maybeWhen(
         data: _buildBottomBar,

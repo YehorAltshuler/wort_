@@ -153,6 +153,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get etymologyTitle => 'أصل الكلمة';
 
   @override
+  String get dictionarySources => 'مصادر القاموس';
+
+  @override
+  String get wiktionaryAttribution =>
+      'محتوى Wiktionary/Kaikki متاح بموجب ترخيص CC BY-SA.';
+
+  @override
+  String get externalLinkError => 'تعذر فتح القاموس الخارجي.';
+
+  @override
   String get coursebooksTitle => 'الكتب الدراسية';
 
   @override
@@ -391,6 +401,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get continueAction => 'متابعة';
+
+  @override
+  String get nextQuestion => 'السؤال التالي';
+
+  @override
+  String get finishAction => 'إنهاء';
 
   @override
   String get correctAnswerLabel => 'الإجابة الصحيحة';

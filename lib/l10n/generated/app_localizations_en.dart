@@ -156,6 +156,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get etymologyTitle => 'Etymology';
 
   @override
+  String get dictionarySources => 'Dictionary sources';
+
+  @override
+  String get wiktionaryAttribution =>
+      'Wiktionary/Kaikki content is available under the CC BY-SA license.';
+
+  @override
+  String get externalLinkError => 'Could not open the external dictionary.';
+
+  @override
   String get coursebooksTitle => 'Coursebooks';
 
   @override
@@ -398,6 +408,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueAction => 'Continue';
+
+  @override
+  String get nextQuestion => 'Next question';
+
+  @override
+  String get finishAction => 'Finish';
 
   @override
   String get correctAnswerLabel => 'Correct answer';

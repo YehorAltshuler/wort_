@@ -10,6 +10,7 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 enum _TrainingMode { sequential, exam, favorites }
 
@@ -32,79 +33,81 @@ class _CitizenshipTrainingSetupPageState
     final hasFavorites = progress.any((item) => item.isFavorite);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.lidTrainingSetupTitle)),
-      body: settings == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: AppSpacing.pageInsets,
-              children: [
-                Text(
-                  context.l10n.lidFederalState,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: settings.bundesland,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: context.l10n.lidSelectFederalState,
+      body: ResponsiveContent(
+        child: settings == null
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: AppSpacing.pageInsets,
+                children: [
+                  Text(
+                    context.l10n.lidFederalState,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  items: [
-                    for (final state in bundeslaender)
-                      DropdownMenuItem(
-                        value: state.code,
-                        child: Text(state.name),
-                      ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      unawaited(
-                        ref
-                            .read(settingsProvider.notifier)
-                            .setBundesland(value),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(height: 28),
-                Text(
-                  context.l10n.lidMode,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                RadioGroup<_TrainingMode>(
-                  groupValue: _mode,
-                  onChanged: (value) => setState(() => _mode = value!),
-                  child: Column(
-                    children: [
-                      RadioListTile<_TrainingMode>(
-                        value: _TrainingMode.sequential,
-                        title: Text(context.l10n.lidSequentialMode),
-                        subtitle: Text(
-                          context.l10n.lidSequentialModeDescription,
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: settings.bundesland,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: context.l10n.lidSelectFederalState,
+                    ),
+                    items: [
+                      for (final state in bundeslaender)
+                        DropdownMenuItem(
+                          value: state.code,
+                          child: Text(state.name),
                         ),
-                      ),
-                      RadioListTile<_TrainingMode>(
-                        value: _TrainingMode.exam,
-                        title: Text(context.l10n.lidExamSimulation),
-                        subtitle: Text(
-                          context.l10n.lidExamSimulationDescription,
-                        ),
-                      ),
-                      RadioListTile<_TrainingMode>(
-                        value: _TrainingMode.favorites,
-                        enabled: hasFavorites,
-                        title: Text(context.l10n.lidFavoritesMode),
-                        subtitle: Text(
-                          hasFavorites
-                              ? context.l10n.lidFavoritesModeDescription
-                              : context.l10n.lidAddFavoritesFirst,
-                        ),
-                      ),
                     ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        unawaited(
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setBundesland(value),
+                        );
+                      }
+                    },
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 28),
+                  Text(
+                    context.l10n.lidMode,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  RadioGroup<_TrainingMode>(
+                    groupValue: _mode,
+                    onChanged: (value) => setState(() => _mode = value!),
+                    child: Column(
+                      children: [
+                        RadioListTile<_TrainingMode>(
+                          value: _TrainingMode.sequential,
+                          title: Text(context.l10n.lidSequentialMode),
+                          subtitle: Text(
+                            context.l10n.lidSequentialModeDescription,
+                          ),
+                        ),
+                        RadioListTile<_TrainingMode>(
+                          value: _TrainingMode.exam,
+                          title: Text(context.l10n.lidExamSimulation),
+                          subtitle: Text(
+                            context.l10n.lidExamSimulationDescription,
+                          ),
+                        ),
+                        RadioListTile<_TrainingMode>(
+                          value: _TrainingMode.favorites,
+                          enabled: hasFavorites,
+                          title: Text(context.l10n.lidFavoritesMode),
+                          subtitle: Text(
+                            hasFavorites
+                                ? context.l10n.lidFavoritesModeDescription
+                                : context.l10n.lidAddFavoritesFirst,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+      ),
       bottomNavigationBar: BottomActionButton(
         label: _mode == _TrainingMode.exam
             ? context.l10n.lidStartExam

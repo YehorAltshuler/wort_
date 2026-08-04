@@ -6,6 +6,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class ModulesPage extends ConsumerWidget {
   const ModulesPage({required this.bookId, super.key});
@@ -17,18 +18,20 @@ class ModulesPage extends ConsumerWidget {
     final books = ref.watch(booksProvider);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.modulesTitle)),
-      body: books.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
+      body: ResponsiveContent(
+        child: books.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (items) {
+            final book = items.where((item) => item.id == bookId).firstOrNull;
+            if (book == null) {
+              return Center(child: Text(context.l10n.invalidCourseRoute));
+            }
+            return _ModuleList(book: book);
+          },
         ),
-        data: (items) {
-          final book = items.where((item) => item.id == bookId).firstOrNull;
-          if (book == null) {
-            return Center(child: Text(context.l10n.invalidCourseRoute));
-          }
-          return _ModuleList(book: book);
-        },
       ),
     );
   }

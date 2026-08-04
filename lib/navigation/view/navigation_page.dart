@@ -24,6 +24,7 @@ class NavigationPage extends ConsumerStatefulWidget {
 
 class _NavigationPageState extends ConsumerState<NavigationPage> {
   late final PageController _pageController;
+  late int _selectedIndex;
 
   static const List<Widget> _pages = [
     ResponsiveContent(child: LearningPage()),
@@ -35,14 +36,18 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
   }
 
   @override
   void didUpdateWidget(covariant NavigationPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialIndex == widget.initialIndex ||
-        !_pageController.hasClients ||
+    if (oldWidget.initialIndex == widget.initialIndex) {
+      return;
+    }
+    _selectedIndex = widget.initialIndex;
+    if (!_pageController.hasClients ||
         _pageController.page?.round() == widget.initialIndex) {
       return;
     }
@@ -56,8 +61,8 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   }
 
   void _selectPage(int index) {
-    if (index == widget.initialIndex) return;
-    context.go(AppRoute.paths[index]);
+    if (index == _selectedIndex) return;
+    setState(() => _selectedIndex = index);
     unawaited(
       _pageController.animateToPage(
         index,
@@ -68,8 +73,12 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   }
 
   void _handlePageChanged(int index) {
-    if (index == widget.initialIndex) return;
-    context.go(AppRoute.paths[index]);
+    if (_selectedIndex != index) {
+      setState(() => _selectedIndex = index);
+    }
+    if (index != widget.initialIndex) {
+      context.go(AppRoute.paths[index]);
+    }
   }
 
   @override
@@ -107,7 +116,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                         fit: BoxFit.contain,
                       ),
                     ),
-                    selectedIndex: widget.initialIndex,
+                    selectedIndex: _selectedIndex,
                     labelType: NavigationRailLabelType.all,
                     onDestinationSelected: _selectPage,
                     destinations: _railDestinations(context),
@@ -129,7 +138,7 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
             child: expanded
                 ? const SizedBox.shrink()
                 : NavigationBar(
-                    selectedIndex: widget.initialIndex,
+                    selectedIndex: _selectedIndex,
                     onDestinationSelected: _selectPage,
                     destinations: _barDestinations(context),
                   ),

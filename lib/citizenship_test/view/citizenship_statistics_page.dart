@@ -6,6 +6,7 @@ import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/progress_stat_card.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class CitizenshipStatisticsPage extends ConsumerWidget {
   const CitizenshipStatisticsPage({super.key});
@@ -15,13 +16,15 @@ class CitizenshipStatisticsPage extends ConsumerWidget {
     final sessions = ref.watch(citizenshipExamSessionsProvider);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.learningProgress)),
-      body: progress.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('$error')),
-        data: (items) => sessions.when(
+      body: ResponsiveContent(
+        child: progress.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('$error')),
-          data: (exams) => _Statistics(progress: items, exams: exams),
+          data: (items) => sessions.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(child: Text('$error')),
+            data: (exams) => _Statistics(progress: items, exams: exams),
+          ),
         ),
       ),
     );

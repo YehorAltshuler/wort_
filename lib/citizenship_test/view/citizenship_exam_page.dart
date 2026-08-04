@@ -12,6 +12,7 @@ import 'package:wort_flutter/citizenship_test/widgets/image_answer_grid.dart';
 import 'package:wort_flutter/citizenship_test/widgets/question_image.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_tile.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
@@ -56,13 +57,15 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
           ),
         ),
       ),
-      body: questions.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('$error')),
-        data: (items) => progress.when(
+      body: ResponsiveContent(
+        child: questions.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('$error')),
-          data: (records) => _buildExam(items, records),
+          data: (items) => progress.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(child: Text('$error')),
+            data: (records) => _buildExam(items, records),
+          ),
         ),
       ),
       bottomNavigationBar: _buildBottomBar(),

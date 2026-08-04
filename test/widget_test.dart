@@ -259,8 +259,16 @@ void main() {
     await tester.tap(find.text('Haus').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('1. дом'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('дом'), findsOneWidget);
     expect(find.text('Das ist mein Haus.'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Словарные источники'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.widgetWithText(OutlinedButton, 'Wiktionary'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'DWDS'), findsOneWidget);
   });
 }
 

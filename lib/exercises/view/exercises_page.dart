@@ -5,6 +5,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class ExercisesPage extends ConsumerWidget {
   const ExercisesPage({super.key});
@@ -15,23 +16,25 @@ class ExercisesPage extends ConsumerWidget {
     final languageCode = Localizations.localeOf(context).languageCode;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.exercisesTitle)),
-      body: exercise.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
-        ),
-        data: (value) => ListView(
-          padding: AppSpacing.pageInsets,
-          children: [
-            _ExerciseCard(
-              title: value.catalog.title,
-              subtitle: value.catalog.descriptionFor(languageCode),
-              wordCount: value.words.length,
-              onTap: () => context.push(
-                AppRoute.exerciseWords(value.catalog.id),
+      body: ResponsiveContent(
+        child: exercise.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (value) => ListView(
+            padding: AppSpacing.pageInsets,
+            children: [
+              _ExerciseCard(
+                title: value.catalog.title,
+                subtitle: value.catalog.descriptionFor(languageCode),
+                wordCount: value.words.length,
+                onTap: () => context.push(
+                  AppRoute.exerciseWords(value.catalog.id),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

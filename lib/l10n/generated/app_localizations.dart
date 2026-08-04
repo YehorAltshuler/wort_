@@ -382,6 +382,24 @@ abstract class AppLocalizations {
   /// **'Этимология'**
   String get etymologyTitle;
 
+  /// No description provided for @dictionarySources.
+  ///
+  /// In ru, this message translates to:
+  /// **'Словарные источники'**
+  String get dictionarySources;
+
+  /// No description provided for @wiktionaryAttribution.
+  ///
+  /// In ru, this message translates to:
+  /// **'Материалы Wiktionary/Kaikki доступны по лицензии CC BY-SA.'**
+  String get wiktionaryAttribution;
+
+  /// No description provided for @externalLinkError.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось открыть внешний словарь.'**
+  String get externalLinkError;
+
   /// No description provided for @coursebooksTitle.
   ///
   /// In ru, this message translates to:
@@ -837,6 +855,18 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Продолжить'**
   String get continueAction;
+
+  /// No description provided for @nextQuestion.
+  ///
+  /// In ru, this message translates to:
+  /// **'Следующий вопрос'**
+  String get nextQuestion;
+
+  /// No description provided for @finishAction.
+  ///
+  /// In ru, this message translates to:
+  /// **'Завершить'**
+  String get finishAction;
 
   /// No description provided for @correctAnswerLabel.
   ///

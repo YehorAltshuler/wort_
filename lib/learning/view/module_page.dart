@@ -11,6 +11,7 @@ import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/progress_stat_card.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class ModulePage extends ConsumerStatefulWidget {
   const ModulePage({required this.bookId, required this.moduleFile, super.key});
@@ -49,25 +50,27 @@ class _ModulePageState extends ConsumerState<ModulePage> {
     );
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.learningProgress)),
-      body: words.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
-        ),
-        data: (items) => _Overview(
-          words: items,
-          progress: progress,
-          bookTitle: book?.title ?? widget.bookId,
-          moduleTitle: moduleTitle ?? widget.moduleFile,
-          selectedFilter: _selectedFilter,
-          onFilterSelected: (filter) {
-            setState(() => _selectedFilter = filter);
-          },
-          onViewWords: () => context.push(
-            AppRoute.moduleWords(
-              widget.bookId,
-              widget.moduleFile,
-              type: _selectedFilter.name,
+      body: ResponsiveContent(
+        child: words.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (items) => _Overview(
+            words: items,
+            progress: progress,
+            bookTitle: book?.title ?? widget.bookId,
+            moduleTitle: moduleTitle ?? widget.moduleFile,
+            selectedFilter: _selectedFilter,
+            onFilterSelected: (filter) {
+              setState(() => _selectedFilter = filter);
+            },
+            onViewWords: () => context.push(
+              AppRoute.moduleWords(
+                widget.bookId,
+                widget.moduleFile,
+                type: _selectedFilter.name,
+              ),
             ),
           ),
         ),

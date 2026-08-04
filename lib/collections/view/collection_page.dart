@@ -5,6 +5,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/dictionary/provider/noun_gender_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/word_list_tile.dart';
 
 class CollectionPage extends ConsumerWidget {
@@ -39,26 +40,28 @@ class CollectionPage extends ConsumerWidget {
             ),
         ],
       ),
-      body: collections.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.collectionsLoadError),
+      body: ResponsiveContent(
+        child: collections.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.collectionsLoadError),
+          ),
+          data: (items) {
+            final collection = items.byId(collectionId);
+            if (collection == null || collection.wordIds.isEmpty) {
+              return Center(child: Text(context.l10n.collectionEmpty));
+            }
+            return ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: collection.wordIds.length,
+              separatorBuilder: (context, index) => const Divider(height: 1),
+              itemBuilder: (context, index) => _SavedWordTile(
+                collectionId: collectionId,
+                wordId: collection.wordIds[index],
+              ),
+            );
+          },
         ),
-        data: (items) {
-          final collection = items.byId(collectionId);
-          if (collection == null || collection.wordIds.isEmpty) {
-            return Center(child: Text(context.l10n.collectionEmpty));
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: collection.wordIds.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) => _SavedWordTile(
-              collectionId: collectionId,
-              wordId: collection.wordIds[index],
-            ),
-          );
-        },
       ),
     );
   }

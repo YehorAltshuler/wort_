@@ -8,6 +8,7 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/word_list_tile.dart';
 import 'package:wort_flutter/widgets/word_list_view.dart';
 
@@ -33,12 +34,14 @@ class ModuleWordsPage extends ConsumerWidget {
     final filter = CourseWordFilterX.fromName(initialFilter);
     return Scaffold(
       appBar: AppBar(title: Text(_filterLabel(context, filter))),
-      body: words.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
+      body: ResponsiveContent(
+        child: words.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (items) => _WordList(words: filter.apply(items)),
         ),
-        data: (items) => _WordList(words: filter.apply(items)),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class ExerciseWordsPage extends ConsumerWidget {
   const ExerciseWordsPage({required this.exerciseId, super.key});
@@ -18,12 +19,14 @@ class ExerciseWordsPage extends ConsumerWidget {
     final exercise = ref.watch(fixedPrepositionExerciseProvider);
     return Scaffold(
       appBar: AppBar(),
-      body: exercise.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text(context.l10n.courseLoadError),
+      body: ResponsiveContent(
+        child: exercise.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(context.l10n.courseLoadError),
+          ),
+          data: (value) => _ExerciseWordList(exercise: value),
         ),
-        data: (value) => _ExerciseWordList(exercise: value),
       ),
       bottomNavigationBar: BottomActionButton(
         label: context.l10n.startKnowledgeCheck,

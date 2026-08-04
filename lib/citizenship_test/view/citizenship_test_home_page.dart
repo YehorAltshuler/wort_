@@ -10,6 +10,7 @@ import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/progress_stat_card.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class CitizenshipTestHomePage extends ConsumerWidget {
   const CitizenshipTestHomePage({super.key});
@@ -26,40 +27,42 @@ class CitizenshipTestHomePage extends ConsumerWidget {
         .firstOrNull;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.learningProgress)),
-      body: Column(
-        children: [
-          Expanded(
-            child: questions.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('$error')),
-              data: (items) => progress.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+      body: ResponsiveContent(
+        child: Column(
+          children: [
+            Expanded(
+              child: questions.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => Center(child: Text('$error')),
-                data: (records) => _StatisticsOverview(
-                  questions: items,
-                  progress: records,
-                  bundesland: bundesland,
+                data: (items) => progress.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  error: (error, _) => Center(child: Text('$error')),
+                  data: (records) => _StatisticsOverview(
+                    questions: items,
+                    progress: records,
+                    bundesland: bundesland,
+                  ),
                 ),
               ),
             ),
-          ),
-          if (activeSession case final session?)
-            Padding(
-              padding: AppSpacing.horizontalPageInsets,
-              child: SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: ready
-                      ? () => context.push(_sessionRoute(session.mode))
-                      : null,
-                  icon: const Icon(Icons.play_arrow),
-                  label: Text(context.l10n.lidContinueSession),
+            if (activeSession case final session?)
+              Padding(
+                padding: AppSpacing.horizontalPageInsets,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: ready
+                        ? () => context.push(_sessionRoute(session.mode))
+                        : null,
+                    icon: const Icon(Icons.play_arrow),
+                    label: Text(context.l10n.lidContinueSession),
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: BottomActionButton(
         label: context.l10n.configureTraining,
