@@ -23,7 +23,8 @@ class WordListView extends StatelessWidget {
     return ListView.separated(
       padding: padding,
       itemCount: itemCount,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.sm),
       itemBuilder: itemBuilder,
     );
   }

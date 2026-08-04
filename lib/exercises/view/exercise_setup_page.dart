@@ -5,6 +5,7 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
+import 'package:wort_flutter/widgets/selection_card.dart';
 
 class ExerciseSetupPage extends StatefulWidget {
   const ExerciseSetupPage({required this.exerciseId, super.key});
@@ -31,27 +32,24 @@ class _ExerciseSetupPageState extends State<ExerciseSetupPage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            RadioGroup<String>(
-              groupValue: _difficulty,
-              onChanged: (value) => setState(() => _difficulty = value!),
-              child: Column(
-                children: [
-                  RadioListTile<String>(
-                    value: 'easy',
-                    title: Text(context.l10n.difficultyEasy),
-                    subtitle: Text(
-                      context.l10n.fixedPrepositionEasyDescription,
-                    ),
-                  ),
-                  RadioListTile<String>(
-                    value: 'hard',
-                    title: Text(context.l10n.difficultyHard),
-                    subtitle: Text(
-                      context.l10n.fixedPrepositionHardDescription,
-                    ),
-                  ),
-                ],
-              ),
+            Column(
+              children: [
+                SelectionCard(
+                  title: context.l10n.difficultyEasy,
+                  subtitle: context.l10n.fixedPrepositionEasyDescription,
+                  selected: _difficulty == 'easy',
+                  onTap: () => setState(() => _difficulty = 'easy'),
+                  leading: Icons.sentiment_satisfied_alt_outlined,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                SelectionCard(
+                  title: context.l10n.difficultyHard,
+                  subtitle: context.l10n.fixedPrepositionHardDescription,
+                  selected: _difficulty == 'hard',
+                  onTap: () => setState(() => _difficulty = 'hard'),
+                  leading: Icons.local_fire_department_outlined,
+                ),
+              ],
             ),
           ],
         ),

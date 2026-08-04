@@ -11,6 +11,7 @@ import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
+import 'package:wort_flutter/widgets/selection_card.dart';
 
 enum _TrainingMode { sequential, exam, favorites }
 
@@ -47,7 +48,13 @@ class _CitizenshipTrainingSetupPageState
                   DropdownButtonFormField<String>(
                     initialValue: settings.bundesland,
                     decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerLow,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       labelText: context.l10n.lidSelectFederalState,
                     ),
                     items: [
@@ -73,37 +80,39 @@ class _CitizenshipTrainingSetupPageState
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  RadioGroup<_TrainingMode>(
-                    groupValue: _mode,
-                    onChanged: (value) => setState(() => _mode = value!),
-                    child: Column(
-                      children: [
-                        RadioListTile<_TrainingMode>(
-                          value: _TrainingMode.sequential,
-                          title: Text(context.l10n.lidSequentialMode),
-                          subtitle: Text(
-                            context.l10n.lidSequentialModeDescription,
-                          ),
+                  Column(
+                    children: [
+                      SelectionCard(
+                        title: context.l10n.lidSequentialMode,
+                        subtitle: context.l10n.lidSequentialModeDescription,
+                        selected: _mode == _TrainingMode.sequential,
+                        onTap: () => setState(
+                          () => _mode = _TrainingMode.sequential,
                         ),
-                        RadioListTile<_TrainingMode>(
-                          value: _TrainingMode.exam,
-                          title: Text(context.l10n.lidExamSimulation),
-                          subtitle: Text(
-                            context.l10n.lidExamSimulationDescription,
-                          ),
+                        leading: Icons.format_list_numbered_rounded,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SelectionCard(
+                        title: context.l10n.lidExamSimulation,
+                        subtitle: context.l10n.lidExamSimulationDescription,
+                        selected: _mode == _TrainingMode.exam,
+                        onTap: () => setState(() => _mode = _TrainingMode.exam),
+                        leading: Icons.assignment_outlined,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SelectionCard(
+                        title: context.l10n.lidFavoritesMode,
+                        subtitle: hasFavorites
+                            ? context.l10n.lidFavoritesModeDescription
+                            : context.l10n.lidAddFavoritesFirst,
+                        selected: _mode == _TrainingMode.favorites,
+                        enabled: hasFavorites,
+                        onTap: () => setState(
+                          () => _mode = _TrainingMode.favorites,
                         ),
-                        RadioListTile<_TrainingMode>(
-                          value: _TrainingMode.favorites,
-                          enabled: hasFavorites,
-                          title: Text(context.l10n.lidFavoritesMode),
-                          subtitle: Text(
-                            hasFavorites
-                                ? context.l10n.lidFavoritesModeDescription
-                                : context.l10n.lidAddFavoritesFirst,
-                          ),
-                        ),
-                      ],
-                    ),
+                        leading: Icons.favorite_outline_rounded,
+                      ),
+                    ],
                   ),
                 ],
               ),
