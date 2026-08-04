@@ -18,7 +18,8 @@ class HttpCitizenshipTestClient implements CitizenshipTestRemoteClient {
     http.Client? client,
     Uri? manifestUri,
     this.timeout = const Duration(seconds: 20),
-    this.maximumImageBytes = 2 * 1024 * 1024,
+    this.maximumImageBytes = 4 * 1024 * 1024,
+    this.useConditionalRequests = true,
   }) : _client = client ?? http.Client(),
        manifestUri =
            manifestUri ??
@@ -31,6 +32,7 @@ class HttpCitizenshipTestClient implements CitizenshipTestRemoteClient {
   final Uri manifestUri;
   final Duration timeout;
   final int maximumImageBytes;
+  final bool useConditionalRequests;
 
   @override
   Future<RemoteDatasetResponse> fetchDataset({
@@ -38,8 +40,10 @@ class HttpCitizenshipTestClient implements CitizenshipTestRemoteClient {
     String? lastModified,
   }) async {
     final headers = <String, String>{};
-    if (etag != null) headers['If-None-Match'] = etag;
-    if (lastModified != null) headers['If-Modified-Since'] = lastModified;
+    if (useConditionalRequests) {
+      if (etag != null) headers['If-None-Match'] = etag;
+      if (lastModified != null) headers['If-Modified-Since'] = lastModified;
+    }
     final response = await _client
         .get(manifestUri, headers: headers)
         .timeout(timeout);

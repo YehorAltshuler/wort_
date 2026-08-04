@@ -4,6 +4,7 @@ import 'package:citizenship_test_repository/citizenship_test_repository.dart';
 import 'package:collections_repository/collections_repository.dart';
 import 'package:course_repository/course_repository.dart';
 import 'package:drift_citizenship_test_client/drift_citizenship_test_client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_citizenship_test_client/http_citizenship_test_client.dart';
 import 'package:learning_progress_repository/learning_progress_repository.dart';
@@ -48,7 +49,7 @@ final Provider<CitizenshipTestLocalClient> citizenshipTestLocalClientProvider =
 final citizenshipTestRepositoryProvider = Provider<CitizenshipTestRepository>(
   (ref) => CitizenshipTestRepository(
     localClient: ref.watch(citizenshipTestLocalClientProvider),
-    remoteClient: HttpCitizenshipTestClient(),
+    remoteClient: HttpCitizenshipTestClient(useConditionalRequests: !kIsWeb),
     mediaStore: ref.watch(citizenshipTestMediaStoreProvider),
   ),
 );

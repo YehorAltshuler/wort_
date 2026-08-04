@@ -89,21 +89,28 @@ class CitizenshipTestRepository {
         var status = MediaStatus.failed;
         var relativePath = '$datasetId/${image.mediaKey}';
         String? contentHash;
+        String? lastError;
         if (asset != null) {
-          final bytes = await loadAsset(asset);
-          contentHash = sha256.convert(bytes).toString();
-          if (contentHash != image.expectedHash) {
-            throw StateError(
-              'Bundled image checksum mismatch: ${image.mediaKey}',
+          try {
+            final bytes = await loadAsset(asset);
+            contentHash = sha256.convert(bytes).toString();
+            if (contentHash != image.expectedHash) {
+              throw StateError(
+                'Bundled image checksum mismatch: ${image.mediaKey}',
+              );
+            }
+            relativePath = await _mediaStore.write(
+              datasetId: datasetId,
+              mediaKey: image.mediaKey,
+              bytes: bytes,
+              extension: _extensionForMime(image.mimeType),
             );
+            status = MediaStatus.available;
+          } on Object catch (error) {
+            lastError = error.toString();
           }
-          relativePath = await _mediaStore.write(
-            datasetId: datasetId,
-            mediaKey: image.mediaKey,
-            bytes: bytes,
-            extension: _extensionForMime(image.mimeType),
-          );
-          status = MediaStatus.available;
+        } else {
+          lastError = 'Bundled image is missing.';
         }
         statuses[image.mediaKey] = status;
         media.add(
@@ -115,9 +122,7 @@ class CitizenshipTestRepository {
             status: status,
             mimeType: image.mimeType,
             contentHash: contentHash ?? image.expectedHash,
-            lastError: status == MediaStatus.failed
-                ? 'Bundled image is missing.'
-                : null,
+            lastError: lastError,
           ),
         );
       }

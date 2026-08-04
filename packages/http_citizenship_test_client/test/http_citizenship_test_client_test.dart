@@ -57,6 +57,35 @@ void main() {
     expect((await client.fetchDataset()).notModified, isTrue);
   });
 
+  test('can omit conditional headers for browser CORS compatibility', () async {
+    final questions = utf8.encode('{"schemaVersion":1,"questions":[]}');
+    final client = HttpCitizenshipTestClient(
+      useConditionalRequests: false,
+      manifestUri: Uri.parse('https://example.com/data/manifest.json'),
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('manifest.json')) {
+          expect(request.headers, isNot(contains('If-None-Match')));
+          expect(request.headers, isNot(contains('If-Modified-Since')));
+          return http.Response(
+            jsonEncode({
+              'schemaVersion': 1,
+              'datasetVersion': 'test',
+              'questions': {
+                'url': 'questions.json',
+                'sha256': sha256.convert(questions).toString(),
+                'count': 0,
+              },
+            }),
+            200,
+          );
+        }
+        return http.Response.bytes(questions, 200);
+      }),
+    );
+
+    await client.fetchDataset(etag: 'tag', lastModified: 'date');
+  });
+
   test('rejects a questions checksum mismatch', () async {
     final client = HttpCitizenshipTestClient(
       client: MockClient((request) async {
@@ -109,6 +138,26 @@ void main() {
     expect(
       () => invalid.downloadImage('https://example.com/a.png'),
       throwsA(isA<CitizenshipTestHttpException>()),
+    );
+  });
+
+  test('accepts images larger than two MiB up to four MiB', () async {
+    final bytes = List<int>.filled(2204407, 1);
+    final client = HttpCitizenshipTestClient(
+      client: MockClient(
+        (_) async => http.Response.bytes(
+          bytes,
+          200,
+          headers: {'content-type': 'image/png'},
+        ),
+      ),
+    );
+
+    expect(
+      (await client.downloadImage(
+        'https://example.com/general-070.png',
+      )).bytes.length,
+      bytes.length,
     );
   });
 }

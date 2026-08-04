@@ -201,6 +201,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Update status has not been checked yet';
 
   @override
+  String get lidCatalogInstalledNotChecked =>
+      'The local catalog is installed; an online check has not completed yet';
+
+  @override
   String get lidCatalogCheckFailed =>
       'Could not verify whether questions are current';
 
@@ -209,7 +213,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lidCatalogQuestions(int count) {
-    return 'Available questions: $count';
+    return 'Questions in catalog: $count';
   }
 
   @override

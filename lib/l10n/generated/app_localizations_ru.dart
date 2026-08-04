@@ -200,6 +200,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get lidCatalogStatusUnknown => 'Актуальность ещё не проверена';
 
   @override
+  String get lidCatalogInstalledNotChecked =>
+      'Локальный каталог установлен, онлайн-проверка ещё не завершена';
+
+  @override
   String get lidCatalogCheckFailed => 'Не удалось проверить актуальность';
 
   @override
@@ -207,7 +211,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String lidCatalogQuestions(int count) {
-    return 'Доступно вопросов: $count';
+    return 'Вопросов в каталоге: $count';
   }
 
   @override

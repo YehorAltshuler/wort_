@@ -22,7 +22,9 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider).value;
     final questions = ref.watch(citizenshipQuestionsProvider);
-    final metadata = ref.watch(citizenshipSyncMetadataProvider).value;
+    final metadataState = ref.watch(citizenshipSyncMetadataProvider);
+    final metadata = metadataState.value;
+    final metadataError = metadataState.hasError ? metadataState.error : null;
     final sync = ref.watch(citizenshipSyncControllerProvider);
     if (settings == null) {
       return const Center(child: CircularProgressIndicator());
@@ -133,6 +135,7 @@ class SettingsPage extends ConsumerWidget {
                 _catalogStatus(
                   context,
                   metadata: metadata,
+                  metadataError: metadataError,
                   checking: sync.isLoading,
                 ),
               ),
@@ -232,13 +235,18 @@ class SettingsPage extends ConsumerWidget {
     BuildContext context, {
     required SyncMetadataRecord? metadata,
     required bool checking,
+    Object? metadataError,
   }) {
     if (checking) return context.l10n.lidCatalogChecking;
-    if (metadata?.lastError != null) {
+    if (metadataError != null || metadata?.lastError != null) {
       return context.l10n.lidCatalogCheckFailed;
     }
     final checkedAt = metadata?.lastSuccessfulCheckAt;
-    if (checkedAt == null) return context.l10n.lidCatalogStatusUnknown;
+    if (checkedAt == null) {
+      return metadata?.lastSuccessfulUpdateAt == null
+          ? context.l10n.lidCatalogStatusUnknown
+          : context.l10n.lidCatalogInstalledNotChecked;
+    }
     if (DateTime.now().difference(checkedAt) <=
         CitizenshipTestRepository.refreshInterval) {
       return context.l10n.lidCatalogUpToDate;
@@ -255,9 +263,15 @@ class SettingsPage extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => Consumer(
         builder: (context, dialogRef, child) {
-          final metadata = dialogRef
-              .watch(citizenshipSyncMetadataProvider)
-              .value;
+          final metadataState = dialogRef.watch(
+            citizenshipSyncMetadataProvider,
+          );
+          final metadata = metadataState.value;
+          final metadataError = metadataState.hasError
+              ? metadataState.error
+              : null;
+          final displayedError =
+              metadata?.lastError ?? metadataError?.toString();
           final sync = dialogRef.watch(citizenshipSyncControllerProvider);
           return AlertDialog(
             icon: Icon(
@@ -272,6 +286,7 @@ class SettingsPage extends ConsumerWidget {
                   _catalogStatus(
                     context,
                     metadata: metadata,
+                    metadataError: metadataError,
                     checking: sync.isLoading,
                   ),
                   style: Theme.of(context).textTheme.titleMedium,
@@ -284,7 +299,7 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 Text(
                   context.l10n.lidCatalogLastChecked(
-                    _date(metadata?.lastSuccessfulCheckAt),
+                    _date(metadata?.lastCheckAttemptAt),
                   ),
                 ),
                 Text(
@@ -292,7 +307,7 @@ class SettingsPage extends ConsumerWidget {
                     _date(metadata?.lastSuccessfulUpdateAt),
                   ),
                 ),
-                if (metadata?.lastError case final error?) ...[
+                if (displayedError case final error?) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     context.l10n.lidCatalogUsingLocal,

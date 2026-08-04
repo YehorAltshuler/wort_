@@ -466,6 +466,12 @@ abstract class AppLocalizations {
   /// **'Актуальность ещё не проверена'**
   String get lidCatalogStatusUnknown;
 
+  /// No description provided for @lidCatalogInstalledNotChecked.
+  ///
+  /// In ru, this message translates to:
+  /// **'Локальный каталог установлен, онлайн-проверка ещё не завершена'**
+  String get lidCatalogInstalledNotChecked;
+
   /// No description provided for @lidCatalogCheckFailed.
   ///
   /// In ru, this message translates to:
@@ -481,7 +487,7 @@ abstract class AppLocalizations {
   /// No description provided for @lidCatalogQuestions.
   ///
   /// In ru, this message translates to:
-  /// **'Доступно вопросов: {count}'**
+  /// **'Вопросов в каталоге: {count}'**
   String lidCatalogQuestions(int count);
 
   /// No description provided for @lidCatalogLastChecked.

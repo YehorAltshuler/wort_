@@ -196,6 +196,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lidCatalogStatusUnknown => 'لم يتم التحقق من حالة التحديث بعد';
 
   @override
+  String get lidCatalogInstalledNotChecked =>
+      'تم تثبيت الدليل المحلي، ولم يكتمل التحقق عبر الإنترنت بعد';
+
+  @override
   String get lidCatalogCheckFailed => 'تعذر التحقق من حداثة الأسئلة';
 
   @override
@@ -203,7 +207,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String lidCatalogQuestions(int count) {
-    return 'الأسئلة المتاحة: $count';
+    return 'الأسئلة في الدليل: $count';
   }
 
   @override

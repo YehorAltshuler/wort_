@@ -93,6 +93,64 @@ void main() {
     expect(result.missingImages, 1);
     expect(local.activated.single.questions.single.isAvailable, isFalse);
   });
+
+  test('bundled image failure does not prevent catalog bootstrap', () async {
+    final imageBytes = Uint8List.fromList([1, 2, 3]);
+    final imageHash = sha256.convert(imageBytes).toString();
+    final bytes = Uint8List.fromList(
+      utf8.encode(
+        jsonEncode({
+          'schemaVersion': 1,
+          'questions': [
+            {
+              'id': 'q',
+              'officialNumber': 1,
+              'scope': 'general',
+              'stateCode': null,
+              'question': 'Welches Bild ist richtig?',
+              'answers': {'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D'},
+              'solution': 'a',
+              'images': [
+                {
+                  'path': 'images/a.png',
+                  'sha256': imageHash,
+                  'mime_type': 'image/png',
+                },
+              ],
+            },
+          ],
+        }),
+      ),
+    );
+    final failingMedia = _Media()..writeError = Exception('cache unavailable');
+    repository = CitizenshipTestRepository(
+      localClient: local,
+      remoteClient: remote,
+      mediaStore: failingMedia,
+      parser: const CitizenshipQuestionParser(
+        minimumQuestions: 1,
+        maximumQuestions: 10,
+      ),
+      now: () => now,
+    );
+
+    await repository.bootstrap(
+      jsonBytes: bytes,
+      datasetVersion: 'test',
+      expectedHash: sha256.convert(bytes).toString(),
+      imageAssets: {
+        'https://yehoraltshuler.github.io/bamf-lid-dataset/images/a.png':
+            'assets/a.png',
+      },
+      loadAsset: (_) async => imageBytes,
+    );
+
+    expect(local.activated.single.questions, hasLength(1));
+    expect(local.activated.single.questions.single.isAvailable, isFalse);
+    expect(local.pending, hasLength(1));
+    expect(local.metadata.questionCount, 1);
+    expect(local.metadata.lastSuccessfulUpdateAt, now);
+  });
 }
 
 Uint8List _datasetWithImage() => Uint8List.fromList(
@@ -128,6 +186,9 @@ class _Local implements CitizenshipTestLocalClient {
   SyncMetadataRecord metadata = const SyncMetadataRecord();
   final activated = <DatasetCandidate>[];
   final pending = <MediaRecord>[];
+
+  @override
+  Future<bool> get isEmpty async => activated.isEmpty;
 
   @override
   Future<void> activateDataset(DatasetCandidate candidate) async {
@@ -181,13 +242,19 @@ class _Remote implements CitizenshipTestRemoteClient {
 }
 
 class _Media implements CitizenshipTestMediaStore {
+  Exception? writeError;
+
   @override
   Future<String> write({
     required String datasetId,
     required String mediaKey,
     required Uint8List bytes,
     required String extension,
-  }) async => '$datasetId/$mediaKey';
+  }) async {
+    if (writeError case final error?) throw error;
+    return '$datasetId/$mediaKey';
+  }
+
   @override
   Future<void> copy({required String from, required String to}) async {}
   @override

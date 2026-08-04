@@ -29,16 +29,20 @@ final FutureProvider<void> citizenshipBootstrapProvider = FutureProvider<void>((
       .map(
         (key, value) => MapEntry(key, value! as String),
       );
-  await repository.bootstrap(
-    jsonBytes: jsonData.buffer.asUint8List(),
-    datasetVersion: datasetManifest['datasetVersion']! as String,
-    expectedHash: questionsManifest['sha256']! as String,
-    imageAssets: imageManifest,
-    loadAsset: (path) async {
-      final data = await rootBundle.load(path);
-      return Uint8List.sublistView(data);
-    },
-  );
+  try {
+    await repository.bootstrap(
+      jsonBytes: jsonData.buffer.asUint8List(),
+      datasetVersion: datasetManifest['datasetVersion']! as String,
+      expectedHash: questionsManifest['sha256']! as String,
+      imageAssets: imageManifest,
+      loadAsset: (path) async {
+        final data = await rootBundle.load(path);
+        return Uint8List.sublistView(data);
+      },
+    );
+  } on Object {
+    // A remote synchronization below can still recover an empty local store.
+  }
   try {
     await repository.synchronize();
   } on Object {
@@ -88,6 +92,11 @@ class CitizenshipSyncController extends AsyncNotifier<SyncResult?> {
   Future<void> synchronize({bool manual = false}) async {
     if (state.isLoading) return;
     state = const AsyncLoading();
+    try {
+      await ref.read(citizenshipBootstrapProvider.future);
+    } on Object {
+      // Manual synchronization remains the recovery path for bootstrap errors.
+    }
     state = await AsyncValue.guard(
       () => ref
           .read(citizenshipTestRepositoryProvider)
