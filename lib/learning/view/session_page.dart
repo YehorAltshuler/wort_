@@ -51,6 +51,21 @@ class _SessionPageState extends ConsumerState<SessionPage> {
   String? _currentExerciseKey;
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(_initializeQueue());
+  }
+
+  Future<void> _initializeQueue() async {
+    final words = await ref.read(
+      moduleWordsProvider(
+        (bookId: widget.bookId, moduleFile: widget.moduleFile),
+      ).future,
+    );
+    if (mounted) setState(() => _queue = _createQueue(words));
+  }
+
+  @override
   void dispose() {
     _answerController.dispose();
     super.dispose();
@@ -65,8 +80,7 @@ class _SessionPageState extends ConsumerState<SessionPage> {
     );
     final session = words.maybeWhen(
       data: (items) {
-        _queue ??= _createQueue(items);
-        final total = _queue!.length;
+        final total = _queue?.length ?? 0;
         return (
           total: total,
           correctProgress: total == 0 ? 0.0 : _correct / total,
@@ -107,7 +121,51 @@ class _SessionPageState extends ConsumerState<SessionPage> {
           error: (error, stackTrace) => Center(
             child: Text(context.l10n.courseLoadError),
           ),
-          data: _buildTraining,
+          data: (allWords) {
+            final queue = _queue;
+            if (queue == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (queue.isEmpty) {
+              return Center(child: Text(context.l10n.noWords));
+            }
+            if (_index >= queue.length) {
+              return _CompletionView(
+                correct: _correct,
+                wrong: _wrong,
+                hasMistakes: _mistakes.isNotEmpty,
+                onRetry: _retryMistakes,
+                onClose: () => context.pop(),
+              );
+            }
+            final word = queue[_index];
+            final exercise = _exerciseFor(
+              word,
+              allWords,
+              Localizations.localeOf(context).languageCode,
+            );
+            final articleExercise =
+                word.type == CourseWordType.noun &&
+                _difficulty != TrainingDifficulty.easy;
+            return _SessionTrainingContent(
+              word: word,
+              exercise: exercise,
+              prompt: _prompt(context),
+              showNounIndicator:
+                  word.article.isNotEmpty &&
+                  (!articleExercise || _result != null),
+              result: _result,
+              selectedAnswer: _selectedAnswer,
+              answerController: _answerController,
+              answerBorderColor: _answerBorderColor(context),
+              answerStateFor: (option) => _answerState(exercise, option),
+              onChoiceSelected: (option) =>
+                  _checkAnswer(word, exercise, option),
+              onInputChanged: () => setState(() {}),
+              onInputSubmitted: (answer) =>
+                  _checkAnswer(word, exercise, answer),
+            );
+          },
         ),
       ),
       bottomNavigationBar: words.maybeWhen(
@@ -117,98 +175,9 @@ class _SessionPageState extends ConsumerState<SessionPage> {
     );
   }
 
-  Widget _buildTraining(List<CourseWord> allWords) {
-    _queue ??= _createQueue(allWords);
-    final queue = _queue!;
-    if (queue.isEmpty) return Center(child: Text(context.l10n.noWords));
-    if (_index >= queue.length) {
-      return _CompletionView(
-        correct: _correct,
-        wrong: _wrong,
-        hasMistakes: _mistakes.isNotEmpty,
-        onRetry: _retryMistakes,
-        onClose: () => context.pop(),
-      );
-    }
-
-    final word = queue[_index];
-    final languageCode = Localizations.localeOf(context).languageCode;
-    final exercise = _exerciseFor(word, allWords, languageCode);
-    final articleExercise =
-        word.type == CourseWordType.noun &&
-        _difficulty != TrainingDifficulty.easy;
-    final showNounIndicator =
-        word.article.isNotEmpty && (!articleExercise || _result != null);
-    return TrainingContentLayout(
-      header: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _prompt(context),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              CollectionActions(wordId: word.id),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: _answerBorderColor(context),
-                width: _result == null ? 1 : 2,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (showNounIndicator) ...[
-                    NounIndicator(articles: word.article),
-                    const SizedBox(width: 13),
-                  ],
-                  Flexible(
-                    child: Text(
-                      exercise.question,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.displaySmall,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      answers: exercise is ChoiceExercise
-          ? TrainingAnswerChipGroup(
-              options: exercise.options,
-              selectedValue: _selectedAnswer,
-              enabled: _result == null,
-              answerStateFor: (option) => _answerState(exercise, option),
-              onSelected: (option) => _checkAnswer(word, exercise, option),
-            )
-          : TextField(
-              controller: _answerController,
-              enabled: _result == null,
-              autocorrect: false,
-              textInputAction: TextInputAction.done,
-              onChanged: (_) => setState(() {}),
-              onSubmitted: (answer) => _checkAnswer(word, exercise, answer),
-            ),
-    );
-  }
-
   Widget? _buildBottomBar(List<CourseWord> allWords) {
-    _queue ??= _createQueue(allWords);
-    final queue = _queue!;
+    final queue = _queue;
+    if (queue == null) return null;
     if (queue.isEmpty || _index >= queue.length) return null;
     final word = queue[_index];
     final exercise = _exerciseFor(
@@ -258,9 +227,10 @@ class _SessionPageState extends ConsumerState<SessionPage> {
   }
 
   TrainingAnswerState? _answerState(
-    ChoiceExercise exercise,
+    TrainingExercise exercise,
     String option,
   ) {
+    if (exercise is! ChoiceExercise) return null;
     if (_result == null) return null;
     if (exercise.check(option)) return TrainingAnswerState.correct;
     if (_selectedAnswer == option) return TrainingAnswerState.incorrect;
@@ -339,6 +309,103 @@ class _SessionPageState extends ConsumerState<SessionPage> {
       _answerController.clear();
     });
   }
+}
+
+class _SessionTrainingContent extends StatelessWidget {
+  const _SessionTrainingContent({
+    required this.word,
+    required this.exercise,
+    required this.prompt,
+    required this.showNounIndicator,
+    required this.result,
+    required this.selectedAnswer,
+    required this.answerController,
+    required this.answerBorderColor,
+    required this.answerStateFor,
+    required this.onChoiceSelected,
+    required this.onInputChanged,
+    required this.onInputSubmitted,
+  });
+
+  final CourseWord word;
+  final TrainingExercise exercise;
+  final String prompt;
+  final bool showNounIndicator;
+  final bool? result;
+  final String? selectedAnswer;
+  final TextEditingController answerController;
+  final Color answerBorderColor;
+  final TrainingAnswerState? Function(String option) answerStateFor;
+  final ValueChanged<String> onChoiceSelected;
+  final VoidCallback onInputChanged;
+  final ValueChanged<String> onInputSubmitted;
+
+  @override
+  Widget build(BuildContext context) => TrainingContentLayout(
+    header: Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                prompt,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            CollectionActions(wordId: word.id),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: answerBorderColor,
+              width: result == null ? 1 : 2,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (showNounIndicator) ...[
+                  NounIndicator(articles: word.article),
+                  const SizedBox(width: 13),
+                ],
+                Flexible(
+                  child: Text(
+                    exercise.question,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.displaySmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+    answers: exercise is ChoiceExercise
+        ? TrainingAnswerChipGroup(
+            options: (exercise as ChoiceExercise).options,
+            selectedValue: selectedAnswer,
+            enabled: result == null,
+            answerStateFor: answerStateFor,
+            onSelected: onChoiceSelected,
+          )
+        : TextField(
+            controller: answerController,
+            enabled: result == null,
+            autocorrect: false,
+            textInputAction: TextInputAction.done,
+            onChanged: (_) => onInputChanged(),
+            onSubmitted: onInputSubmitted,
+          ),
+  );
 }
 
 class _CompletionView extends StatelessWidget {

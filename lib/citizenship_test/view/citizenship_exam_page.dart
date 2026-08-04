@@ -8,15 +8,12 @@ import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
-import 'package:wort_flutter/citizenship_test/widgets/image_answer_grid.dart';
-import 'package:wort_flutter/citizenship_test/widgets/question_image.dart';
+import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_exercise.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
-import 'package:wort_flutter/widgets/training_answer_tile.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
-import 'package:wort_flutter/widgets/training_content_layout.dart';
 
 class CitizenshipExamPage extends ConsumerStatefulWidget {
   const CitizenshipExamPage({this.startNew = false, super.key});
@@ -34,13 +31,28 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
   int _index = 0;
   int? _selected;
   bool _saving = false;
-  bool _initializing = false;
+  Object? _initializationError;
   final List<GlobalKey> _answerKeys = List.generate(4, (_) => GlobalKey());
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(_loadExam());
+  }
+
+  Future<void> _loadExam() async {
+    try {
+      final questions = await ref.read(citizenshipQuestionsProvider.future);
+      await _initializeExam(questions);
+    } on Object catch (error) {
+      if (mounted) setState(() => _initializationError = error);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final questions = ref.watch(citizenshipQuestionsProvider);
     final progress = ref.watch(citizenshipProgressProvider);
+    final initializationError = _initializationError;
     final total =
         _questions?.length ?? LebenInDeutschlandExamRules.totalQuestionCount;
     return Scaffold(
@@ -58,107 +70,37 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
         ),
       ),
       body: ResponsiveContent(
-        child: questions.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('$error')),
-          data: (items) => progress.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('$error')),
-            data: (records) => _buildExam(items, records),
-          ),
-        ),
-      ),
-      bottomNavigationBar: _buildBottomBar(),
-    );
-  }
-
-  Widget _buildExam(
-    List<CitizenshipQuestion> all,
-    List<QuestionProgressRecord> progress,
-  ) {
-    if (_questions == null) {
-      if (!_initializing) {
-        _initializing = true;
-        unawaited(_initializeExam(all));
-      }
-      return const Center(child: CircularProgressIndicator());
-    }
-    final questions = _questions!;
-    final question = questions[_index];
-    final usesImageAnswers = _usesImageAnswers(question);
-    final currentProgress = progress
-        .where((item) => item.questionId == question.id)
-        .firstOrNull;
-    return TrainingContentLayout(
-      answersBottomPadding: 8,
-      header: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Text(context.l10n.lidQuestionNumber(question.num)),
-              const Spacer(),
-              IconButton(
-                tooltip: context.l10n.lidFavoriteTooltip,
-                icon: Icon(
-                  currentProgress?.isFavorite == true
-                      ? Icons.star
-                      : Icons.star_outline,
+        child: initializationError != null
+            ? Center(child: Text('$initializationError'))
+            : progress.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
                 ),
-                onPressed: () async {
-                  await ref
-                      .read(citizenshipTestRepositoryProvider)
-                      .toggleFavorite(question.id);
-                  ref.invalidate(citizenshipProgressProvider);
+                error: (error, _) => Center(child: Text('$error')),
+                data: (records) {
+                  final questions = _questions;
+                  if (questions == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final question = questions[_index];
+                  final currentProgress = records
+                      .where((item) => item.questionId == question.id)
+                      .firstOrNull;
+                  return CitizenshipQuestionExercise(
+                    question: question,
+                    selectedAnswer: _selected,
+                    enabled: _selected == null && !_saving,
+                    answerKeys: _answerKeys,
+                    answerStateFor: (answer) => _answerState(question, answer),
+                    onSelected: (answer) => _selectAnswer(question, answer),
+                    onToggleFavorite: () => _toggleFavorite(question.id),
+                    isFavorite: currentProgress?.isFavorite == true,
+                    imageBeforeQuestion: false,
+                  );
                 },
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                question.text,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-          ),
-        ],
       ),
-      answers: usesImageAnswers
-          ? CitizenshipImageAnswerGrid(
-              questionId: question.id,
-              answers: question.answers,
-              correctAnswer: question.correctAnswer,
-              selectedAnswer: _selected,
-              enabled: _selected == null && !_saving,
-              answerKeys: _answerKeys,
-              onSelected: (answer) => _selectAnswer(question, answer),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CitizenshipQuestionImage(
-                  questionId: question.id,
-                  hasImage: question.hasImage,
-                ),
-                for (var answer = 0; answer < question.answers.length; answer++)
-                  Padding(
-                    key: _answerKeys[answer],
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: TrainingAnswerTile(
-                      label: question.answers[answer],
-                      position: answer,
-                      selected: _selected == answer,
-                      enabled: _selected == null && !_saving,
-                      answerState: _answerState(question, answer),
-                      onSelected: () => _selectAnswer(question, answer),
-                    ),
-                  ),
-              ],
-            ),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -215,16 +157,11 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
     if (mounted) setState(() => _saving = false);
   }
 
-  bool _usesImageAnswers(CitizenshipQuestion question) {
-    if (question.images.length != 4 || question.answers.length != 4) {
-      return false;
-    }
-    for (var index = 0; index < question.answers.length; index++) {
-      if (question.answers[index].trim().toLowerCase() != 'bild ${index + 1}') {
-        return false;
-      }
-    }
-    return true;
+  Future<void> _toggleFavorite(String questionId) async {
+    await ref
+        .read(citizenshipTestRepositoryProvider)
+        .toggleFavorite(questionId);
+    ref.invalidate(citizenshipProgressProvider);
   }
 
   Future<void> _initializeExam(List<CitizenshipQuestion> all) async {
@@ -256,7 +193,6 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
       _session = session;
       _index = index;
       _selected = savedAnswer?.selectedAnswer;
-      _initializing = false;
     });
   }
 

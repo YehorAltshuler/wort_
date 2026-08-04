@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -39,6 +40,19 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
   int _wrong = 0;
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(_initializeQueue());
+  }
+
+  Future<void> _initializeQueue() async {
+    final exercise = await ref.read(fixedPrepositionExerciseProvider.future);
+    if (mounted) {
+      setState(() => _queue = [...exercise.words]..shuffle(Random()));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final exercise = ref.watch(fixedPrepositionExerciseProvider);
     return exercise.when(
@@ -48,118 +62,53 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
       error: (error, stackTrace) => Scaffold(
         body: Center(child: Text(context.l10n.courseLoadError)),
       ),
-      data: _buildTraining,
-    );
-  }
-
-  Widget _buildTraining(FixedPrepositionExercise exercise) {
-    _queue ??= [...exercise.words]..shuffle(Random());
-    if (_index >= _queue!.length) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: ResponsiveContent(
-          child: Center(
-            child: Text(
-              context.l10n.knowledgeCheckComplete,
-              style: Theme.of(context).textTheme.headlineSmall,
+      data: (exercise) {
+        final queue = _queue;
+        if (queue == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (_index >= queue.length) {
+          return Scaffold(
+            appBar: AppBar(),
+            body: ResponsiveContent(
+              child: Center(
+                child: Text(
+                  context.l10n.knowledgeCheckComplete,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-    }
-    final word = _queue![_index];
-    final hard = widget.difficulty == 'hard';
-    final firstOptions = _firstOptionsFor(exercise, word, hard);
-    final correctFirst = hard
-        ? word.preposition
-        : word.translationFor(Localizations.localeOf(context).languageCode);
-    final ready = _firstAnswer != null && _caseAnswer != null;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.exercisesTitle),
-        actions: [
-          Center(child: Text('${_index + 1} / ${_queue!.length}')),
-          const SizedBox(width: 16),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: TrainingProgressIndicator(
-            correctProgress: _correct / _queue!.length,
-            incorrectProgress: _wrong / _queue!.length,
-          ),
-        ),
-      ),
-      body: ResponsiveContent(
-        child: TrainingContentLayout(
-          header: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ExerciseSectionLabel(
-                hard
-                    ? context.l10n.fixedPrepositionPrompt
-                    : context.l10n.chooseTranslationAndCase,
-              ),
-              const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    hard ? _cloze(word) : word.example,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          answers: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ExerciseSectionLabel(
-                hard ? context.l10n.preposition : context.l10n.translationTitle,
-              ),
-              const SizedBox(height: 8),
-              TrainingAnswerChipGroup(
-                options: firstOptions,
-                selectedValue: _firstAnswer,
-                enabled: _result == null,
-                answerStateFor: (option) => _answerState(
-                  selectedAnswer: _firstAnswer,
-                  option: option,
-                  correctAnswer: correctFirst,
-                ),
-                onSelected: (option) => setState(() => _firstAnswer = option),
-              ),
-              const SizedBox(height: 20),
-              _ExerciseSectionLabel(
-                context.l10n.grammaticalCase,
-              ),
-              const SizedBox(height: 8),
-              TrainingAnswerChipGroup(
-                options: const ['Akkusativ', 'Dativ'],
-                selectedValue: _caseAnswer,
-                enabled: _result == null,
-                answerStateFor: (option) => _answerState(
-                  selectedAnswer: _caseAnswer,
-                  option: option,
-                  correctAnswer: word.grammaticalCase,
-                ),
-                onSelected: (option) => setState(() => _caseAnswer = option),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: TrainingBottomBar(
-        result: _result,
-        correctAnswers: [correctFirst, word.grammaticalCase],
-        primaryLabel: _result == null
-            ? context.l10n.checkAnswer
-            : context.l10n.continueAction,
-        primaryEnabled: _result != null || ready,
-        onPrimary: _result == null ? () => _check(word, hard) : _next,
-      ),
+          );
+        }
+        final word = queue[_index];
+        final hard = widget.difficulty == 'hard';
+        final firstOptions = _firstOptionsFor(exercise, word, hard);
+        final correctFirst = hard
+            ? word.preposition
+            : word.translationFor(
+                Localizations.localeOf(context).languageCode,
+              );
+        return _ExerciseTrainingScaffold(
+          word: word,
+          hard: hard,
+          index: _index,
+          total: queue.length,
+          correct: _correct,
+          wrong: _wrong,
+          firstOptions: firstOptions,
+          correctFirst: correctFirst,
+          firstAnswer: _firstAnswer,
+          caseAnswer: _caseAnswer,
+          result: _result,
+          cloze: _cloze(word),
+          answerStateFor: _answerState,
+          onFirstSelected: (value) => setState(() => _firstAnswer = value),
+          onCaseSelected: (value) => setState(() => _caseAnswer = value),
+          onPrimary: _result == null ? () => _check(word, hard) : _next,
+        );
+      },
     );
   }
 
@@ -242,6 +191,141 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
     return word.example.replaceFirst(
       RegExp('\\b${RegExp.escape(word.preposition)}\\b', caseSensitive: false),
       '...',
+    );
+  }
+}
+
+class _ExerciseTrainingScaffold extends StatelessWidget {
+  const _ExerciseTrainingScaffold({
+    required this.word,
+    required this.hard,
+    required this.index,
+    required this.total,
+    required this.correct,
+    required this.wrong,
+    required this.firstOptions,
+    required this.correctFirst,
+    required this.firstAnswer,
+    required this.caseAnswer,
+    required this.result,
+    required this.cloze,
+    required this.answerStateFor,
+    required this.onFirstSelected,
+    required this.onCaseSelected,
+    required this.onPrimary,
+  });
+
+  final FixedPrepositionVerb word;
+  final bool hard;
+  final int index;
+  final int total;
+  final int correct;
+  final int wrong;
+  final List<String> firstOptions;
+  final String correctFirst;
+  final String? firstAnswer;
+  final String? caseAnswer;
+  final bool? result;
+  final String cloze;
+  final TrainingAnswerState? Function({
+    required String? selectedAnswer,
+    required String option,
+    required String correctAnswer,
+  })
+  answerStateFor;
+  final ValueChanged<String> onFirstSelected;
+  final ValueChanged<String> onCaseSelected;
+  final VoidCallback onPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    final ready = firstAnswer != null && caseAnswer != null;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.l10n.exercisesTitle),
+        actions: [
+          Center(child: Text('${index + 1} / $total')),
+          const SizedBox(width: 16),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: TrainingProgressIndicator(
+            correctProgress: correct / total,
+            incorrectProgress: wrong / total,
+          ),
+        ),
+      ),
+      body: ResponsiveContent(
+        child: TrainingContentLayout(
+          header: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ExerciseSectionLabel(
+                hard
+                    ? context.l10n.fixedPrepositionPrompt
+                    : context.l10n.chooseTranslationAndCase,
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    hard ? cloze : word.example,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          answers: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ExerciseSectionLabel(
+                hard ? context.l10n.preposition : context.l10n.translationTitle,
+              ),
+              const SizedBox(height: 8),
+              TrainingAnswerChipGroup(
+                options: firstOptions,
+                selectedValue: firstAnswer,
+                enabled: result == null,
+                answerStateFor: (option) => answerStateFor(
+                  selectedAnswer: firstAnswer,
+                  option: option,
+                  correctAnswer: correctFirst,
+                ),
+                onSelected: onFirstSelected,
+              ),
+              const SizedBox(height: 20),
+              _ExerciseSectionLabel(
+                context.l10n.grammaticalCase,
+              ),
+              const SizedBox(height: 8),
+              TrainingAnswerChipGroup(
+                options: const ['Akkusativ', 'Dativ'],
+                selectedValue: caseAnswer,
+                enabled: result == null,
+                answerStateFor: (option) => answerStateFor(
+                  selectedAnswer: caseAnswer,
+                  option: option,
+                  correctAnswer: word.grammaticalCase,
+                ),
+                onSelected: onCaseSelected,
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: TrainingBottomBar(
+        result: result,
+        correctAnswers: [correctFirst, word.grammaticalCase],
+        primaryLabel: result == null
+            ? context.l10n.checkAnswer
+            : context.l10n.continueAction,
+        primaryEnabled: result != null || ready,
+        onPrimary: onPrimary,
+      ),
     );
   }
 }

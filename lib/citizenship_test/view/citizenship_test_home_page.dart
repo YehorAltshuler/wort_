@@ -8,6 +8,7 @@ import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/adaptive_stat_card_row.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/progress_stat_card.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
@@ -125,49 +126,23 @@ class _StatisticsOverview extends StatelessWidget {
           progress: ratio,
         ),
         const SizedBox(height: 12),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxWidth < 600;
-            Widget card({required bool correctCard}) => ProgressStatCard(
-              icon: correctCard
-                  ? Icons.check_circle_outline
-                  : Icons.cancel_outlined,
-              label: correctCard
-                  ? context.l10n.lidCorrectAnswers
-                  : context.l10n.lidIncorrect,
-              progress: correctCard ? correctRatio : incorrectRatio,
-              progressLabel:
-                  '${correctCard ? correct : incorrect} / ${available.length}',
-              fillHeight: compact,
-            );
-
-            final row = Row(
-              crossAxisAlignment: compact
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: compact
-                      ? AspectRatio(
-                          aspectRatio: 1,
-                          child: card(correctCard: true),
-                        )
-                      : card(correctCard: true),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: compact
-                      ? AspectRatio(
-                          aspectRatio: 1,
-                          child: card(correctCard: false),
-                        )
-                      : card(correctCard: false),
-                ),
-              ],
-            );
-            if (compact) return row;
-            return IntrinsicHeight(child: row);
-          },
+        AdaptiveStatCardRow(
+          firstBuilder: (context, {required fillHeight}) => ProgressStatCard(
+            key: const ValueKey('lid-correct-stat'),
+            icon: Icons.check_circle_outline,
+            label: context.l10n.lidCorrectAnswers,
+            progress: correctRatio,
+            progressLabel: '$correct / ${available.length}',
+            fillHeight: fillHeight,
+          ),
+          secondBuilder: (context, {required fillHeight}) => ProgressStatCard(
+            key: const ValueKey('lid-incorrect-stat'),
+            icon: Icons.cancel_outlined,
+            label: context.l10n.lidIncorrect,
+            progress: incorrectRatio,
+            progressLabel: '$incorrect / ${available.length}',
+            fillHeight: fillHeight,
+          ),
         ),
       ],
     );

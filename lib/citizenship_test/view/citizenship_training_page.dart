@@ -7,16 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
-import 'package:wort_flutter/citizenship_test/widgets/image_answer_grid.dart';
-import 'package:wort_flutter/citizenship_test/widgets/question_image.dart';
+import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_exercise.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
-import 'package:wort_flutter/widgets/training_answer_tile.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
-import 'package:wort_flutter/widgets/training_content_layout.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
 class CitizenshipTrainingPage extends ConsumerStatefulWidget {
@@ -42,7 +39,7 @@ class _CitizenshipTrainingPageState
     extends ConsumerState<CitizenshipTrainingPage> {
   List<CitizenshipQuestion>? _queue;
   ExamSessionRecord? _session;
-  bool _loadingSession = false;
+  Object? _initializationError;
   final List<CitizenshipQuestion> _mistakes = [];
   final List<GlobalKey> _answerKeys = List.generate(4, (_) => GlobalKey());
   int _index = 0;
@@ -51,19 +48,31 @@ class _CitizenshipTrainingPageState
   int _wrong = 0;
 
   @override
-  Widget build(BuildContext context) {
-    final questions = ref.watch(citizenshipQuestionsProvider);
-    final progress = ref.watch(citizenshipProgressProvider);
-    if (_queue == null &&
-        widget.filter != 'all' &&
-        widget.filter != 'examMistakes') {
-      switch ((questions, progress)) {
-        case (AsyncData(value: final items), AsyncData(value: final records)):
-          _queue = _createQueue(items, records);
-        default:
-          break;
+  void initState() {
+    super.initState();
+    unawaited(_initializeQueue());
+  }
+
+  Future<void> _initializeQueue() async {
+    try {
+      final all = await ref.read(citizenshipQuestionsProvider.future);
+      final progress = await ref.read(citizenshipProgressProvider.future);
+      if (widget.filter == 'all') {
+        await _restoreAllQuestionsSession(all, progress);
+      } else if (widget.filter == 'examMistakes') {
+        await _restoreExamMistakes(all);
+      } else if (mounted) {
+        setState(() => _queue = _createQueue(all, progress));
       }
+    } on Object catch (error) {
+      if (mounted) setState(() => _initializationError = error);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = ref.watch(citizenshipProgressProvider);
+    final initializationError = _initializationError;
     final total = _queue?.length ?? 0;
     return Scaffold(
       appBar: AppBar(
@@ -90,138 +99,55 @@ class _CitizenshipTrainingPageState
         ),
       ),
       body: ResponsiveContent(
-        child: questions.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('$error')),
-          data: (items) => progress.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('$error')),
-            data: (records) => _buildSession(items, records),
-          ),
-        ),
+        child: initializationError != null
+            ? Center(child: Text('$initializationError'))
+            : progress.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, _) => Center(child: Text('$error')),
+                data: (records) {
+                  final queue = _queue;
+                  if (queue == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (queue.isEmpty) {
+                    return Center(child: Text(context.l10n.lidNoQuestions));
+                  }
+                  if (_index >= queue.length) {
+                    return _TrainingComplete(
+                      total: queue.length,
+                      mistakes: _mistakes.length,
+                      onRetry: _mistakes.isEmpty ? null : _retryMistakes,
+                    );
+                  }
+                  final question = queue[_index];
+                  final currentProgress = records
+                      .where((item) => item.questionId == question.id)
+                      .firstOrNull;
+                  return CitizenshipQuestionExercise(
+                    question: question,
+                    selectedAnswer: _selected,
+                    enabled: _selected == null,
+                    answerKeys: _answerKeys,
+                    answerStateFor: (answer) => _answerState(question, answer),
+                    onSelected: (answer) => _answer(question, answer),
+                    onToggleFavorite: () => _toggleFavorite(question.id),
+                    isFavorite: currentProgress?.isFavorite == true,
+                    scrollTogether: true,
+                  );
+                },
+              ),
       ),
       bottomNavigationBar: _buildBottomBar(),
     );
   }
 
-  Widget _buildSession(
-    List<CitizenshipQuestion> all,
-    List<QuestionProgressRecord> progress,
-  ) {
-    if (_queue == null &&
-        (widget.filter == 'all' || widget.filter == 'examMistakes')) {
-      if (!_loadingSession) {
-        _loadingSession = true;
-        unawaited(
-          widget.filter == 'all'
-              ? _restoreAllQuestionsSession(all, progress)
-              : _restoreExamMistakes(all),
-        );
-      }
-      return const Center(child: CircularProgressIndicator());
-    }
-    _queue ??= _createQueue(all, progress);
-    final queue = _queue!;
-    if (queue.isEmpty) {
-      return Center(child: Text(context.l10n.lidNoQuestions));
-    }
-    if (_index >= queue.length) {
-      return _TrainingComplete(
-        total: queue.length,
-        mistakes: _mistakes.length,
-        onRetry: _mistakes.isEmpty ? null : _retryMistakes,
-      );
-    }
-    final question = queue[_index];
-    final usesImageAnswers = _usesImageAnswers(question);
-    final currentProgress = progress
-        .where((item) => item.questionId == question.id)
-        .firstOrNull;
-    return TrainingContentLayout(
-      answersBottomPadding: 8,
-      scrollTogether: true,
-      header: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Text(context.l10n.lidQuestionNumber(question.num)),
-              const Spacer(),
-              IconButton(
-                tooltip: context.l10n.lidFavoriteTooltip,
-                icon: Icon(
-                  currentProgress?.isFavorite == true
-                      ? Icons.star
-                      : Icons.star_outline,
-                ),
-                onPressed: () async {
-                  await ref
-                      .read(citizenshipTestRepositoryProvider)
-                      .toggleFavorite(question.id);
-                  ref.invalidate(citizenshipProgressProvider);
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (!usesImageAnswers)
-            CitizenshipQuestionImage(
-              questionId: question.id,
-              hasImage: question.hasImage,
-            ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                question.text,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-          ),
-        ],
-      ),
-      answers: usesImageAnswers
-          ? CitizenshipImageAnswerGrid(
-              questionId: question.id,
-              answers: question.answers,
-              correctAnswer: question.correctAnswer,
-              selectedAnswer: _selected,
-              enabled: _selected == null,
-              answerKeys: _answerKeys,
-              onSelected: (answer) => _answer(question, answer),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var answer = 0; answer < question.answers.length; answer++)
-                  Padding(
-                    key: _answerKeys[answer],
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: TrainingAnswerTile(
-                      label: question.answers[answer],
-                      position: answer,
-                      selected: _selected == answer,
-                      enabled: _selected == null,
-                      answerState: _answerState(question, answer),
-                      onSelected: () => _answer(question, answer),
-                    ),
-                  ),
-              ],
-            ),
-    );
-  }
-
-  bool _usesImageAnswers(CitizenshipQuestion question) {
-    if (question.images.length != 4 || question.answers.length != 4) {
-      return false;
-    }
-    for (var index = 0; index < question.answers.length; index++) {
-      if (question.answers[index].trim().toLowerCase() != 'bild ${index + 1}') {
-        return false;
-      }
-    }
-    return true;
+  Future<void> _toggleFavorite(String questionId) async {
+    await ref
+        .read(citizenshipTestRepositoryProvider)
+        .toggleFavorite(questionId);
+    ref.invalidate(citizenshipProgressProvider);
   }
 
   Widget? _buildBottomBar() {
@@ -360,7 +286,6 @@ class _CitizenshipTrainingPageState
       _session = session;
       _queue = queue;
       _index = session.currentIndex.clamp(0, queue.length);
-      _loadingSession = false;
     });
   }
 
@@ -383,7 +308,6 @@ class _CitizenshipTrainingPageState
     if (!mounted) return;
     setState(() {
       _queue = queue;
-      _loadingSession = false;
     });
   }
 
