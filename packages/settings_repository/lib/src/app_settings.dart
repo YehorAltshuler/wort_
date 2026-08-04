@@ -1,6 +1,7 @@
 import 'package:settings_repository/src/app_language.dart';
 import 'package:settings_repository/src/color_palette.dart';
 import 'package:settings_repository/src/noun_indicator_version.dart';
+import 'package:settings_repository/src/text_size_preference.dart';
 import 'package:settings_repository/src/theme_preference.dart';
 
 class AppSettings {
@@ -9,6 +10,7 @@ class AppSettings {
     required this.theme,
     this.palette = ColorPalette.pink,
     this.nounIndicator = NounIndicatorVersion.v2,
+    this.textSize = TextSizePreference.standard,
     this.bundesland = 'BE',
   });
 
@@ -16,6 +18,7 @@ class AppSettings {
   final ThemePreference theme;
   final ColorPalette palette;
   final NounIndicatorVersion nounIndicator;
+  final TextSizePreference textSize;
   final String bundesland;
 
   AppSettings copyWith({
@@ -23,6 +26,7 @@ class AppSettings {
     ThemePreference? theme,
     ColorPalette? palette,
     NounIndicatorVersion? nounIndicator,
+    TextSizePreference? textSize,
     String? bundesland,
   }) {
     return AppSettings(
@@ -30,6 +34,7 @@ class AppSettings {
       theme: theme ?? this.theme,
       palette: palette ?? this.palette,
       nounIndicator: nounIndicator ?? this.nounIndicator,
+      textSize: textSize ?? this.textSize,
       bundesland: bundesland ?? this.bundesland,
     );
   }

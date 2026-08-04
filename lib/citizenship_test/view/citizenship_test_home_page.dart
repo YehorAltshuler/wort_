@@ -125,33 +125,49 @@ class _StatisticsOverview extends StatelessWidget {
           progress: ratio,
         ),
         const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: ProgressStatCard(
-                  icon: Icons.check_circle_outline,
-                  label: context.l10n.lidCorrectAnswers,
-                  progress: correctRatio,
-                  progressLabel: '$correct / ${available.length}',
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 600;
+            Widget card({required bool correctCard}) => ProgressStatCard(
+              icon: correctCard
+                  ? Icons.check_circle_outline
+                  : Icons.cancel_outlined,
+              label: correctCard
+                  ? context.l10n.lidCorrectAnswers
+                  : context.l10n.lidIncorrect,
+              progress: correctCard ? correctRatio : incorrectRatio,
+              progressLabel:
+                  '${correctCard ? correct : incorrect} / ${available.length}',
+              fillHeight: compact,
+            );
+
+            final row = Row(
+              crossAxisAlignment: compact
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: compact
+                      ? AspectRatio(
+                          aspectRatio: 1,
+                          child: card(correctCard: true),
+                        )
+                      : card(correctCard: true),
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: ProgressStatCard(
-                  icon: Icons.cancel_outlined,
-                  label: context.l10n.lidIncorrect,
-                  progress: incorrectRatio,
-                  progressLabel: '$incorrect / ${available.length}',
+                const SizedBox(width: 12),
+                Expanded(
+                  child: compact
+                      ? AspectRatio(
+                          aspectRatio: 1,
+                          child: card(correctCard: false),
+                        )
+                      : card(correctCard: false),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+            if (compact) return row;
+            return IntrinsicHeight(child: row);
+          },
         ),
       ],
     );

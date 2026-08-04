@@ -128,6 +128,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get themeDark => 'Тёмная';
 
   @override
+  String get textSizeTitle => 'Размер текста';
+
+  @override
+  String get textSizeStandard => 'Стандартный';
+
+  @override
+  String get textSizeLarge => 'Крупный';
+
+  @override
+  String get textSizeExtraLarge => 'Очень крупный';
+
+  @override
   String get wordLoadError => 'Не удалось загрузить слово';
 
   @override

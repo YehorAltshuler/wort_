@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:citizenship_test_client/citizenship_test_client.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:drift_citizenship_test_client/drift_citizenship_test_client.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -91,6 +92,35 @@ void main() {
     expect(progress?.lastSelectedAnswer, isNull);
     expect(progress?.isMastered, isFalse);
     expect(progress?.isFavorite, isTrue);
+  });
+
+  test('repairs duplicate synchronization metadata', () async {
+    await database
+        .into(database.citizenshipSyncMetadata)
+        .insert(
+          CitizenshipSyncMetadataCompanion.insert(
+            singleton: const Value(1),
+            lastCheckAttemptAt: Value(DateTime(2026)),
+            questionCount: const Value(310),
+          ),
+        );
+    await database
+        .into(database.citizenshipSyncMetadata)
+        .insert(
+          CitizenshipSyncMetadataCompanion.insert(
+            singleton: const Value(2),
+            lastCheckAttemptAt: Value(DateTime(2026, 2)),
+            questionCount: const Value(460),
+          ),
+        );
+
+    final metadata = await client.loadSyncMetadata();
+    expect(metadata.questionCount, 460);
+
+    await client.saveSyncMetadata(metadata);
+    final rows = await database.select(database.citizenshipSyncMetadata).get();
+    expect(rows, hasLength(1));
+    expect(rows.single.singleton, 1);
   });
 }
 

@@ -14,7 +14,6 @@ abstract final class AppRoute {
   static const citizenshipTraining = '/citizenship-test/training';
   static const citizenshipExam = '/citizenship-test/exam';
   static const citizenshipResultPattern = '/citizenship-test/result/:sessionId';
-  static const citizenshipStats = '/citizenship-test/statistics';
   static const wordDetailsPattern = '/dictionary/word/:id';
   static const modulesPattern = '/learning/book/:bookId';
   static const modulePattern = '/learning/book/:bookId/module/:moduleFile';

@@ -12,6 +12,7 @@ import 'package:wort_flutter/citizenship_test/widgets/question_image.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
+import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_tile.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
@@ -389,11 +390,11 @@ class _CitizenshipTrainingPageState
   Future<void> _showQuestionList() async {
     final queue = _queue;
     if (queue == null || queue.isEmpty) return;
-    final selected = await showModalBottomSheet<int>(
+    final selected = await showAppBottomSheet<int>(
       context: context,
-      isScrollControlled: true,
       useRootNavigator: true,
-      showDragHandle: true,
+      title: context.l10n.lidQuestionList,
+      maxHeightFactor: 0.75,
       builder: (sheetContext) => Consumer(
         builder: (context, ref, _) {
           final progress =
@@ -401,40 +402,34 @@ class _CitizenshipTrainingPageState
           final progressById = {
             for (final item in progress) item.questionId: item,
           };
-          return SafeArea(
-            child: SizedBox(
-              height: MediaQuery.sizeOf(context).height * 0.75,
-              child: ListView.builder(
-                itemCount: queue.length,
-                itemBuilder: (context, index) {
-                  final status = progressById[queue[index].id];
-                  final answered = status?.lastSelectedAnswer != null;
-                  final color = !answered
-                      ? Theme.of(context).colorScheme.surfaceContainerHighest
-                      : status!.isMastered
-                      ? TrainingAnswerChip.correctColor(context)
-                      : Theme.of(context).colorScheme.error;
-                  return ListTile(
-                    selected: index == _index,
-                    leading: CircleAvatar(
-                      backgroundColor: color.withValues(alpha: 0.16),
-                      foregroundColor: color,
-                      child: Text('${index + 1}'),
-                    ),
-                    title: Text(queue[index].text, maxLines: 2),
-                    trailing: answered
-                        ? Icon(
-                            status!.isMastered
-                                ? Icons.check_circle
-                                : Icons.cancel,
-                            color: color,
-                          )
-                        : const Icon(Icons.radio_button_unchecked),
-                    onTap: () => Navigator.pop(sheetContext, index),
-                  );
-                },
-              ),
-            ),
+          return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 16),
+            itemCount: queue.length,
+            itemBuilder: (context, index) {
+              final status = progressById[queue[index].id];
+              final answered = status?.lastSelectedAnswer != null;
+              final color = !answered
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : status!.isMastered
+                  ? TrainingAnswerChip.correctColor(context)
+                  : Theme.of(context).colorScheme.error;
+              return ListTile(
+                selected: index == _index,
+                leading: CircleAvatar(
+                  backgroundColor: color.withValues(alpha: 0.16),
+                  foregroundColor: color,
+                  child: Text('${index + 1}'),
+                ),
+                title: Text(queue[index].text, maxLines: 2),
+                trailing: answered
+                    ? Icon(
+                        status!.isMastered ? Icons.check_circle : Icons.cancel,
+                        color: color,
+                      )
+                    : const Icon(Icons.radio_button_unchecked),
+                onTap: () => Navigator.pop(sheetContext, index),
+              );
+            },
           );
         },
       ),

@@ -14,6 +14,7 @@ import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/section_header.dart';
+import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -43,8 +44,10 @@ class SettingsPage extends ConsumerWidget {
               onTap: () async {
                 final language = await _selectOption(
                   context,
+                  context.l10n.languageTitle,
                   AppLanguage.values,
                   (value) => _languageLabel(context, value),
+                  settings.language,
                 );
                 if (language != null) {
                   await ref
@@ -76,8 +79,10 @@ class SettingsPage extends ConsumerWidget {
               onTap: () async {
                 final palette = await _selectOption(
                   context,
+                  context.l10n.paletteTitle,
                   ColorPalette.values,
                   (value) => _paletteLabel(context, value),
+                  settings.palette,
                 );
                 if (palette != null) {
                   await ref.read(settingsProvider.notifier).setPalette(palette);
@@ -92,11 +97,33 @@ class SettingsPage extends ConsumerWidget {
               onTap: () async {
                 final theme = await _selectOption(
                   context,
+                  context.l10n.themeTitle,
                   ThemePreference.values,
                   (value) => _themeLabel(context, value),
+                  settings.theme,
                 );
                 if (theme != null) {
                   await ref.read(settingsProvider.notifier).setTheme(theme);
+                }
+              },
+              trailing: const Icon(Icons.chevron_right_rounded),
+            ),
+            _SettingsRow(
+              icon: Icons.format_size_rounded,
+              title: context.l10n.textSizeTitle,
+              subtitle: Text(_textSizeLabel(context, settings.textSize)),
+              onTap: () async {
+                final textSize = await _selectOption(
+                  context,
+                  context.l10n.textSizeTitle,
+                  TextSizePreference.values,
+                  (value) => _textSizeLabel(context, value),
+                  settings.textSize,
+                );
+                if (textSize != null) {
+                  await ref
+                      .read(settingsProvider.notifier)
+                      .setTextSize(textSize);
                 }
               },
               trailing: const Icon(Icons.chevron_right_rounded),
@@ -111,8 +138,10 @@ class SettingsPage extends ConsumerWidget {
               onTap: () async {
                 final version = await _selectOption(
                   context,
+                  context.l10n.nounIndicatorTitle,
                   NounIndicatorVersion.values,
                   (value) => _nounIndicatorLabel(context, value),
+                  settings.nounIndicator,
                 );
                 if (version != null) {
                   await ref
@@ -176,24 +205,17 @@ class SettingsPage extends ConsumerWidget {
 
   Future<T?> _selectOption<T>(
     BuildContext context,
+    String title,
     List<T> values,
     String Function(T value) label,
+    T selectedValue,
   ) {
-    return showModalBottomSheet<T>(
+    return showSelectionBottomSheet<T>(
       context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            for (final value in values)
-              ListTile(
-                title: Text(label(value)),
-                onTap: () => Navigator.pop(sheetContext, value),
-              ),
-          ],
-        ),
-      ),
+      title: title,
+      values: values,
+      label: label,
+      selectedValue: selectedValue,
     );
   }
 
@@ -204,6 +226,15 @@ class SettingsPage extends ConsumerWidget {
       ThemePreference.dark => context.l10n.themeDark,
     };
   }
+
+  String _textSizeLabel(
+    BuildContext context,
+    TextSizePreference preference,
+  ) => switch (preference) {
+    TextSizePreference.standard => context.l10n.textSizeStandard,
+    TextSizePreference.large => context.l10n.textSizeLarge,
+    TextSizePreference.extraLarge => context.l10n.textSizeExtraLarge,
+  };
 
   String _paletteLabel(BuildContext context, ColorPalette palette) =>
       switch (palette) {

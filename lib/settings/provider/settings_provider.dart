@@ -72,4 +72,15 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
       state = AsyncError(error, stackTrace);
     }
   }
+
+  Future<void> setTextSize(TextSizePreference textSize) async {
+    final current = state.value;
+    if (current == null || current.textSize == textSize) return;
+    state = AsyncData(current.copyWith(textSize: textSize));
+    try {
+      await ref.read(settingsRepositoryProvider).setTextSize(textSize);
+    } on Object catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+    }
+  }
 }

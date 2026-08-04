@@ -9,12 +9,16 @@ abstract final class WortTheme {
     ColorPalette.lime: Color(0xFF5F8F12),
   };
 
-  static ThemeData light(ColorPalette palette) =>
-      _build(Brightness.light, palette);
-  static ThemeData dark(ColorPalette palette) =>
-      _build(Brightness.dark, palette);
+  static ThemeData light(ColorPalette palette, TextSizePreference textSize) =>
+      _build(Brightness.light, palette, textSize);
+  static ThemeData dark(ColorPalette palette, TextSizePreference textSize) =>
+      _build(Brightness.dark, palette, textSize);
 
-  static ThemeData _build(Brightness brightness, ColorPalette palette) {
+  static ThemeData _build(
+    Brightness brightness,
+    ColorPalette palette,
+    TextSizePreference textSize,
+  ) {
     final monochrome = palette == ColorPalette.monochrome;
     final colorScheme = monochrome
         ? _monochromeScheme(brightness)
@@ -26,7 +30,7 @@ abstract final class WortTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      textTheme: AppTypography.textTheme.apply(
+      textTheme: _textTheme(textSize).apply(
         bodyColor: colorScheme.onSurface,
         displayColor: colorScheme.onSurface,
       ),
@@ -50,6 +54,13 @@ abstract final class WortTheme {
       ),
     );
   }
+
+  static TextTheme _textTheme(TextSizePreference preference) =>
+      switch (preference) {
+        TextSizePreference.standard => AppTypography.standard,
+        TextSizePreference.large => AppTypography.large,
+        TextSizePreference.extraLarge => AppTypography.extraLarge,
+      };
 
   static ColorScheme _monochromeScheme(Brightness brightness) =>
       brightness == Brightness.light

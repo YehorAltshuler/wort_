@@ -11,6 +11,7 @@ import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
+import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 import 'package:wort_flutter/widgets/selection_card.dart';
 
 enum _TrainingMode { sequential, exam, favorites }
@@ -45,31 +46,29 @@ class _CitizenshipTrainingSetupPageState
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: settings.bundesland,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerLow,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      labelText: context.l10n.lidSelectFederalState,
-                    ),
-                    items: [
-                      for (final state in bundeslaender)
-                        DropdownMenuItem(
-                          value: state.code,
-                          child: Text(state.name),
-                        ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
+                  SelectionField(
+                    label: context.l10n.lidSelectFederalState,
+                    value: bundeslaender
+                        .firstWhere(
+                          (state) => state.code == settings.bundesland,
+                        )
+                        .name,
+                    leading: Icons.location_on_outlined,
+                    onTap: () async {
+                      final selected = await showSelectionBottomSheet<String>(
+                        context: context,
+                        title: context.l10n.lidSelectFederalState,
+                        values: [for (final state in bundeslaender) state.code],
+                        label: (code) => bundeslaender
+                            .firstWhere((state) => state.code == code)
+                            .name,
+                        selectedValue: settings.bundesland,
+                      );
+                      if (selected != null) {
                         unawaited(
                           ref
                               .read(settingsProvider.notifier)
-                              .setBundesland(value),
+                              .setBundesland(selected),
                         );
                       }
                     },

@@ -328,6 +328,30 @@ abstract class AppLocalizations {
   /// **'Тёмная'**
   String get themeDark;
 
+  /// No description provided for @textSizeTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Размер текста'**
+  String get textSizeTitle;
+
+  /// No description provided for @textSizeStandard.
+  ///
+  /// In ru, this message translates to:
+  /// **'Стандартный'**
+  String get textSizeStandard;
+
+  /// No description provided for @textSizeLarge.
+  ///
+  /// In ru, this message translates to:
+  /// **'Крупный'**
+  String get textSizeLarge;
+
+  /// No description provided for @textSizeExtraLarge.
+  ///
+  /// In ru, this message translates to:
+  /// **'Очень крупный'**
+  String get textSizeExtraLarge;
+
   /// No description provided for @wordLoadError.
   ///
   /// In ru, this message translates to:

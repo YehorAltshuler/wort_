@@ -3,6 +3,7 @@ import 'package:settings_repository/src/app_language.dart';
 import 'package:settings_repository/src/app_settings.dart';
 import 'package:settings_repository/src/color_palette.dart';
 import 'package:settings_repository/src/noun_indicator_version.dart';
+import 'package:settings_repository/src/text_size_preference.dart';
 import 'package:settings_repository/src/theme_preference.dart';
 
 class SettingsRepository {
@@ -14,6 +15,7 @@ class SettingsRepository {
   static const _paletteKey = 'colorPalette';
   static const _nounIndicatorKey = 'nounIndicatorVersion';
   static const _bundeslandKey = 'citizenshipTestBundesland';
+  static const _textSizeKey = 'textSizePreference';
 
   final PreferencesClient _client;
 
@@ -24,6 +26,7 @@ class SettingsRepository {
       _client.readString(_paletteKey),
       _client.readString(_nounIndicatorKey),
       _client.readString(_bundeslandKey),
+      _client.readString(_textSizeKey),
     ]);
     return AppSettings(
       language: values[0] == null
@@ -33,6 +36,7 @@ class SettingsRepository {
       palette: _paletteFromName(values[2]),
       nounIndicator: _nounIndicatorFromName(values[3]),
       bundesland: values[4] ?? 'BE',
+      textSize: _textSizeFromName(values[5]),
     );
   }
 
@@ -56,6 +60,10 @@ class SettingsRepository {
     return _client.writeString(_bundeslandKey, code);
   }
 
+  Future<void> setTextSize(TextSizePreference textSize) {
+    return _client.writeString(_textSizeKey, textSize.name);
+  }
+
   static ThemePreference _themeFromName(String? value) => switch (value) {
     'light' => ThemePreference.light,
     'dark' => ThemePreference.dark,
@@ -71,4 +79,10 @@ class SettingsRepository {
 
   static NounIndicatorVersion _nounIndicatorFromName(String? value) =>
       value == 'v1' ? NounIndicatorVersion.v1 : NounIndicatorVersion.v2;
+
+  static TextSizePreference _textSizeFromName(String? value) => switch (value) {
+    'large' => TextSizePreference.large,
+    'extraLarge' => TextSizePreference.extraLarge,
+    _ => TextSizePreference.standard,
+  };
 }

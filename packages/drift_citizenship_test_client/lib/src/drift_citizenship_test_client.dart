@@ -281,9 +281,14 @@ class DriftCitizenshipTestClient implements CitizenshipTestLocalClient {
 
   @override
   Future<SyncMetadataRecord> loadSyncMetadata() async {
-    final row = await _database
-        .select(_database.citizenshipSyncMetadata)
-        .getSingleOrNull();
+    final query = _database.select(_database.citizenshipSyncMetadata)
+      ..orderBy([
+        (row) => OrderingTerm.desc(row.lastCheckAttemptAt),
+        (row) => OrderingTerm.desc(row.lastSuccessfulUpdateAt),
+        (row) => OrderingTerm.desc(row.singleton),
+      ])
+      ..limit(1);
+    final row = await query.getSingleOrNull();
     return row == null
         ? const SyncMetadataRecord()
         : SyncMetadataRecord(
@@ -301,22 +306,26 @@ class DriftCitizenshipTestClient implements CitizenshipTestLocalClient {
   }
 
   @override
-  Future<void> saveSyncMetadata(SyncMetadataRecord metadata) => _database
-      .into(_database.citizenshipSyncMetadata)
-      .insertOnConflictUpdate(
-        CitizenshipSyncMetadataCompanion.insert(
-          lastCheckAttemptAt: Value(metadata.lastCheckAttemptAt),
-          lastSuccessfulCheckAt: Value(metadata.lastSuccessfulCheckAt),
-          lastSuccessfulUpdateAt: Value(metadata.lastSuccessfulUpdateAt),
-          etag: Value(metadata.etag),
-          lastModified: Value(metadata.lastModified),
-          jsonHash: Value(metadata.jsonHash),
-          questionCount: Value(metadata.questionCount),
-          lastError: Value(metadata.lastError),
-          consecutiveFailures: Value(metadata.consecutiveFailures),
-          nextAutomaticAttemptAt: Value(metadata.nextAutomaticAttemptAt),
-        ),
-      );
+  Future<void> saveSyncMetadata(SyncMetadataRecord metadata) =>
+      _database.transaction(() async {
+        await _database.delete(_database.citizenshipSyncMetadata).go();
+        await _database
+            .into(_database.citizenshipSyncMetadata)
+            .insert(
+              CitizenshipSyncMetadataCompanion.insert(
+                lastCheckAttemptAt: Value(metadata.lastCheckAttemptAt),
+                lastSuccessfulCheckAt: Value(metadata.lastSuccessfulCheckAt),
+                lastSuccessfulUpdateAt: Value(metadata.lastSuccessfulUpdateAt),
+                etag: Value(metadata.etag),
+                lastModified: Value(metadata.lastModified),
+                jsonHash: Value(metadata.jsonHash),
+                questionCount: Value(metadata.questionCount),
+                lastError: Value(metadata.lastError),
+                consecutiveFailures: Value(metadata.consecutiveFailures),
+                nextAutomaticAttemptAt: Value(metadata.nextAutomaticAttemptAt),
+              ),
+            );
+      });
 
   @override
   Future<void> cleanupObsoleteDatasets() async {

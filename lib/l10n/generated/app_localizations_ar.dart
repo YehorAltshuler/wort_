@@ -124,6 +124,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get themeDark => 'داكن';
 
   @override
+  String get textSizeTitle => 'حجم النص';
+
+  @override
+  String get textSizeStandard => 'قياسي';
+
+  @override
+  String get textSizeLarge => 'كبير';
+
+  @override
+  String get textSizeExtraLarge => 'كبير جدًا';
+
+  @override
   String get wordLoadError => 'تعذّر تحميل الكلمة';
 
   @override

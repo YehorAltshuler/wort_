@@ -13,6 +13,7 @@ void main() {
   });
 
   test('loads stored language and theme', () async {
+    when(() => client.readString(any())).thenAnswer((_) async => null);
     when(() => client.readString('appLanguage')).thenAnswer((_) async => 'ar');
     when(
       () => client.readString('themePreference'),
@@ -35,6 +36,7 @@ void main() {
 
     expect(settings.language, AppLanguage.russian);
     expect(settings.theme, ThemePreference.system);
+    expect(settings.textSize, TextSizePreference.standard);
   });
 
   test('persists Expo-compatible preference values', () async {
@@ -42,9 +44,26 @@ void main() {
 
     await repository.setLanguage(AppLanguage.english);
     await repository.setTheme(ThemePreference.light);
+    await repository.setTextSize(TextSizePreference.extraLarge);
 
     verify(() => client.writeString('appLanguage', 'en')).called(1);
     verify(() => client.writeString('themePreference', 'light')).called(1);
+    verify(
+      () => client.writeString('textSizePreference', 'extraLarge'),
+    ).called(1);
+  });
+
+  test('loads stored text size', () async {
+    when(() => client.readString(any())).thenAnswer((_) async => null);
+    when(
+      () => client.readString('textSizePreference'),
+    ).thenAnswer((_) async => 'large');
+
+    final settings = await repository.load(
+      fallbackLanguage: AppLanguage.english,
+    );
+
+    expect(settings.textSize, TextSizePreference.large);
   });
 }
 

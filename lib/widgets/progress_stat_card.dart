@@ -8,6 +8,7 @@ class ProgressStatCard extends StatelessWidget {
     required this.progressLabel,
     this.selected = false,
     this.onTap,
+    this.fillHeight = true,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class ProgressStatCard extends StatelessWidget {
   final String progressLabel;
   final bool selected;
   final VoidCallback? onTap;
+  final bool fillHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,7 @@ class ProgressStatCard extends StatelessWidget {
                       Icon(Icons.check_circle, color: colors.primary, size: 20),
                   ],
                 ),
-                const Spacer(),
+                if (fillHeight) const Spacer() else const SizedBox(height: 24),
                 Text(
                   label,
                   maxLines: 2,

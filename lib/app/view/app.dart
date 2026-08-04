@@ -46,8 +46,14 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'wort_',
-      theme: WortTheme.light(settings?.palette ?? ColorPalette.pink),
-      darkTheme: WortTheme.dark(settings?.palette ?? ColorPalette.pink),
+      theme: WortTheme.light(
+        settings?.palette ?? ColorPalette.pink,
+        settings?.textSize ?? TextSizePreference.standard,
+      ),
+      darkTheme: WortTheme.dark(
+        settings?.palette ?? ColorPalette.pink,
+        settings?.textSize ?? TextSizePreference.standard,
+      ),
       themeMode: _themeMode(settings?.theme ?? ThemePreference.system),
       locale: Locale(settings?.language.code ?? 'en'),
       localizationsDelegates: const [

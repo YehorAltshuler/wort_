@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/citizenship_test/view/citizenship_exam_page.dart';
 import 'package:wort_flutter/citizenship_test/view/citizenship_result_page.dart';
-import 'package:wort_flutter/citizenship_test/view/citizenship_statistics_page.dart';
 import 'package:wort_flutter/citizenship_test/view/citizenship_test_home_page.dart';
 import 'package:wort_flutter/citizenship_test/view/citizenship_training_page.dart';
 import 'package:wort_flutter/citizenship_test/view/citizenship_training_setup_page.dart';
@@ -137,10 +136,6 @@ final appRouter = GoRouter(
       builder: (context, state) => CitizenshipResultPage(
         sessionId: state.pathParameters['sessionId']!,
       ),
-    ),
-    GoRoute(
-      path: AppRoute.citizenshipStats,
-      builder: (context, state) => const CitizenshipStatisticsPage(),
     ),
   ],
 );
