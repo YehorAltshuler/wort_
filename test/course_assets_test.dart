@@ -9,7 +9,7 @@ void main() {
     const repository = CourseRepository(client: AssetCourseClient());
     final books = await repository.getBooks();
 
-    expect(books, hasLength(4));
+    expect(books, hasLength(5));
     for (final book in books) {
       expect(book.modules, isNotEmpty);
       for (final module in book.modules) {

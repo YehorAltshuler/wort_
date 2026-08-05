@@ -20,7 +20,7 @@ Deutschland**. Dieselbe adaptive Flutter-App läuft auf Android, iOS und im Web.
 ### Funktionen
 
 - schnelle Suche, Wortdetails, Beispiele, Formen und externe Quellen;
-- Wortschatz aus vier Lehrwerken und 31 Lernmodulen;
+- Wortschatz aus vier Lehrwerken plus LiD-Wortschatz in 37 Lernmodulen;
 - Trainings, Übungen, Favoriten und eigene Sammlungen;
 - alle 460 LiD-Fragen, Bundeslandauswahl, Prüfung, Statistik und fortsetzbare Sitzungen;
 - lokale Datenspeicherung und sichere Aktualisierung des LiD-Datensatzes;

@@ -11,6 +11,7 @@ class AssetCourseClient implements CourseClient {
     'schritte-plus-neu-a1-2',
     'schritte-plus-neu-a2-1',
     'schritt-für-schritt-zum-dtz',
+    'leben-in-deutschland',
   ];
 
   final AssetBundle? _bundle;

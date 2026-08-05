@@ -22,19 +22,24 @@ class CoursebooksPage extends ConsumerWidget {
           error: (error, stackTrace) => Center(
             child: Text(context.l10n.courseLoadError),
           ),
-          data: (items) => ListView.separated(
-            padding: AppSpacing.pageInsets,
-            itemCount: items.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 14),
-            itemBuilder: (context, index) => SizedBox(
-              height: 184,
-              child: _BookCard(
-                book: items[index],
-                index: index,
-                onTap: () => context.push(AppRoute.modules(items[index].id)),
+          data: (items) {
+            final books = items
+                .where((item) => item.id != AppRoute.lidVocabularyBookId)
+                .toList(growable: false);
+            return ListView.separated(
+              padding: AppSpacing.pageInsets,
+              itemCount: books.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 14),
+              itemBuilder: (context, index) => SizedBox(
+                height: 184,
+                child: _BookCard(
+                  book: books[index],
+                  index: index,
+                  onTap: () => context.push(AppRoute.modules(books[index].id)),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

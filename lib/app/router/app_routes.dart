@@ -11,6 +11,8 @@ abstract final class AppRoute {
   static const dictionary = '/dictionary';
   static const collections = '/collections';
   static const settings = '/settings';
+  static const lid = '/learning/lid';
+  static const lidVocabularyBookId = 'leben-in-deutschland';
   static const citizenshipTest = '/citizenship-test';
   static const citizenshipTrainingSetup = '/citizenship-test/training/setup';
   static const citizenshipTraining = '/citizenship-test/training';

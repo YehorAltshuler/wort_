@@ -21,7 +21,7 @@ iOS, and the Web.
 ### Highlights
 
 - fast dictionary search, word details, examples, forms, and external references;
-- vocabulary from four course books and 31 learning modules;
+- vocabulary from four course books plus a LiD deck, across 37 learning modules;
 - focused practice sessions, exercises, favorites, and custom collections;
 - all 460 LiD questions, state selection, exam mode, statistics, and resumable sessions;
 - offline-first storage with safe background dataset updates;

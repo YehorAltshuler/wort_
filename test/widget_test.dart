@@ -8,6 +8,7 @@ import 'package:lexicon_repository/lexicon_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:settings_repository/settings_repository.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
+import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/app/view/app.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
@@ -71,6 +72,18 @@ void main() {
           level: 'A1',
           modules: [
             CourseModule(id: 1, title: 'Modul 1: Hallo', file: 'module1.json'),
+          ],
+        ),
+        CourseBook(
+          id: AppRoute.lidVocabularyBookId,
+          title: 'Leben in Deutschland',
+          level: 'LiD',
+          modules: [
+            CourseModule(
+              id: 1,
+              title: 'Modul 1: Grundrechte und Demokratie',
+              file: 'module0.json',
+            ),
           ],
         ),
       ],
@@ -219,8 +232,14 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Leben in Deutschland'));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Leben in Deutschland'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Тест LiD'), findsOneWidget);
+    expect(find.text('Лексика LiD'), findsOneWidget);
+    await tester.tap(find.text('Лексика LiD'));
+    await tester.pumpAndSettle();
+    expect(find.text('Grundrechte und Demokratie'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 

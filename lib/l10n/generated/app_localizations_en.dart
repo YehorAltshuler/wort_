@@ -70,6 +70,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Official test preparation and exam practice';
 
   @override
+  String get lidTestChoiceTitle => 'LiD test';
+
+  @override
+  String get lidTestChoiceSubtitle =>
+      'Questions, statistics, and exam simulation';
+
+  @override
+  String get lidVocabularyChoiceTitle => 'LiD vocabulary';
+
+  @override
+  String get lidVocabularyChoiceSubtitle =>
+      'Learn words from the Life in Germany catalog';
+
+  @override
   String get progressTitle => 'Progress';
 
   @override

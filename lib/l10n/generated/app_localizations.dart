@@ -214,6 +214,30 @@ abstract class AppLocalizations {
   /// **'Подготовка к официальному тесту и экзаменационная тренировка'**
   String get citizenshipTestSubtitle;
 
+  /// No description provided for @lidTestChoiceTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Тест LiD'**
+  String get lidTestChoiceTitle;
+
+  /// No description provided for @lidTestChoiceSubtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вопросы, статистика и симуляция экзамена'**
+  String get lidTestChoiceSubtitle;
+
+  /// No description provided for @lidVocabularyChoiceTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Лексика LiD'**
+  String get lidVocabularyChoiceTitle;
+
+  /// No description provided for @lidVocabularyChoiceSubtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Изучение слов из каталога Leben in Deutschland'**
+  String get lidVocabularyChoiceSubtitle;
+
   /// No description provided for @progressTitle.
   ///
   /// In ru, this message translates to:

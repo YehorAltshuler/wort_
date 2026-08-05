@@ -38,7 +38,7 @@ class LearningPage extends StatelessWidget {
               icon: Icons.how_to_vote_outlined,
               title: 'Leben in Deutschland',
               subtitle: context.l10n.citizenshipTestSubtitle,
-              onTap: () => context.push(AppRoute.citizenshipTest),
+              onTap: () => context.push(AppRoute.lid),
             ),
           ],
         ),

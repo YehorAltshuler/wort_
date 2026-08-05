@@ -71,6 +71,20 @@ class AppLocalizationsRu extends AppLocalizations {
       'Подготовка к официальному тесту и экзаменационная тренировка';
 
   @override
+  String get lidTestChoiceTitle => 'Тест LiD';
+
+  @override
+  String get lidTestChoiceSubtitle =>
+      'Вопросы, статистика и симуляция экзамена';
+
+  @override
+  String get lidVocabularyChoiceTitle => 'Лексика LiD';
+
+  @override
+  String get lidVocabularyChoiceSubtitle =>
+      'Изучение слов из каталога Leben in Deutschland';
+
+  @override
   String get progressTitle => 'Прогресс';
 
   @override

@@ -12,6 +12,7 @@ import 'package:wort_flutter/exercises/view/exercise_training_page.dart';
 import 'package:wort_flutter/exercises/view/exercise_words_page.dart';
 import 'package:wort_flutter/exercises/view/exercises_page.dart';
 import 'package:wort_flutter/learning/view/coursebooks_page.dart';
+import 'package:wort_flutter/learning/view/lid_page.dart';
 import 'package:wort_flutter/learning/view/module_page.dart';
 import 'package:wort_flutter/learning/view/module_words_page.dart';
 import 'package:wort_flutter/learning/view/modules_page.dart';
@@ -34,6 +35,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoute.coursebooks,
       builder: (context, state) => const CoursebooksPage(),
+    ),
+    GoRoute(
+      path: AppRoute.lid,
+      builder: (context, state) => const LidPage(),
     ),
     GoRoute(
       path: AppRoute.exercises,

@@ -67,6 +67,19 @@ class AppLocalizationsAr extends AppLocalizations {
       'التحضير للاختبار الرسمي والتدرب على الامتحان';
 
   @override
+  String get lidTestChoiceTitle => 'اختبار LiD';
+
+  @override
+  String get lidTestChoiceSubtitle => 'الأسئلة والإحصاءات ومحاكاة الامتحان';
+
+  @override
+  String get lidVocabularyChoiceTitle => 'مفردات LiD';
+
+  @override
+  String get lidVocabularyChoiceSubtitle =>
+      'تعلّم كلمات من دليل الحياة في ألمانيا';
+
+  @override
   String get progressTitle => 'التقدّم';
 
   @override
