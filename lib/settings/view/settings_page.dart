@@ -8,12 +8,15 @@ import 'package:intl/intl.dart';
 import 'package:settings_repository/settings_repository.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
+import 'package:wort_flutter/content/content_provider.dart';
+import 'package:wort_flutter/content/content_repository.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/platform/apk_download.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
+import 'package:wort_flutter/settings/widgets/settings_section.dart';
+import 'package:wort_flutter/settings/widgets/sync_catalog_dialog.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
-import 'package:wort_flutter/widgets/section_header.dart';
 import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -27,6 +30,9 @@ class SettingsPage extends ConsumerWidget {
     final metadata = metadataState.value;
     final metadataError = metadataState.hasError ? metadataState.error : null;
     final sync = ref.watch(citizenshipSyncControllerProvider);
+    final contentMetadataState = ref.watch(contentMetadataProvider);
+    final contentMetadata = contentMetadataState.value;
+    final contentSync = ref.watch(contentSyncControllerProvider);
     if (settings == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -34,10 +40,10 @@ class SettingsPage extends ConsumerWidget {
     return ListView(
       padding: AppSpacing.pageInsets,
       children: [
-        _SettingsSection(
+        SettingsSection(
           title: context.l10n.generalSettingsSection,
           children: [
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.language,
               title: context.l10n.languageTitle,
               subtitle: Text(_languageLabel(context, settings.language)),
@@ -58,7 +64,7 @@ class SettingsPage extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right_rounded),
             ),
             if (supportsApkDownload)
-              _SettingsRow(
+              SettingsRow(
                 icon: Icons.android,
                 title: context.l10n.downloadAndroidTitle,
                 subtitle: Text(context.l10n.downloadAndroidSubtitle),
@@ -68,10 +74,10 @@ class SettingsPage extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.xxl),
-        _SettingsSection(
+        SettingsSection(
           title: context.l10n.appearanceSettingsSection,
           children: [
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.palette_outlined,
               iconColor: _paletteColor(settings.palette),
               title: context.l10n.paletteTitle,
@@ -90,7 +96,7 @@ class SettingsPage extends ConsumerWidget {
               },
               trailing: const Icon(Icons.chevron_right_rounded),
             ),
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.contrast,
               title: context.l10n.themeTitle,
               subtitle: Text(_themeLabel(context, settings.theme)),
@@ -108,7 +114,7 @@ class SettingsPage extends ConsumerWidget {
               },
               trailing: const Icon(Icons.chevron_right_rounded),
             ),
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.format_size_rounded,
               title: context.l10n.textSizeTitle,
               subtitle: Text(_textSizeLabel(context, settings.textSize)),
@@ -128,7 +134,7 @@ class SettingsPage extends ConsumerWidget {
               },
               trailing: const Icon(Icons.chevron_right_rounded),
             ),
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.article_outlined,
               title: context.l10n.nounIndicatorTitle,
               subtitle: const Padding(
@@ -154,10 +160,37 @@ class SettingsPage extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.xxl),
-        _SettingsSection(
+        SettingsSection(
+          title: context.l10n.contentSettingsSection,
+          children: [
+            SettingsRow(
+              icon: Icons.cloud_sync_outlined,
+              title: context.l10n.contentCatalogTitle,
+              subtitle: Text(
+                _contentCatalogStatus(
+                  context,
+                  metadata: contentMetadata,
+                  metadataError: contentMetadataState.hasError
+                      ? contentMetadataState.error
+                      : null,
+                  checking: contentSync.isLoading,
+                ),
+              ),
+              onTap: () => _showContentCatalogDialog(context, ref),
+              trailing: contentSync.isLoading
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        SettingsSection(
           title: context.l10n.lidSettingsSection,
           children: [
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.sync,
               title: context.l10n.lidCatalogTitle,
               subtitle: Text(
@@ -181,7 +214,7 @@ class SettingsPage extends ConsumerWidget {
                     )
                   : const Icon(Icons.refresh),
             ),
-            _SettingsRow(
+            SettingsRow(
               icon: Icons.restart_alt,
               title: context.l10n.lidResetProgress,
               subtitle: Text(context.l10n.lidResetProgressMessage),
@@ -285,6 +318,69 @@ class SettingsPage extends ConsumerWidget {
     return context.l10n.lidCatalogCheckRecommended;
   }
 
+  String _contentCatalogStatus(
+    BuildContext context, {
+    required ContentSyncMetadata? metadata,
+    required bool checking,
+    Object? metadataError,
+  }) {
+    if (checking) return context.l10n.contentCatalogChecking;
+    if (metadataError != null || metadata?.lastError != null) {
+      return context.l10n.contentCatalogCheckFailed;
+    }
+    return metadata?.version == null
+        ? context.l10n.contentCatalogBundled
+        : context.l10n.contentCatalogVersion(metadata!.version!);
+  }
+
+  Future<void> _showContentCatalogDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Consumer(
+        builder: (context, dialogRef, child) {
+          final metadataState = dialogRef.watch(contentMetadataProvider);
+          final metadata = metadataState.value;
+          final metadataError = metadataState.hasError
+              ? metadataState.error
+              : null;
+          final displayedError =
+              metadata?.lastError ?? metadataError?.toString();
+          final sync = dialogRef.watch(contentSyncControllerProvider);
+          return SyncCatalogDialog(
+            title: context.l10n.contentCatalogTitle,
+            status: _contentCatalogStatus(
+              context,
+              metadata: metadata,
+              metadataError: metadataError,
+              checking: sync.isLoading,
+            ),
+            details: [
+              Text(
+                context.l10n.lidCatalogLastChecked(
+                  _date(metadata?.lastCheckedAt),
+                ),
+              ),
+              Text(
+                context.l10n.lidCatalogLastUpdated(
+                  _date(metadata?.lastUpdatedAt),
+                ),
+              ),
+            ],
+            isLoading: sync.isLoading,
+            cancelLabel: context.l10n.cancel,
+            checkLabel: context.l10n.lidCatalogCheckAction,
+            errorMessage: context.l10n.contentCatalogCheckError,
+            errorDetails: displayedError,
+            onCheck: () => _checkContent(context, dialogContext, dialogRef),
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _showCatalogDialog(
     BuildContext context,
     WidgetRef ref, {
@@ -304,81 +400,37 @@ class SettingsPage extends ConsumerWidget {
           final displayedError =
               metadata?.lastError ?? metadataError?.toString();
           final sync = dialogRef.watch(citizenshipSyncControllerProvider);
-          return AlertDialog(
-            icon: Icon(
-              sync.isLoading ? Icons.sync : Icons.cloud_done_outlined,
+          return SyncCatalogDialog(
+            title: context.l10n.lidCatalogTitle,
+            status: _catalogStatus(
+              context,
+              metadata: metadata,
+              metadataError: metadataError,
+              checking: sync.isLoading,
             ),
-            title: Text(context.l10n.lidCatalogTitle),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _catalogStatus(
-                    context,
-                    metadata: metadata,
-                    metadataError: metadataError,
-                    checking: sync.isLoading,
-                  ),
-                  style: Theme.of(context).textTheme.titleMedium,
+            details: [
+              Text(
+                context.l10n.lidCatalogQuestions(
+                  metadata?.questionCount ?? questionCount,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  context.l10n.lidCatalogQuestions(
-                    metadata?.questionCount ?? questionCount,
-                  ),
-                ),
-                Text(
-                  context.l10n.lidCatalogLastChecked(
-                    _date(metadata?.lastCheckAttemptAt),
-                  ),
-                ),
-                Text(
-                  context.l10n.lidCatalogLastUpdated(
-                    _date(metadata?.lastSuccessfulUpdateAt),
-                  ),
-                ),
-                if (displayedError case final error?) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    context.l10n.lidCatalogUsingLocal,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    error,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-                if (sync.isLoading) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  const LinearProgressIndicator(),
-                ],
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: sync.isLoading
-                    ? null
-                    : () => Navigator.pop(dialogContext),
-                child: Text(context.l10n.cancel),
               ),
-              FilledButton.icon(
-                onPressed: sync.isLoading
-                    ? null
-                    : () => _checkCatalog(
-                        context,
-                        dialogContext,
-                        dialogRef,
-                      ),
-                icon: const Icon(Icons.refresh),
-                label: Text(context.l10n.lidCatalogCheckAction),
+              Text(
+                context.l10n.lidCatalogLastChecked(
+                  _date(metadata?.lastCheckAttemptAt),
+                ),
+              ),
+              Text(
+                context.l10n.lidCatalogLastUpdated(
+                  _date(metadata?.lastSuccessfulUpdateAt),
+                ),
               ),
             ],
+            isLoading: sync.isLoading,
+            cancelLabel: context.l10n.cancel,
+            checkLabel: context.l10n.lidCatalogCheckAction,
+            errorMessage: context.l10n.lidCatalogUsingLocal,
+            errorDetails: displayedError,
+            onCheck: () => _checkCatalog(context, dialogContext, dialogRef),
           );
         },
       ),
@@ -418,6 +470,32 @@ class SettingsPage extends ConsumerWidget {
         SyncOutcome.skipped || null => context.l10n.lidCatalogUpToDate,
       };
 
+  Future<void> _checkContent(
+    BuildContext pageContext,
+    BuildContext dialogContext,
+    WidgetRef ref,
+  ) async {
+    await ref
+        .read(contentSyncControllerProvider.notifier)
+        .synchronize(manual: true);
+    final state = ref.read(contentSyncControllerProvider);
+    if (!dialogContext.mounted) return;
+    Navigator.pop(dialogContext);
+    if (!pageContext.mounted) return;
+    final message = state.hasError
+        ? pageContext.l10n.contentCatalogCheckError
+        : switch (state.value?.outcome) {
+            ContentSyncOutcome.updated =>
+              pageContext.l10n.contentCatalogUpdated,
+            ContentSyncOutcome.notModified ||
+            ContentSyncOutcome.skipped ||
+            null => pageContext.l10n.contentCatalogNoChanges,
+          };
+    ScaffoldMessenger.of(pageContext).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
+  }
+
   Future<void> _resetCitizenshipProgress(
     BuildContext context,
     WidgetRef ref,
@@ -449,86 +527,6 @@ class SettingsPage extends ConsumerWidget {
         content: Text(context.l10n.lidProgressReset),
         behavior: SnackBarBehavior.floating,
       ),
-    );
-  }
-}
-
-class _SettingsSection extends StatelessWidget {
-  const _SettingsSection({required this.title, required this.children});
-
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionHeader(title: title),
-        Card(
-          margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              for (var index = 0; index < children.length; index++) ...[
-                children[index],
-                if (index != children.length - 1) const Divider(height: 1),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.trailing,
-    this.iconColor,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final Widget subtitle;
-  final Widget trailing;
-  final Color? iconColor;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final effectiveColor = iconColor ?? colors.primary;
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
-      leading: Container(
-        width: 44,
-        height: 44,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: effectiveColor.withValues(alpha: 0.13),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(icon, color: effectiveColor),
-      ),
-      title: Text(
-        title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-      ),
-      subtitle: DefaultTextStyle(
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall!.copyWith(color: colors.onSurfaceVariant),
-        child: subtitle,
-      ),
-      trailing: trailing,
     );
   }
 }

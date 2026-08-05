@@ -490,6 +490,60 @@ abstract class AppLocalizations {
   /// **'Leben in Deutschland'**
   String get lidSettingsSection;
 
+  /// No description provided for @contentSettingsSection.
+  ///
+  /// In ru, this message translates to:
+  /// **'Учебные материалы'**
+  String get contentSettingsSection;
+
+  /// No description provided for @contentCatalogTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Обновление содержания'**
+  String get contentCatalogTitle;
+
+  /// No description provided for @contentCatalogChecking.
+  ///
+  /// In ru, this message translates to:
+  /// **'Проверяем обновления…'**
+  String get contentCatalogChecking;
+
+  /// No description provided for @contentCatalogCheckFailed.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось проверить обновления'**
+  String get contentCatalogCheckFailed;
+
+  /// No description provided for @contentCatalogBundled.
+  ///
+  /// In ru, this message translates to:
+  /// **'Используется встроенная версия'**
+  String get contentCatalogBundled;
+
+  /// No description provided for @contentCatalogVersion.
+  ///
+  /// In ru, this message translates to:
+  /// **'Версия: {version}'**
+  String contentCatalogVersion(String version);
+
+  /// No description provided for @contentCatalogUpdated.
+  ///
+  /// In ru, this message translates to:
+  /// **'Учебные материалы обновлены'**
+  String get contentCatalogUpdated;
+
+  /// No description provided for @contentCatalogNoChanges.
+  ///
+  /// In ru, this message translates to:
+  /// **'Учебные материалы уже актуальны'**
+  String get contentCatalogNoChanges;
+
+  /// No description provided for @contentCatalogCheckError.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось обновить материалы. Используется сохранённая версия.'**
+  String get contentCatalogCheckError;
+
   /// No description provided for @lidCatalogTitle.
   ///
   /// In ru, this message translates to:

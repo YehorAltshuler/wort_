@@ -213,6 +213,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lidSettingsSection => 'Leben in Deutschland';
 
   @override
+  String get contentSettingsSection => 'Learning content';
+
+  @override
+  String get contentCatalogTitle => 'Content updates';
+
+  @override
+  String get contentCatalogChecking => 'Checking for updates…';
+
+  @override
+  String get contentCatalogCheckFailed => 'Could not check for updates';
+
+  @override
+  String get contentCatalogBundled => 'Using the bundled version';
+
+  @override
+  String contentCatalogVersion(String version) {
+    return 'Version: $version';
+  }
+
+  @override
+  String get contentCatalogUpdated => 'Learning content updated';
+
+  @override
+  String get contentCatalogNoChanges => 'Learning content is already current';
+
+  @override
+  String get contentCatalogCheckError =>
+      'Could not update content. The saved version is still available.';
+
+  @override
   String get lidCatalogTitle => 'LiD question catalog';
 
   @override

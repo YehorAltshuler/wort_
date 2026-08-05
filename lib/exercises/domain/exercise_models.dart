@@ -17,6 +17,7 @@ class ExerciseCatalogItem {
 
 class FixedPrepositionVerb {
   const FixedPrepositionVerb({
+    required this.id,
     required this.verb,
     required this.preposition,
     required this.grammaticalCase,
@@ -24,6 +25,7 @@ class FixedPrepositionVerb {
     required this.example,
   });
 
+  final String id;
   final String verb;
   final String preposition;
   final String grammaticalCase;
@@ -37,8 +39,7 @@ class FixedPrepositionVerb {
 
   String get pattern => '$verb $preposition + $grammaticalCase';
 
-  String get progressId =>
-      'exercise:fixed-preposition-verbs:$verb:$preposition:$grammaticalCase';
+  String get progressId => 'exercise:fixed-preposition-verbs:$id';
 }
 
 class FixedPrepositionExercise {

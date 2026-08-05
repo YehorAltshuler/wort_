@@ -209,6 +209,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lidSettingsSection => 'Leben in Deutschland';
 
   @override
+  String get contentSettingsSection => 'المحتوى التعليمي';
+
+  @override
+  String get contentCatalogTitle => 'تحديثات المحتوى';
+
+  @override
+  String get contentCatalogChecking => 'جارٍ التحقق من التحديثات…';
+
+  @override
+  String get contentCatalogCheckFailed => 'تعذر التحقق من التحديثات';
+
+  @override
+  String get contentCatalogBundled => 'يتم استخدام النسخة المضمنة';
+
+  @override
+  String contentCatalogVersion(String version) {
+    return 'الإصدار: $version';
+  }
+
+  @override
+  String get contentCatalogUpdated => 'تم تحديث المحتوى التعليمي';
+
+  @override
+  String get contentCatalogNoChanges => 'المحتوى التعليمي محدّث بالفعل';
+
+  @override
+  String get contentCatalogCheckError =>
+      'تعذر تحديث المحتوى. ما زالت النسخة المحفوظة متاحة.';
+
+  @override
   String get lidCatalogTitle => 'دليل أسئلة LiD';
 
   @override

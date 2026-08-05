@@ -214,6 +214,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get lidSettingsSection => 'Leben in Deutschland';
 
   @override
+  String get contentSettingsSection => 'Учебные материалы';
+
+  @override
+  String get contentCatalogTitle => 'Обновление содержания';
+
+  @override
+  String get contentCatalogChecking => 'Проверяем обновления…';
+
+  @override
+  String get contentCatalogCheckFailed => 'Не удалось проверить обновления';
+
+  @override
+  String get contentCatalogBundled => 'Используется встроенная версия';
+
+  @override
+  String contentCatalogVersion(String version) {
+    return 'Версия: $version';
+  }
+
+  @override
+  String get contentCatalogUpdated => 'Учебные материалы обновлены';
+
+  @override
+  String get contentCatalogNoChanges => 'Учебные материалы уже актуальны';
+
+  @override
+  String get contentCatalogCheckError =>
+      'Не удалось обновить материалы. Используется сохранённая версия.';
+
+  @override
   String get lidCatalogTitle => 'Каталог вопросов LiD';
 
   @override

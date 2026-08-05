@@ -1,4 +1,3 @@
-import 'package:asset_course_client/asset_course_client.dart';
 import 'package:citizenship_test_client/citizenship_test_client.dart';
 import 'package:citizenship_test_repository/citizenship_test_repository.dart';
 import 'package:collections_repository/collections_repository.dart';
@@ -13,6 +12,7 @@ import 'package:preferences_client/preferences_client.dart';
 import 'package:settings_repository/settings_repository.dart';
 import 'package:wort_flutter/app/provider/collections_client_factory.dart';
 import 'package:wort_flutter/app/provider/lexicon_client_factory.dart';
+import 'package:wort_flutter/content/content_repository.dart';
 
 final lexiconRepositoryProvider = Provider<LexiconRepository>(
   (ref) => LexiconRepository(client: createLexiconClient()),
@@ -22,8 +22,12 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
   (ref) => SettingsRepository(client: PreferencesClient()),
 );
 
+final contentRepositoryProvider = Provider<ContentRepository>(
+  (ref) => ContentRepository(),
+);
+
 final courseRepositoryProvider = Provider<CourseRepository>(
-  (ref) => const CourseRepository(client: AssetCourseClient()),
+  (ref) => CourseRepository(client: ref.watch(contentRepositoryProvider)),
 );
 
 final collectionsRepositoryProvider = Provider<CollectionsRepository>(

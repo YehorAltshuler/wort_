@@ -24,7 +24,10 @@ class CourseRepository {
     );
     return [
       for (var index = 0; index < records.length; index++)
-        _mapWord(records[index], '$bookId:$moduleFile:$index'),
+        _mapWord(
+          records[index],
+          '$bookId:$moduleFile:${records[index]['id'] ?? index}',
+        ),
     ];
   }
 

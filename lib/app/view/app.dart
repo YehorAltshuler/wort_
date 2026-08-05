@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_repository/settings_repository.dart';
 import 'package:wort_flutter/app/router/app_router.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
+import 'package:wort_flutter/content/content_provider.dart';
 import 'package:wort_flutter/l10n/generated/app_localizations.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/wort_theme.dart';
@@ -36,12 +37,17 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       unawaited(
         ref.read(citizenshipSyncControllerProvider.notifier).synchronize(),
       );
+      unawaited(
+        ref.read(contentSyncControllerProvider.notifier).synchronize(),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(citizenshipBootstrapProvider);
+    ref
+      ..watch(citizenshipBootstrapProvider)
+      ..watch(contentBootstrapProvider);
     final settings = ref.watch(settingsProvider).value;
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

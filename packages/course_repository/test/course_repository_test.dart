@@ -27,6 +27,7 @@ void main() {
     ).thenAnswer(
       (_) async => [
         {
+          'id': 'haus-card',
           'dictionaryId': 'haus',
           'type': 'noun',
           'article': ['das'],
@@ -47,7 +48,7 @@ void main() {
     );
 
     expect(books.single.modules.single.file, 'module1.json');
-    expect(words.single.id, 'book-a1:module1.json:0');
+    expect(words.single.id, 'book-a1:module1.json:haus-card');
     expect(words.single.dictionaryId, 'haus');
     expect(words.single.translationsFor('ru'), ['дом']);
   });

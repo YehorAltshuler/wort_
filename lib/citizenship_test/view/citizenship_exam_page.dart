@@ -8,12 +8,12 @@ import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
+import 'package:wort_flutter/citizenship_test/widgets/citizenship_answer_bottom_bar.dart';
 import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_exercise.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
-import 'package:wort_flutter/widgets/training_bottom_bar.dart';
 
 class CitizenshipExamPage extends ConsumerStatefulWidget {
   const CitizenshipExamPage({this.startNew = false, super.key});
@@ -95,7 +95,7 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
                     onSelected: (answer) => _selectAnswer(question, answer),
                     onToggleFavorite: () => _toggleFavorite(question.id),
                     isFavorite: currentProgress?.isFavorite == true,
-                    imageBeforeQuestion: false,
+                    scrollTogether: true,
                   );
                 },
               ),
@@ -109,9 +109,9 @@ class _CitizenshipExamPageState extends ConsumerState<CitizenshipExamPage> {
     if (questions == null || _index >= questions.length) return null;
     final question = questions[_index];
     final selected = _selected;
-    return TrainingBottomBar(
-      result: selected == null ? null : selected == question.correctAnswer,
-      correctAnswers: [question.answers[question.correctAnswer]],
+    return CitizenshipAnswerBottomBar(
+      question: question,
+      selectedAnswer: selected,
       primaryEnabled: selected != null && !_saving,
       primaryLabel: _index == questions.length - 1
           ? context.l10n.lidSubmitExam

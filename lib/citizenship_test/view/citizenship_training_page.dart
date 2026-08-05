@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
+import 'package:wort_flutter/citizenship_test/widgets/citizenship_answer_bottom_bar.dart';
 import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_exercise.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
-import 'package:wort_flutter/widgets/training_bottom_bar.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
 class CitizenshipTrainingPage extends ConsumerStatefulWidget {
@@ -155,9 +155,9 @@ class _CitizenshipTrainingPageState
     if (queue == null || queue.isEmpty || _index >= queue.length) return null;
     final question = queue[_index];
     final selected = _selected;
-    return TrainingBottomBar(
-      result: selected == null ? null : selected == question.correctAnswer,
-      correctAnswers: [question.answers[question.correctAnswer]],
+    return CitizenshipAnswerBottomBar(
+      question: question,
+      selectedAnswer: selected,
       primaryEnabled: selected != null,
       primaryLabel: _index == queue.length - 1
           ? context.l10n.finishAction

@@ -10,6 +10,8 @@ import 'package:settings_repository/settings_repository.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/app/view/app.dart';
+import 'package:wort_flutter/content/content_provider.dart';
+import 'package:wort_flutter/content/content_repository.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
 void main() {
@@ -29,6 +31,13 @@ void main() {
     final collectionsRepository = _MockCollectionsRepository();
     final settingsRepository = _MockSettingsRepository();
     final progressRepository = _MockLearningProgressRepository();
+    final contentRepository = _MockContentRepository();
+    when(
+      () => contentRepository.loadExercise(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      contentRepository.loadMetadata,
+    ).thenAnswer((_) async => const ContentSyncMetadata());
     when(progressRepository.load).thenAnswer(
       (_) async => const LearningProgress(),
     );
@@ -158,6 +167,8 @@ void main() {
           learningProgressRepositoryProvider.overrideWithValue(
             progressRepository,
           ),
+          contentBootstrapProvider.overrideWith((ref) async {}),
+          contentRepositoryProvider.overrideWithValue(contentRepository),
         ],
         child: const App(),
       ),
@@ -352,3 +363,5 @@ class _MockCollectionsRepository extends Mock
 
 class _MockLearningProgressRepository extends Mock
     implements LearningProgressRepository {}
+
+class _MockContentRepository extends Mock implements ContentRepository {}
