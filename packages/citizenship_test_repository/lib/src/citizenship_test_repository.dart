@@ -174,8 +174,11 @@ class CitizenshipTestRepository {
           etag: response.etag,
           lastModified: response.lastModified,
         );
-        await retryMissingImages(manual: manual);
-        return const SyncResult(SyncOutcome.notModified);
+        final missing = await retryMissingImages(manual: manual);
+        return SyncResult(
+          missing == 0 ? SyncOutcome.notModified : SyncOutcome.partiallyUpdated,
+          missingImages: missing,
+        );
       }
       final bytes = response.bytes!;
       final sourceHash = sha256.convert(bytes).toString();
@@ -189,8 +192,11 @@ class CitizenshipTestRepository {
           etag: response.etag,
           lastModified: response.lastModified,
         );
-        await retryMissingImages(manual: manual);
-        return const SyncResult(SyncOutcome.notModified);
+        final missing = await retryMissingImages(manual: manual);
+        return SyncResult(
+          missing == 0 ? SyncOutcome.notModified : SyncOutcome.partiallyUpdated,
+          missingImages: missing,
+        );
       }
       final questions = _parser.parse(
         bytes,
@@ -260,7 +266,7 @@ class CitizenshipTestRepository {
     }
   }
 
-  Future<void> retryMissingImages({bool manual = false}) async {
+  Future<int> retryMissingImages({bool manual = false}) async {
     final now = _now();
     for (final media in await _local.loadPendingMedia()) {
       if (!manual && media.nextRetryAt?.isAfter(now) == true) continue;
@@ -307,6 +313,7 @@ class CitizenshipTestRepository {
         );
       }
     }
+    return (await _local.loadPendingMedia()).length;
   }
 
   Future<MediaRecord> _prepareMedia(

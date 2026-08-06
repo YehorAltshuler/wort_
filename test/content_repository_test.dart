@@ -112,8 +112,9 @@ void main() {
       '${root}exercises/fixed/words.json': exerciseWordBytes,
     };
     var requests = 0;
+    final cache = _MemoryCache();
     final repository = ContentRepository(
-      cache: _MemoryCache(),
+      cache: cache,
       fallback: _FallbackCourseClient(),
       manifestUri: Uri.parse('${root}manifest.json'),
       httpClient: MockClient((request) async {
@@ -139,7 +140,28 @@ void main() {
 
     final second = await repository.synchronize(manual: true);
     expect(second.outcome, ContentSyncOutcome.notModified);
-    expect(requests, 7, reason: 'the second check downloads only the manifest');
+    expect(
+      requests,
+      12,
+      reason: 'every manual check verifies the complete content graph',
+    );
+
+    cache.values['wort.content.bundle.v1'] = '{"books": []}';
+    final recoveredRepository = ContentRepository(
+      cache: cache,
+      fallback: _FallbackCourseClient(),
+      manifestUri: Uri.parse('${root}manifest.json'),
+      httpClient: MockClient((request) async {
+        final bytes = responses[request.url.toString()];
+        return bytes == null
+            ? http.Response('', 404)
+            : http.Response.bytes(bytes, 200);
+      }),
+    );
+    expect((await recoveredRepository.loadBooks()).single['id'], 'bundled');
+    final recovered = await recoveredRepository.synchronize(manual: true);
+    expect(recovered.outcome, ContentSyncOutcome.updated);
+    expect((await recoveredRepository.loadBooks()).single['id'], 'lid');
   });
 
   test('does not activate a bundle with a checksum mismatch', () async {
@@ -162,6 +184,77 @@ void main() {
     await expectLater(
       repository.synchronize(manual: true),
       throwsA(isA<FormatException>()),
+    );
+    expect((await repository.loadBooks()).single['id'], 'bundled');
+  });
+
+  test('rejects content whose declared record count is incorrect', () async {
+    const root = 'https://example.com/';
+    final wordsBytes = utf8.encode(jsonEncode(<Object?>[]));
+    final descriptorBytes = utf8.encode(
+      jsonEncode({
+        'schemaVersion': 1,
+        'id': 'book',
+        'title': 'Book',
+        'level': 'A1',
+        'modules': [
+          {
+            'title': 'Module',
+            'url': 'words.json',
+            'sha256': sha256.convert(wordsBytes).toString(),
+            'count': 1,
+          },
+        ],
+      }),
+    );
+    final catalogBytes = utf8.encode(
+      jsonEncode({
+        'schemaVersion': 1,
+        'sources': [
+          {
+            'id': 'book',
+            'type': 'coursebook',
+            'url': 'book.json',
+            'sha256': sha256.convert(descriptorBytes).toString(),
+          },
+        ],
+      }),
+    );
+    final responses = <String, List<int>>{
+      '${root}manifest.json': utf8.encode(
+        jsonEncode({
+          'schemaVersion': 1,
+          'datasetVersion': 'v1',
+          'catalog': {
+            'url': 'catalog.json',
+            'sha256': sha256.convert(catalogBytes).toString(),
+          },
+        }),
+      ),
+      '${root}catalog.json': catalogBytes,
+      '${root}book.json': descriptorBytes,
+      '${root}words.json': wordsBytes,
+    };
+    final repository = ContentRepository(
+      cache: _MemoryCache(),
+      fallback: _FallbackCourseClient(),
+      manifestUri: Uri.parse('${root}manifest.json'),
+      httpClient: MockClient(
+        (request) => Future.value(
+          http.Response.bytes(responses[request.url.toString()]!, 200),
+        ),
+      ),
+    );
+
+    await expectLater(
+      repository.synchronize(manual: true),
+      throwsA(
+        isA<FormatException>().having(
+          (error) => error.message,
+          'message',
+          contains('count mismatch'),
+        ),
+      ),
     );
     expect((await repository.loadBooks()).single['id'], 'bundled');
   });

@@ -1,6 +1,6 @@
 name: citizenship_test_repository
 description: Domain and offline-first synchronization for Leben in Deutschland.
-version: 0.1.0
+version: 0.1.1
 publish_to: none
 
 environment:

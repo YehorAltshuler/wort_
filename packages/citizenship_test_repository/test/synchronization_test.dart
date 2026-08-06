@@ -36,6 +36,28 @@ void main() {
     expect(local.metadata.consecutiveFailures, 0);
   });
 
+  test('304 reports images that are still missing after retry', () async {
+    local.pending.add(
+      const MediaRecord(
+        datasetId: 'active',
+        mediaKey: 'oversized.png',
+        sourceUrl: 'https://example.com/oversized.png',
+        relativePath: 'active/oversized.png',
+        status: MediaStatus.failed,
+        mimeType: 'image/png',
+        contentHash: 'hash',
+      ),
+    );
+    remote
+      ..response = const RemoteDatasetResponse.notModified(etag: 'tag')
+      ..imageError = Exception('Invalid image size.');
+
+    final result = await repository.synchronize(manual: true);
+
+    expect(result.outcome, SyncOutcome.partiallyUpdated);
+    expect(result.missingImages, 1);
+  });
+
   test('automatic sync honors retry cooldown', () async {
     local.metadata = SyncMetadataRecord(
       lastSuccessfulCheckAt: now.subtract(const Duration(days: 20)),
@@ -208,7 +230,14 @@ class _Local implements CitizenshipTestLocalClient {
   @override
   Future<MediaRecord?> findReusableMedia(String sourceUrl) async => null;
   @override
-  Future<void> updateMedia(MediaRecord media) async {}
+  Future<void> updateMedia(MediaRecord media) async {
+    pending.removeWhere(
+      (item) =>
+          item.datasetId == media.datasetId && item.mediaKey == media.mediaKey,
+    );
+    if (media.status != MediaStatus.available) pending.add(media);
+  }
+
   @override
   Future<void> cleanupObsoleteDatasets() async {}
   @override

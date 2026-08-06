@@ -21,6 +21,7 @@ class ContentSyncMetadata {
     this.lastCheckedAt,
     this.lastUpdatedAt,
     this.lastError,
+    this.bundleChecksum,
   });
 
   factory ContentSyncMetadata.fromJson(
@@ -30,12 +31,14 @@ class ContentSyncMetadata {
     lastCheckedAt: DateTime.tryParse(json['lastCheckedAt'] as String? ?? ''),
     lastUpdatedAt: DateTime.tryParse(json['lastUpdatedAt'] as String? ?? ''),
     lastError: json['lastError'] as String?,
+    bundleChecksum: json['bundleChecksum'] as String?,
   );
 
   final String? version;
   final DateTime? lastCheckedAt;
   final DateTime? lastUpdatedAt;
   final String? lastError;
+  final String? bundleChecksum;
 
   Map<String, Object?> toJson() => {
     if (version != null) 'version': version,
@@ -44,6 +47,7 @@ class ContentSyncMetadata {
     if (lastUpdatedAt != null)
       'lastUpdatedAt': lastUpdatedAt!.toUtc().toIso8601String(),
     if (lastError != null) 'lastError': lastError,
+    if (bundleChecksum != null) 'bundleChecksum': bundleChecksum,
   };
 }
 
@@ -166,19 +170,12 @@ class ContentRepository implements CourseClient {
       _expectSchema(manifest, 'manifest');
       final version = _string(manifest, 'datasetVersion', 'manifest');
       final catalogReference = _map(manifest, 'catalog', 'manifest');
-      if (oldMetadata.version == version && await _loadBundle() != null) {
-        await _saveMetadata(
-          ContentSyncMetadata(
-            version: version,
-            lastCheckedAt: now,
-            lastUpdatedAt: oldMetadata.lastUpdatedAt,
-          ),
-        );
-        return ContentSyncResult(
-          ContentSyncOutcome.notModified,
-          version: version,
-        );
-      }
+      final hadValidBundle =
+          await _loadBundle(
+            expectedChecksum: oldMetadata.bundleChecksum,
+            useMemoryCache: false,
+          ) !=
+          null;
 
       final catalogUri = _safeResolve(
         _manifestUri,
@@ -196,10 +193,14 @@ class ContentRepository implements CourseClient {
       final books = <Map<String, Object?>>[];
       final modules = <String, Object?>{};
       final exercises = <String, Object?>{};
+      final sourceIds = <String>{};
 
       for (final rawSource in sources) {
         final source = (rawSource! as Map).cast<String, Object?>();
         final sourceId = _string(source, 'id', 'source');
+        if (!sourceIds.add(sourceId)) {
+          throw FormatException('Duplicate content source: $sourceId');
+        }
         final sourceType = _string(source, 'type', sourceId);
         final descriptorUri = _safeResolve(
           _manifestUri,
@@ -213,6 +214,9 @@ class ContentRepository implements CourseClient {
         );
         final descriptor = _decodeMap(descriptorBytes, sourceId);
         _expectSchema(descriptor, sourceId);
+        if (_string(descriptor, 'id', sourceId) != sourceId) {
+          throw FormatException('$sourceId descriptor id mismatch.');
+        }
         if (sourceType == 'coursebook') {
           final moduleRecords = <Map<String, Object?>>[];
           for (final rawModule in _list(descriptor, 'modules', sourceId)) {
@@ -226,9 +230,14 @@ class ContentRepository implements CourseClient {
               _string(module, 'sha256', '$sourceId module'),
               url,
             );
-            final words = _decodeList(moduleBytes, url);
+            final words = _decodeRecordList(moduleBytes, url);
+            _verifyCount(words, module, url);
             final filename = Uri.parse(url).pathSegments.last;
-            modules['$sourceId/$filename'] = words;
+            final moduleKey = '$sourceId/$filename';
+            if (modules.containsKey(moduleKey)) {
+              throw FormatException('Duplicate content module: $moduleKey');
+            }
+            modules[moduleKey] = words;
             moduleRecords.add({
               'id': moduleRecords.length + 1,
               'title': _string(module, 'title', '$sourceId module'),
@@ -252,9 +261,11 @@ class ContentRepository implements CourseClient {
             _string(wordsReference, 'sha256', sourceId),
             wordsUrl,
           );
+          final words = _decodeRecordList(wordBytes, wordsUrl);
+          _verifyCount(words, wordsReference, wordsUrl);
           exercises[sourceId] = {
             'metadata': descriptor,
-            'words': _decodeList(wordBytes, wordsUrl),
+            'words': words,
           };
         } else {
           throw FormatException('Unsupported content source: $sourceType');
@@ -267,16 +278,27 @@ class ContentRepository implements CourseClient {
         'modules': modules,
         'exercises': exercises,
       };
-      await _cache.write(_bundleKey, jsonEncode(bundle));
+      final encodedBundle = jsonEncode(bundle);
+      final bundleChecksum = sha256
+          .convert(utf8.encode(encodedBundle))
+          .toString();
+      await _cache.write(_bundleKey, encodedBundle);
       _memoryBundle = bundle;
+      final contentChanged = oldMetadata.version != version || !hadValidBundle;
       await _saveMetadata(
         ContentSyncMetadata(
           version: version,
           lastCheckedAt: now,
-          lastUpdatedAt: now,
+          lastUpdatedAt: contentChanged ? now : oldMetadata.lastUpdatedAt,
+          bundleChecksum: bundleChecksum,
         ),
       );
-      return ContentSyncResult(ContentSyncOutcome.updated, version: version);
+      return ContentSyncResult(
+        contentChanged
+            ? ContentSyncOutcome.updated
+            : ContentSyncOutcome.notModified,
+        version: version,
+      );
     } on Object catch (error) {
       await _saveMetadata(
         ContentSyncMetadata(
@@ -284,17 +306,30 @@ class ContentRepository implements CourseClient {
           lastCheckedAt: now,
           lastUpdatedAt: oldMetadata.lastUpdatedAt,
           lastError: error.toString(),
+          bundleChecksum: oldMetadata.bundleChecksum,
         ),
       );
       rethrow;
     }
   }
 
-  Future<Map<String, Object?>?> _loadBundle() async {
-    if (_memoryBundle case final bundle?) return bundle;
+  Future<Map<String, Object?>?> _loadBundle({
+    String? expectedChecksum,
+    bool useMemoryCache = true,
+  }) async {
+    if (useMemoryCache) {
+      if (_memoryBundle case final bundle?) return bundle;
+    }
     final value = await _cache.read(_bundleKey);
     if (value == null) return null;
     try {
+      final checksum =
+          expectedChecksum ?? (await loadMetadata()).bundleChecksum;
+      if (checksum != null &&
+          sha256.convert(utf8.encode(value)).toString() != checksum) {
+        _memoryBundle = null;
+        return null;
+      }
       final bundle = (jsonDecode(value) as Map).cast<String, Object?>();
       if (bundle['books'] is! List ||
           bundle['modules'] is! Map ||
@@ -352,6 +387,36 @@ class ContentRepository implements CourseClient {
       return jsonDecode(utf8.decode(bytes))! as List<Object?>;
     } on Object {
       throw FormatException('$context is not a valid JSON array.');
+    }
+  }
+
+  List<Map<String, Object?>> _decodeRecordList(
+    List<int> bytes,
+    String context,
+  ) {
+    final values = _decodeList(bytes, context);
+    try {
+      return values
+          .map((value) => (value! as Map).cast<String, Object?>())
+          .toList(growable: false);
+    } on Object {
+      throw FormatException('$context contains an invalid record.');
+    }
+  }
+
+  void _verifyCount(
+    List<Object?> records,
+    Map<String, Object?> reference,
+    String context,
+  ) {
+    final expected = reference['count'];
+    if (expected is! int || expected < 0) {
+      throw FormatException('$context count is invalid.');
+    }
+    if (records.length != expected) {
+      throw FormatException(
+        '$context count mismatch: expected $expected, got ${records.length}.',
+      );
     }
   }
 
