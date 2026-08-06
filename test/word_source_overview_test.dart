@@ -51,7 +51,7 @@ void main() {
     expect(find.text('Nouns'), findsOneWidget);
     expect(find.text('Verbs'), findsNothing);
     expect(find.text('Other'), findsNothing);
-    final cardSize = tester.getSize(find.byType(ProgressStatCard).first);
+    final cardSize = tester.getSize(find.byType(SelectableProgressCard).first);
     expect(cardSize.width, greaterThan(400));
     expect(cardSize.height, lessThan(250));
   });

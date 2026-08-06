@@ -9,11 +9,10 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
-import 'package:wort_flutter/widgets/adaptive_stat_card_row.dart';
+import 'package:wort_flutter/widgets/async_value_view.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
-import 'package:wort_flutter/widgets/overall_progress_card.dart';
-import 'package:wort_flutter/widgets/progress_stat_card.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
+import 'package:wort_flutter/widgets/training_statistics_view.dart';
 
 class ExerciseWordsPage extends ConsumerWidget {
   const ExerciseWordsPage({required this.exerciseId, super.key});
@@ -28,16 +27,12 @@ class ExerciseWordsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.learningProgress)),
       body: ResponsiveContent(
-        child: exercise.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(context.l10n.courseLoadError),
-          ),
-          data: (value) => progress.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Center(
-              child: Text(context.l10n.courseLoadError),
-            ),
+        child: AsyncValueView(
+          value: exercise,
+          errorMessage: context.l10n.courseLoadError,
+          data: (value) => AsyncValueView(
+            value: progress,
+            errorMessage: context.l10n.courseLoadError,
             data: (records) => _ExerciseOverview(
               exercise: value,
               progress: records,
@@ -74,11 +69,9 @@ class ExerciseWordListPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(_filterLabel(context, selectedFilter))),
       body: ResponsiveContent(
-        child: exercise.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(context.l10n.courseLoadError),
-          ),
+        child: AsyncValueView(
+          value: exercise,
+          errorMessage: context.l10n.courseLoadError,
           data: (value) => _ExerciseWordList(
             exercise: value,
             words: _filterExerciseWords(value.words, selectedFilter, progress),
@@ -117,35 +110,13 @@ class _ExerciseOverview extends StatelessWidget {
     );
     final total = exercise.words.length;
     final answered = correct + incorrect;
-    return ListView(
-      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
-      children: [
-        OverallProgressCard(
-          key: const ValueKey('exercise-all-stat'),
-          title: exercise.catalog.title,
-          progressLabel: context.l10n.lidAnsweredProgress(answered, total),
-          progress: total == 0 ? 0 : answered / total,
-        ),
-        const SizedBox(height: 12),
-        AdaptiveStatCardRow(
-          firstBuilder: (context, {required fillHeight}) => ProgressStatCard(
-            key: const ValueKey('exercise-correct-stat'),
-            icon: Icons.check_circle_outline,
-            label: context.l10n.lidCorrectAnswers,
-            progress: total == 0 ? 0 : correct / total,
-            progressLabel: '$correct',
-            fillHeight: fillHeight,
-          ),
-          secondBuilder: (context, {required fillHeight}) => ProgressStatCard(
-            key: const ValueKey('exercise-incorrect-stat'),
-            icon: Icons.cancel_outlined,
-            label: context.l10n.lidIncorrect,
-            progress: total == 0 ? 0 : incorrect / total,
-            progressLabel: '$incorrect',
-            fillHeight: fillHeight,
-          ),
-        ),
-      ],
+    return TrainingStatisticsView(
+      title: exercise.catalog.title,
+      total: total,
+      answered: answered,
+      correct: correct,
+      incorrect: incorrect,
+      keyPrefix: 'exercise',
     );
   }
 }

@@ -496,6 +496,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get retryMistakes => 'Повторить ошибки';
 
   @override
+  String get retryAction => 'Повторить';
+
+  @override
+  String get lidLoadError => 'Не удалось загрузить вопросы LID';
+
+  @override
   String get lidTitle => 'Leben in Deutschland';
 
   @override

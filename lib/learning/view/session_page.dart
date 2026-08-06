@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:course_repository/course_repository.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/collections/widgets/collection_actions.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/l10n/native_language_scope.dart';
+import 'package:wort_flutter/learning/controller/word_training_controller.dart';
 import 'package:wort_flutter/learning/domain/training_exercise.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
@@ -53,24 +53,16 @@ class SessionPage extends ConsumerStatefulWidget {
 }
 
 class _SessionPageState extends ConsumerState<SessionPage> {
-  List<CourseWord>? _queue;
-  final List<CourseWord> _mistakes = [];
+  WordTrainingController? _training;
   final TextEditingController _answerController = TextEditingController();
-  int _index = 0;
-  int _correct = 0;
-  int _wrong = 0;
-  bool? _result;
-  String? _selectedAnswer;
-  TrainingExercise? _currentExercise;
-  String? _currentExerciseKey;
 
   @override
   void initState() {
     super.initState();
-    unawaited(_initializeQueue());
+    unawaited(_initializeController());
   }
 
-  Future<void> _initializeQueue() async {
+  Future<void> _initializeController() async {
     final words = widget.collectionId == null
         ? await ref.read(
             moduleWordsProvider(
@@ -78,11 +70,25 @@ class _SessionPageState extends ConsumerState<SessionPage> {
             ).future,
           )
         : await ref.read(collectionWordsProvider(widget.collectionId!).future);
-    if (mounted) setState(() => _queue = _createQueue(words));
+    if (!mounted) return;
+    final training = WordTrainingController(
+      words: words,
+      filter: CourseWordFilterX.fromName(widget.type),
+      difficulty: _difficulty,
+      languageCode: context.nativeLanguageCode,
+    )..addListener(_onTrainingChanged);
+    setState(() => _training = training);
+  }
+
+  void _onTrainingChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _training
+      ?..removeListener(_onTrainingChanged)
+      ..dispose();
     _answerController.dispose();
     super.dispose();
   }
@@ -98,11 +104,12 @@ class _SessionPageState extends ConsumerState<SessionPage> {
         : ref.watch(collectionWordsProvider(widget.collectionId!));
     final session = words.maybeWhen(
       data: (items) {
-        final total = _queue?.length ?? 0;
+        final training = _training;
+        final total = training?.total ?? 0;
         return (
           total: total,
-          correctProgress: total == 0 ? 0.0 : _correct / total,
-          incorrectProgress: total == 0 ? 0.0 : _wrong / total,
+          correctProgress: total == 0 ? 0.0 : training!.correct / total,
+          incorrectProgress: total == 0 ? 0.0 : training!.wrong / total,
         );
       },
       orElse: () => (
@@ -120,7 +127,7 @@ class _SessionPageState extends ConsumerState<SessionPage> {
               padding: const EdgeInsetsDirectional.only(end: 16),
               child: Center(
                 child: Text(
-                  '${min(_index + 1, session.total)} / ${session.total}',
+                  '${((_training?.index ?? 0) + 1).clamp(1, session.total)} / ${session.total}',
                 ),
               ),
             ),
@@ -140,33 +147,32 @@ class _SessionPageState extends ConsumerState<SessionPage> {
             child: Text(context.l10n.courseLoadError),
           ),
           data: (allWords) {
-            final queue = _queue;
-            if (queue == null) {
+            final training = _training;
+            if (training == null) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (queue.isEmpty) {
+            if (training.total == 0) {
               return Center(child: Text(context.l10n.noWords));
             }
-            if (_index >= queue.length) {
+            if (training.isComplete) {
               return TrainingCompletionView(
                 title: context.l10n.knowledgeCheckComplete,
-                correct: _correct,
-                incorrect: _wrong,
-                total: queue.length,
-                secondaryAction: _mistakes.isEmpty
+                correct: training.correct,
+                incorrect: training.wrong,
+                total: training.total,
+                secondaryAction: !training.hasMistakes
                     ? null
                     : TrainingCompletionAction(
                         label: context.l10n.retryMistakes,
-                        onPressed: _retryMistakes,
+                        onPressed: () {
+                          training.retryMistakes();
+                          _answerController.clear();
+                        },
                       ),
               );
             }
-            final word = queue[_index];
-            final exercise = _exerciseFor(
-              word,
-              allWords,
-              context.nativeLanguageCode,
-            );
+            final word = training.currentWord!;
+            final exercise = training.currentExercise!;
             final articleExercise =
                 word.type == CourseWordType.noun &&
                 _difficulty != TrainingDifficulty.easy;
@@ -176,63 +182,54 @@ class _SessionPageState extends ConsumerState<SessionPage> {
               prompt: _prompt(context),
               showNounIndicator:
                   word.article.isNotEmpty &&
-                  (!articleExercise || _result != null),
-              result: _result,
-              selectedAnswer: _selectedAnswer,
+                  (!articleExercise || training.result != null),
+              result: training.result,
+              selectedAnswer: training.selectedAnswer,
               answerController: _answerController,
               answerBorderColor: _answerBorderColor(context),
-              answerStateFor: (option) => _answerState(exercise, option),
+              answerStateFor: (option) => _answerState(training, option),
               onChoiceSelected: (option) =>
-                  _checkAnswer(word, exercise, option),
+                  _checkAnswer(training, word, option),
               onInputChanged: () => setState(() {}),
               onInputSubmitted: (answer) =>
-                  _checkAnswer(word, exercise, answer),
+                  _checkAnswer(training, word, answer),
             );
           },
         ),
       ),
       bottomNavigationBar: words.maybeWhen(
-        data: _buildBottomBar,
+        data: (allWords) {
+          final training = _training;
+          if (training == null || training.total == 0) return null;
+          if (training.isComplete) {
+            return BottomActionButton(
+              label: context.l10n.backToModule,
+              onPressed: () => context.pop(),
+            );
+          }
+          final word = training.currentWord!;
+          final currentExercise = training.currentExercise!;
+          return _SessionBottomBar(
+            word: word,
+            exercise: currentExercise,
+            result: training.result,
+            inputReady: _answerController.text.trim().isNotEmpty,
+            onShowDetails: word.dictionaryId == null
+                ? null
+                : () => context.push(AppRoute.wordDetails(word.dictionaryId!)),
+            onNext: () {
+              training.next();
+              _answerController.clear();
+            },
+            onCheck: () => _checkAnswer(
+              training,
+              word,
+              _answerController.text,
+            ),
+          );
+        },
         orElse: () => null,
       ),
-    );
-  }
-
-  Widget? _buildBottomBar(List<CourseWord> allWords) {
-    final queue = _queue;
-    if (queue == null) return null;
-    if (queue.isEmpty) return null;
-    if (_index >= queue.length) {
-      return BottomActionButton(
-        label: context.l10n.backToModule,
-        onPressed: () => context.pop(),
-      );
-    }
-    final word = queue[_index];
-    final exercise = _exerciseFor(
-      word,
-      allWords,
-      context.nativeLanguageCode,
-    );
-    final inputReady =
-        exercise is InputExercise && _answerController.text.trim().isNotEmpty;
-    return TrainingBottomBar(
-      result: _result,
-      correctAnswers: exercise.correctAnswers,
-      primaryEnabled: _result != null || inputReady,
-      primaryLabel: _result == null
-          ? exercise is InputExercise
-                ? context.l10n.checkAnswer
-                : context.l10n.continueAction
-          : context.l10n.continueAction,
-      secondaryLabel: context.l10n.wordDetailsAction,
-      secondaryEnabled: _result != null && word.dictionaryId != null,
-      onSecondary: word.dictionaryId == null
-          ? null
-          : () => context.push(AppRoute.wordDetails(word.dictionaryId!)),
-      onPrimary: _result != null
-          ? _next
-          : () => _checkAnswer(word, exercise, _answerController.text),
     );
   }
 
@@ -250,94 +247,70 @@ class _SessionPageState extends ConsumerState<SessionPage> {
 
   Color _answerBorderColor(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    if (_result == null) return colors.outlineVariant;
-    if (_result == false) return colors.error;
+    if (_training?.result == null) return colors.outlineVariant;
+    if (_training?.result == false) return colors.error;
     return TrainingAnswerChip.correctColor(context);
   }
 
   TrainingAnswerState? _answerState(
-    TrainingExercise exercise,
+    WordTrainingController training,
     String option,
   ) {
+    final exercise = training.currentExercise;
     if (exercise is! ChoiceExercise) return null;
-    if (_result == null) return null;
+    if (training.result == null) return null;
     if (exercise.check(option)) return TrainingAnswerState.correct;
-    if (_selectedAnswer == option) return TrainingAnswerState.incorrect;
+    if (training.selectedAnswer == option) return TrainingAnswerState.incorrect;
     return null;
   }
 
-  TrainingExercise _exerciseFor(
-    CourseWord word,
-    List<CourseWord> words,
-    String languageCode,
-  ) {
-    final key = '${word.id}:${_difficulty.name}:$languageCode';
-    if (_currentExerciseKey != key) {
-      _currentExerciseKey = key;
-      _currentExercise = createExercise(
-        word: word,
-        words: words,
-        difficulty: _difficulty,
-        languageCode: languageCode,
-      );
-    }
-    return _currentExercise!;
-  }
-
-  List<CourseWord> _createQueue(List<CourseWord> words) {
-    return [...CourseWordFilterX.fromName(widget.type).apply(words)]
-      ..shuffle(Random());
-  }
-
   void _checkAnswer(
+    WordTrainingController training,
     CourseWord word,
-    TrainingExercise exercise,
     String answer,
   ) {
-    if (_result != null || answer.trim().isEmpty) return;
-    final correct = exercise.check(answer);
-    setState(() {
-      _selectedAnswer = answer;
-      _result = correct;
-      if (correct) {
-        _correct++;
-      } else {
-        _wrong++;
-        _mistakes.add(word);
-      }
-    });
+    final correct = training.checkAnswer(answer);
+    if (correct == null) return;
     unawaited(
       ref
           .read(learningProgressProvider.notifier)
           .recordResult(word.id, correct: correct),
     );
   }
+}
 
-  void _next() {
-    setState(() {
-      _index++;
-      _result = null;
-      _selectedAnswer = null;
-      _currentExercise = null;
-      _currentExerciseKey = null;
-      _answerController.clear();
-    });
-  }
+class _SessionBottomBar extends StatelessWidget {
+  const _SessionBottomBar({
+    required this.word,
+    required this.exercise,
+    required this.result,
+    required this.inputReady,
+    required this.onShowDetails,
+    required this.onNext,
+    required this.onCheck,
+  });
 
-  void _retryMistakes() {
-    setState(() {
-      _queue = [..._mistakes]..shuffle();
-      _mistakes.clear();
-      _index = 0;
-      _correct = 0;
-      _wrong = 0;
-      _result = null;
-      _selectedAnswer = null;
-      _currentExercise = null;
-      _currentExerciseKey = null;
-      _answerController.clear();
-    });
-  }
+  final CourseWord word;
+  final TrainingExercise exercise;
+  final bool? result;
+  final bool inputReady;
+  final VoidCallback? onShowDetails;
+  final VoidCallback onNext;
+  final VoidCallback onCheck;
+
+  @override
+  Widget build(BuildContext context) => TrainingBottomBar(
+    result: result,
+    correctAnswers: exercise.correctAnswers,
+    primaryEnabled: result != null || (exercise is InputExercise && inputReady),
+    primaryLabel: result == null && exercise is InputExercise
+        ? context.l10n.checkAnswer
+        : context.l10n.continueAction,
+    secondaryLabel: context.l10n.wordDetailsAction,
+    secondaryEnabled: result != null && word.dictionaryId != null,
+    onSecondary: onShowDetails,
+    onPrimary: result != null ? onNext : onCheck,
+  );
 }
 
 class _SessionTrainingContent extends StatelessWidget {

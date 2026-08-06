@@ -159,6 +159,8 @@
   "wrongAnswer": "خطأ",
   "knowledgeCheckComplete": "اكتمل اختبار المعرفة",
   "retryMistakes": "إعادة الأخطاء",
+  "retryAction": "إعادة المحاولة",
+  "lidLoadError": "تعذر تحميل أسئلة LID",
   "lidTitle": "الحياة في ألمانيا",
   "lidTrainingTitle": "التدريب",
   "lidTrainingSetupTitle": "إعداد التدريب",

@@ -497,6 +497,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retryMistakes => 'Retry mistakes';
 
   @override
+  String get retryAction => 'Try again';
+
+  @override
+  String get lidLoadError => 'Unable to load LID questions';
+
+  @override
   String get lidTitle => 'Life in Germany';
 
   @override

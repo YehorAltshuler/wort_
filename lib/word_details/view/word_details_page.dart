@@ -8,6 +8,7 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/async_value_view.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/word_details/provider/word_details_provider.dart';
 
@@ -26,11 +27,9 @@ class WordDetailsPage extends ConsumerWidget {
         actions: [CollectionActions(wordId: 'lexicon:$lexemeId')],
       ),
       body: ResponsiveContent(
-        child: details.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(context.l10n.wordLoadError),
-          ),
+        child: AsyncValueView(
+          value: details,
+          errorMessage: context.l10n.wordLoadError,
           data: (lexeme) => lexeme == null
               ? Center(child: Text(context.l10n.wordNotFound))
               : _WordDetailsView(

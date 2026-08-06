@@ -6,6 +6,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/async_value_view.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class CoursebooksPage extends ConsumerWidget {
@@ -17,11 +18,9 @@ class CoursebooksPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.coursebooksTitle)),
       body: ResponsiveContent(
-        child: books.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(context.l10n.courseLoadError),
-          ),
+        child: AsyncValueView(
+          value: books,
+          errorMessage: context.l10n.courseLoadError,
           data: (items) {
             final books = items
                 .where((item) => item.id != AppRoute.lidVocabularyBookId)

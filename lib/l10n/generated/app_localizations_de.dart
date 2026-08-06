@@ -508,6 +508,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get retryMistakes => 'Fehler wiederholen';
 
   @override
+  String get retryAction => 'Erneut versuchen';
+
+  @override
+  String get lidLoadError => 'LID-Fragen konnten nicht geladen werden';
+
+  @override
   String get lidTitle => 'Leben in Deutschland';
 
   @override

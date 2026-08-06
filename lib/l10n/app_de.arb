@@ -159,6 +159,8 @@
   "wrongAnswer": "Falsch",
   "knowledgeCheckComplete": "Wissenstest abgeschlossen",
   "retryMistakes": "Fehler wiederholen",
+  "retryAction": "Erneut versuchen",
+  "lidLoadError": "LID-Fragen konnten nicht geladen werden",
   "lidTitle": "Leben in Deutschland",
   "lidTrainingTitle": "Training",
   "lidTrainingSetupTitle": "Training konfigurieren",

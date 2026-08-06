@@ -162,7 +162,7 @@ class _WordProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final filtered = filter.apply(words);
     final tested = progress.testedCount(filtered.map((word) => word.id));
-    return ProgressStatCard(
+    return SelectableProgressCard(
       icon: switch (filter) {
         CourseWordFilter.all => Icons.layers_outlined,
         CourseWordFilter.noun => Icons.category_outlined,

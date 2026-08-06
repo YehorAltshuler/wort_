@@ -159,6 +159,8 @@
   "wrongAnswer": "Incorrect",
   "knowledgeCheckComplete": "Knowledge check complete",
   "retryMistakes": "Retry mistakes",
+  "retryAction": "Try again",
+  "lidLoadError": "Unable to load LID questions",
   "lidTitle": "Life in Germany",
   "lidTrainingTitle": "Training",
   "lidTrainingSetupTitle": "Configure training",

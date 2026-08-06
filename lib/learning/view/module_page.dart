@@ -8,6 +8,7 @@ import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/learning/widgets/word_source_overview.dart';
+import 'package:wort_flutter/widgets/async_value_view.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 
@@ -49,11 +50,9 @@ class _ModulePageState extends ConsumerState<ModulePage> {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.learningProgress)),
       body: ResponsiveContent(
-        child: words.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(context.l10n.courseLoadError),
-          ),
+        child: AsyncValueView(
+          value: words,
+          errorMessage: context.l10n.courseLoadError,
           data: (items) => WordSourceOverview(
             words: items,
             progress: progress,

@@ -489,6 +489,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retryMistakes => 'إعادة الأخطاء';
 
   @override
+  String get retryAction => 'إعادة المحاولة';
+
+  @override
+  String get lidLoadError => 'تعذر تحميل أسئلة LID';
+
+  @override
   String get lidTitle => 'الحياة في ألمانيا';
 
   @override

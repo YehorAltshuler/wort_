@@ -160,6 +160,8 @@
   "wrongAnswer": "Ошибка",
   "knowledgeCheckComplete": "Проверка завершена",
   "retryMistakes": "Повторить ошибки",
+  "retryAction": "Повторить",
+  "lidLoadError": "Не удалось загрузить вопросы LID",
   "lidTitle": "Leben in Deutschland",
   "lidTrainingTitle": "Тренировка",
   "lidTrainingSetupTitle": "Настройка тренировки",

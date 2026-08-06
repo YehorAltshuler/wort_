@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wort_flutter/exercises/controller/fixed_preposition_training_controller.dart';
 import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
@@ -36,41 +36,36 @@ class ExerciseTrainingPage extends ConsumerStatefulWidget {
 }
 
 class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
-  List<FixedPrepositionVerb>? _queue;
-  int _index = 0;
-  String? _firstAnswer;
-  String? _caseAnswer;
-  bool? _result;
-  List<String>? _firstOptions;
-  String? _firstOptionsKey;
-  int _correct = 0;
-  int _wrong = 0;
-  final List<FixedPrepositionVerb> _mistakes = [];
+  FixedPrepositionTrainingController? _controller;
 
   @override
   void initState() {
     super.initState();
-    unawaited(_initializeQueue());
+    unawaited(_initializeController());
   }
 
-  Future<void> _initializeQueue() async {
+  Future<void> _initializeController() async {
     final exercise = await ref.read(fixedPrepositionExerciseProvider.future);
     final progress = await ref.read(learningProgressProvider.future);
-    if (mounted) {
-      final filter = FixedPrepositionFilterX.fromName(widget.filter);
-      final words = switch (filter) {
-        FixedPrepositionFilter.all => exercise.words,
-        FixedPrepositionFilter.correct =>
-          exercise.words
-              .where((word) => progress.isTested(word.progressId))
-              .toList(),
-        FixedPrepositionFilter.incorrect =>
-          exercise.words
-              .where((word) => progress.isIncorrect(word.progressId))
-              .toList(),
-      };
-      setState(() => _queue = [...words]..shuffle(Random()));
-    }
+    if (!mounted) return;
+    final controller = FixedPrepositionTrainingController(
+      exercise: exercise,
+      progress: progress,
+      filter: FixedPrepositionFilterX.fromName(widget.filter),
+    )..addListener(_onControllerChanged);
+    setState(() => _controller = controller);
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _controller
+      ?..removeListener(_onControllerChanged)
+      ..dispose();
+    super.dispose();
   }
 
   @override
@@ -84,26 +79,26 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
         body: Center(child: Text(context.l10n.courseLoadError)),
       ),
       data: (exercise) {
-        final queue = _queue;
-        if (queue == null) {
+        final controller = _controller;
+        if (controller == null) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (_index >= queue.length) {
+        if (controller.isComplete) {
           return Scaffold(
             appBar: AppBar(),
             body: ResponsiveContent(
               child: TrainingCompletionView(
                 title: context.l10n.knowledgeCheckComplete,
-                correct: _correct,
-                incorrect: _wrong,
-                total: queue.length,
-                secondaryAction: _mistakes.isEmpty
+                correct: controller.correct,
+                incorrect: controller.wrong,
+                total: controller.total,
+                secondaryAction: !controller.hasMistakes
                     ? null
                     : TrainingCompletionAction(
                         label: context.l10n.retryMistakes,
-                        onPressed: _retryMistakes,
+                        onPressed: controller.retryMistakes,
                       ),
               ),
             ),
@@ -113,135 +108,77 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
             ),
           );
         }
-        final word = queue[_index];
+        final word = controller.currentWord!;
         final hard = widget.difficulty == 'hard';
-        final firstOptions = _firstOptionsFor(exercise, word, hard);
+        final languageCode = context.nativeLanguageCode;
+        final firstOptions = controller.firstOptions(
+          word: word,
+          hard: hard,
+          languageCode: languageCode,
+        );
         final correctFirst = hard
             ? word.preposition
-            : word.translationFor(
-                context.nativeLanguageCode,
-              );
+            : word.translationFor(languageCode);
         return _ExerciseTrainingScaffold(
           word: word,
           hard: hard,
-          index: _index,
-          total: queue.length,
-          correct: _correct,
-          wrong: _wrong,
+          index: controller.index,
+          total: controller.total,
+          correct: controller.correct,
+          wrong: controller.wrong,
           firstOptions: firstOptions,
           correctFirst: correctFirst,
-          firstAnswer: _firstAnswer,
-          caseAnswer: _caseAnswer,
-          result: _result,
-          cloze: _cloze(word),
-          answerStateFor: _answerState,
-          onFirstSelected: (value) => setState(() => _firstAnswer = value),
-          onCaseSelected: (value) => setState(() => _caseAnswer = value),
-          onPrimary: _result == null ? () => _check(word, hard) : _next,
+          firstAnswer: controller.firstAnswer,
+          caseAnswer: controller.caseAnswer,
+          result: controller.result,
+          cloze: controller.cloze(word),
+          answerStateFor:
+              ({
+                required selectedAnswer,
+                required option,
+                required correctAnswer,
+              }) => _answerState(
+                result: controller.result,
+                selectedAnswer: selectedAnswer,
+                option: option,
+                correctAnswer: correctAnswer,
+              ),
+          onFirstSelected: controller.selectFirstAnswer,
+          onCaseSelected: controller.selectCaseAnswer,
+          onPrimary: controller.result == null
+              ? () => _check(controller, word, correctFirst)
+              : controller.next,
         );
       },
     );
   }
 
-  void _check(FixedPrepositionVerb word, bool hard) {
-    final languageCode = context.nativeLanguageCode;
-    final correctFirst = hard
-        ? word.preposition
-        : word.translationFor(languageCode);
-    setState(() {
-      _result =
-          _firstAnswer == correctFirst && _caseAnswer == word.grammaticalCase;
-      if (_result!) {
-        _correct++;
-      } else {
-        _wrong++;
-        if (!_mistakes.contains(word)) _mistakes.add(word);
-      }
-    });
+  void _check(
+    FixedPrepositionTrainingController controller,
+    FixedPrepositionVerb word,
+    String correctFirst,
+  ) {
+    final result = controller.check(
+      correctFirst: correctFirst,
+      grammaticalCase: word.grammaticalCase,
+    );
     unawaited(
       ref
           .read(learningProgressProvider.notifier)
-          .recordResult(word.progressId, correct: _result!),
+          .recordResult(word.progressId, correct: result),
     );
   }
 
   TrainingAnswerState? _answerState({
+    required bool? result,
     required String? selectedAnswer,
     required String option,
     required String correctAnswer,
   }) {
-    if (_result == null) return null;
+    if (result == null) return null;
     if (option == correctAnswer) return TrainingAnswerState.correct;
     if (option == selectedAnswer) return TrainingAnswerState.incorrect;
     return null;
-  }
-
-  List<String> _firstOptionsFor(
-    FixedPrepositionExercise exercise,
-    FixedPrepositionVerb word,
-    bool hard,
-  ) {
-    final languageCode = context.nativeLanguageCode;
-    final key = '${word.verb}:$hard:$languageCode';
-    if (_firstOptionsKey != key) {
-      _firstOptionsKey = key;
-      _firstOptions = hard
-          ? _options(
-              word.preposition,
-              exercise.words.map((item) => item.preposition),
-            )
-          : _options(
-              word.translationFor(languageCode),
-              exercise.words.map(
-                (item) => item.translationFor(languageCode),
-              ),
-            );
-    }
-    return _firstOptions!;
-  }
-
-  void _next() {
-    setState(() {
-      _index++;
-      _firstAnswer = null;
-      _caseAnswer = null;
-      _result = null;
-      _firstOptions = null;
-      _firstOptionsKey = null;
-    });
-  }
-
-  void _retryMistakes() => setState(() {
-    _queue = [..._mistakes]..shuffle(Random());
-    _mistakes.clear();
-    _index = 0;
-    _correct = 0;
-    _wrong = 0;
-    _firstAnswer = null;
-    _caseAnswer = null;
-    _result = null;
-    _firstOptions = null;
-    _firstOptionsKey = null;
-  });
-
-  List<String> _options(String correct, Iterable<String> alternatives) {
-    final wrong = alternatives
-        .where((value) => value != correct)
-        .toSet()
-        .take(3);
-    return [correct, ...wrong]..shuffle(Random());
-  }
-
-  String _cloze(FixedPrepositionVerb word) {
-    const contractions = {'bei': 'beim', 'von': 'vom', 'zu': 'zum'};
-    final contraction = contractions[word.preposition];
-    if (contraction != null && word.example.contains(contraction)) {
-      return word.example.replaceFirst(contraction, '... dem');
-    }
-    return word.example.replaceFirst(
-      RegExp('\\b${RegExp.escape(word.preposition)}\\b', caseSensitive: false),
-      '...',
-    );
   }
 }
 

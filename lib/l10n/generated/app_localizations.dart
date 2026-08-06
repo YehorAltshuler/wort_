@@ -1020,6 +1020,18 @@ abstract class AppLocalizations {
   /// **'Повторить ошибки'**
   String get retryMistakes;
 
+  /// No description provided for @retryAction.
+  ///
+  /// In ru, this message translates to:
+  /// **'Повторить'**
+  String get retryAction;
+
+  /// No description provided for @lidLoadError.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось загрузить вопросы LID'**
+  String get lidLoadError;
+
   /// No description provided for @lidTitle.
   ///
   /// In ru, this message translates to:

@@ -8,11 +8,9 @@ import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
-import 'package:wort_flutter/widgets/adaptive_stat_card_row.dart';
 import 'package:wort_flutter/widgets/bottom_action_button.dart';
-import 'package:wort_flutter/widgets/overall_progress_card.dart';
-import 'package:wort_flutter/widgets/progress_stat_card.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
+import 'package:wort_flutter/widgets/training_statistics_view.dart';
 
 class CitizenshipTestHomePage extends ConsumerWidget {
   const CitizenshipTestHomePage({super.key});
@@ -112,43 +110,13 @@ class _StatisticsOverview extends StatelessWidget {
         .length;
     final correct = relevantProgress.where((item) => item.isMastered).length;
     final incorrect = answered - correct;
-    final ratio = available.isEmpty ? 0.0 : answered / available.length;
-    final correctRatio = available.isEmpty ? 0.0 : correct / available.length;
-    final incorrectRatio = available.isEmpty
-        ? 0.0
-        : incorrect / available.length;
-
-    return ListView(
-      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
-      children: [
-        OverallProgressCard(
-          title: context.l10n.lidTitle,
-          progressLabel: context.l10n.lidAnsweredProgress(
-            answered,
-            available.length,
-          ),
-          progress: ratio,
-        ),
-        const SizedBox(height: 12),
-        AdaptiveStatCardRow(
-          firstBuilder: (context, {required fillHeight}) => ProgressStatCard(
-            key: const ValueKey('lid-correct-stat'),
-            icon: Icons.check_circle_outline,
-            label: context.l10n.lidCorrectAnswers,
-            progress: correctRatio,
-            progressLabel: '$correct',
-            fillHeight: fillHeight,
-          ),
-          secondBuilder: (context, {required fillHeight}) => ProgressStatCard(
-            key: const ValueKey('lid-incorrect-stat'),
-            icon: Icons.cancel_outlined,
-            label: context.l10n.lidIncorrect,
-            progress: incorrectRatio,
-            progressLabel: '$incorrect',
-            fillHeight: fillHeight,
-          ),
-        ),
-      ],
+    return TrainingStatisticsView(
+      title: context.l10n.lidTitle,
+      total: available.length,
+      answered: answered,
+      correct: correct,
+      incorrect: incorrect,
+      keyPrefix: 'lid',
     );
   }
 }

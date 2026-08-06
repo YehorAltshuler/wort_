@@ -6,6 +6,7 @@ import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/async_value_view.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class ExercisesPage extends ConsumerWidget {
@@ -18,11 +19,9 @@ class ExercisesPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.exercisesTitle)),
       body: ResponsiveContent(
-        child: exercise.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(context.l10n.courseLoadError),
-          ),
+        child: AsyncValueView(
+          value: exercise,
+          errorMessage: context.l10n.courseLoadError,
           data: (value) => ListView(
             padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
             children: [

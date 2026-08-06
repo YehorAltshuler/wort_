@@ -29,111 +29,78 @@ class SelectionCard extends StatelessWidget {
       button: true,
       selected: selected,
       enabled: enabled,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: selected
-              ? colors.primaryContainer.withValues(alpha: 0.55)
-              : colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? colors.primary : colors.outlineVariant,
-            width: selected ? 1.5 : 1,
+      child: ListTile(
+        enabled: enabled,
+        selected: selected,
+        selectedTileColor: colors.primaryContainer.withValues(alpha: 0.28),
+        onTap: enabled ? onTap : null,
+        contentPadding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
+        leading: leading == null
+            ? null
+            : Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(
+                    alpha: enabled ? 0.13 : 0.06,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  leading,
+                  color: colors.primary.withValues(alpha: enabled ? 1 : 0.4),
+                ),
+              ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: foreground.withValues(alpha: enabled ? 1 : 0.5),
+            fontWeight: FontWeight.w700,
           ),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: enabled ? onTap : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  if (leading case final leading?) ...[
-                    Icon(
-                      leading,
-                      size: 22,
-                      color: enabled
-                          ? (selected
-                                ? colors.primary
-                                : colors.onSurfaceVariant)
-                          : colors.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(width: 14),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: foreground.withValues(
-                                  alpha: enabled ? 1 : 0.5,
-                                ),
-                                fontWeight: selected
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                              ),
-                        ),
-                        if (subtitle case final subtitle?) ...[
-                          const SizedBox(height: 3),
-                          Text(
-                            subtitle,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: colors.onSurfaceVariant.withValues(
-                                    alpha: enabled ? 1 : 0.5,
-                                  ),
-                                ),
-                          ),
-                        ],
-                      ],
-                    ),
+        subtitle: subtitle == null
+            ? null
+            : Text(
+                subtitle!,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant.withValues(
+                    alpha: enabled ? 1 : 0.5,
                   ),
-                  if (badge case final badge?) ...[
-                    const SizedBox(width: 12),
-                    Container(
-                      constraints: const BoxConstraints(minWidth: 32),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 5,
-                      ),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? colors.primary.withValues(alpha: 0.12)
-                            : colors.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                      child: Text(
-                        badge,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: selected
-                                  ? colors.primary
-                                  : colors.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(width: 12),
-                  Icon(
-                    selected
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    color: enabled
-                        ? (selected ? colors.primary : colors.onSurfaceVariant)
-                        : colors.onSurfaceVariant.withValues(alpha: 0.4),
-                  ),
-                ],
+                ),
               ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (badge case final badge?) ...[
+              Container(
+                height: 28,
+                constraints: const BoxConstraints(minWidth: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(
+                  badge,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: selected ? colors.primary : colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Icon(
+              selected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              color: enabled
+                  ? (selected ? colors.primary : colors.onSurfaceVariant)
+                  : colors.onSurfaceVariant.withValues(alpha: 0.4),
             ),
-          ),
+          ],
         ),
       ),
     );
