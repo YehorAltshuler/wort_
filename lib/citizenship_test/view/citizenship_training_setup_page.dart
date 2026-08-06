@@ -39,7 +39,10 @@ class _CitizenshipTrainingSetupPageState
         child: settings == null
             ? const Center(child: CircularProgressIndicator())
             : ListView(
-                padding: AppSpacing.pageInsets,
+                padding: ResponsiveContent.insets(
+                  context,
+                  AppSpacing.pageInsets,
+                ),
                 children: [
                   Text(
                     context.l10n.lidFederalState,

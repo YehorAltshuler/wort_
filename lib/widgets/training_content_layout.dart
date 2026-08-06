@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class TrainingContentLayout extends StatelessWidget {
   const TrainingContentLayout({
@@ -20,16 +21,21 @@ class TrainingContentLayout extends StatelessWidget {
     if (scrollTogether) {
       return SafeArea(
         bottom: false,
-        child: Padding(
-          padding: AppSpacing.horizontalPageInsets,
-          child: LayoutBuilder(
-            builder: (context, constraints) => SingleChildScrollView(
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: Align(
+              alignment: Alignment.topCenter,
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                  maxWidth: AppBreakpoints.maxContentWidth,
+                ),
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    top: AppSpacing.xl,
-                    bottom: answersBottomPadding,
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    answersBottomPadding,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -49,27 +55,43 @@ class TrainingContentLayout extends StatelessWidget {
 
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: AppSpacing.horizontalPageInsets,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xl),
-              child: header,
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxContentWidth,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  0,
+                ),
+                child: header,
+              ),
             ),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) => SingleChildScrollView(
+          ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: Align(
+                  alignment: Alignment.topCenter,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight,
+                      maxWidth: AppBreakpoints.maxContentWidth,
                     ),
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Padding(
-                        padding: EdgeInsets.only(
-                          top: 20,
-                          bottom: answersBottomPadding,
+                        padding: EdgeInsets.fromLTRB(
+                          AppSpacing.xl,
+                          20,
+                          AppSpacing.xl,
+                          answersBottomPadding,
                         ),
                         child: answers,
                       ),
@@ -78,8 +100,8 @@ class TrainingContentLayout extends StatelessWidget {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1065,7 +1065,7 @@ abstract class AppLocalizations {
   /// No description provided for @lidExamSimulationDescription.
   ///
   /// In ru, this message translates to:
-  /// **'Экзамен в реалистичных условиях'**
+  /// **'33 случайных вопроса из актуального каталога'**
   String get lidExamSimulationDescription;
 
   /// No description provided for @lidFederalState.

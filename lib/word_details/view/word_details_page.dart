@@ -59,11 +59,14 @@ class _WordDetailsView extends StatelessWidget {
     final etymology = localized?.etymology ?? lexeme.etymology;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.lg,
-        AppSpacing.xl,
-        AppSpacing.huge,
+      padding: ResponsiveContent.insets(
+        context,
+        const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.huge,
+        ),
       ),
       children: [
         _WordHeader(lexeme: lexeme, articles: articles),

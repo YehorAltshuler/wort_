@@ -49,11 +49,14 @@ class _ModuleList extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Container(
-            margin: const EdgeInsets.fromLTRB(
-              AppSpacing.xl,
-              AppSpacing.md,
-              AppSpacing.xl,
-              AppSpacing.xxl,
+            margin: ResponsiveContent.insets(
+              context,
+              const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.md,
+                AppSpacing.xl,
+                AppSpacing.xxl,
+              ),
             ),
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
@@ -89,11 +92,14 @@ class _ModuleList extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xl,
-            0,
-            AppSpacing.xl,
-            AppSpacing.xxl,
+          padding: ResponsiveContent.insets(
+            context,
+            const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              0,
+              AppSpacing.xl,
+              AppSpacing.xxl,
+            ),
           ),
           sliver: SliverList.separated(
             itemCount: book.modules.length,

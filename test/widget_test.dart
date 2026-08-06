@@ -12,6 +12,8 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/app/view/app.dart';
 import 'package:wort_flutter/content/content_provider.dart';
 import 'package:wort_flutter/content/content_repository.dart';
+import 'package:wort_flutter/widgets/overall_progress_card.dart';
+import 'package:wort_flutter/widgets/progress_stat_card.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
 void main() {
@@ -232,9 +234,33 @@ void main() {
     await tester.tap(find.text('Verben mit festen Präpositionen'));
     await tester.pumpAndSettle();
     expect(find.text('Прогресс обучения'), findsOneWidget);
-    expect(find.text('Все слова'), findsOneWidget);
+    expect(find.text('Verben mit festen Präpositionen'), findsOneWidget);
     expect(find.text('Правильные ответы'), findsOneWidget);
     expect(find.text('Неправильно'), findsOneWidget);
+    expect(
+      tester
+          .widget<OverallProgressCard>(
+            find.byKey(const ValueKey('exercise-all-stat')),
+          )
+          .onTap,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<ProgressStatCard>(
+            find.byKey(const ValueKey('exercise-correct-stat')),
+          )
+          .onTap,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<ProgressStatCard>(
+            find.byKey(const ValueKey('exercise-incorrect-stat')),
+          )
+          .onTap,
+      isNull,
+    );
     expect(find.text('Akkusativ'), findsNothing);
     expect(find.text('Dativ'), findsNothing);
     expect(find.text('Настроить тренировку'), findsOneWidget);

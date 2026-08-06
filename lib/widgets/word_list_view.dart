@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class WordListView extends StatelessWidget {
   const WordListView({
@@ -21,7 +22,10 @@ class WordListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: padding,
+      padding: ResponsiveContent.insets(
+        context,
+        padding.resolve(Directionality.of(context)),
+      ),
       itemCount: itemCount,
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppSpacing.sm),

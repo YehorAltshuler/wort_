@@ -5,15 +5,18 @@ import 'package:citizenship_test_client/citizenship_test_client.dart';
 import 'package:citizenship_test_repository/citizenship_test_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/provider/repository_providers.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
 import 'package:wort_flutter/citizenship_test/widgets/citizenship_answer_bottom_bar.dart';
 import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_exercise.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
+import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
+import 'package:wort_flutter/widgets/training_completion_view.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
 class CitizenshipTrainingPage extends ConsumerStatefulWidget {
@@ -41,6 +44,7 @@ class _CitizenshipTrainingPageState
   ExamSessionRecord? _session;
   Object? _initializationError;
   final List<CitizenshipQuestion> _mistakes = [];
+  final Map<String, bool> _answers = {};
   final List<GlobalKey> _answerKeys = List.generate(4, (_) => GlobalKey());
   int _index = 0;
   int? _selected;
@@ -115,10 +119,17 @@ class _CitizenshipTrainingPageState
                     return Center(child: Text(context.l10n.lidNoQuestions));
                   }
                   if (_index >= queue.length) {
-                    return _TrainingComplete(
+                    return TrainingCompletionView(
+                      title: context.l10n.lidTrainingComplete,
+                      correct: _correct,
+                      incorrect: _wrong,
                       total: queue.length,
-                      mistakes: _mistakes.length,
-                      onRetry: _mistakes.isEmpty ? null : _retryMistakes,
+                      secondaryAction: _mistakes.isEmpty
+                          ? null
+                          : TrainingCompletionAction(
+                              label: context.l10n.retryMistakes,
+                              onPressed: _retryMistakes,
+                            ),
                     );
                   }
                   final question = queue[_index];
@@ -152,7 +163,13 @@ class _CitizenshipTrainingPageState
 
   Widget? _buildBottomBar() {
     final queue = _queue;
-    if (queue == null || queue.isEmpty || _index >= queue.length) return null;
+    if (queue == null || queue.isEmpty) return null;
+    if (_index >= queue.length) {
+      return BottomActionButton(
+        label: context.l10n.lidBackToOverview,
+        onPressed: () => context.pop(),
+      );
+    }
     final question = queue[_index];
     final selected = _selected;
     return CitizenshipAnswerBottomBar(
@@ -199,9 +216,15 @@ class _CitizenshipTrainingPageState
   }
 
   void _answer(CitizenshipQuestion question, int answer) {
+    final isCorrect = answer == question.correctAnswer;
     setState(() {
       _selected = answer;
-      if (answer == question.correctAnswer) {
+      final previous = _answers[question.id];
+      if (previous == true) _correct--;
+      if (previous == false) _wrong--;
+      _answers[question.id] = isCorrect;
+      _mistakes.remove(question);
+      if (isCorrect) {
         _correct++;
       } else {
         _wrong++;
@@ -213,9 +236,18 @@ class _CitizenshipTrainingPageState
   }
 
   Future<void> _recordAnswer(CitizenshipQuestion question, int answer) async {
-    await ref
-        .read(citizenshipTestRepositoryProvider)
-        .recordAnswer(question: question, selectedAnswer: answer);
+    final repository = ref.read(citizenshipTestRepositoryProvider);
+    await repository.recordAnswer(question: question, selectedAnswer: answer);
+    if (_session case final session?) {
+      await repository.saveExamAnswer(
+        ExamAnswerRecord(
+          sessionId: session.id,
+          questionId: question.id,
+          selectedAnswer: answer,
+          isCorrect: answer == question.correctAnswer,
+        ),
+      );
+    }
     ref.invalidate(citizenshipProgressProvider);
   }
 
@@ -280,12 +312,27 @@ class _CitizenshipTrainingPageState
               .toList();
     final session =
         existing ?? await repository.startAllQuestions(queue, state);
+    final savedAnswers = await repository.loadExamAnswers(session.id);
     if (existing == null) ref.invalidate(citizenshipExamSessionsProvider);
     if (!mounted) return;
     setState(() {
       _session = session;
       _queue = queue;
       _index = session.currentIndex.clamp(0, queue.length);
+      _answers
+        ..clear()
+        ..addEntries(
+          savedAnswers.map(
+            (answer) => MapEntry(answer.questionId, answer.isCorrect),
+          ),
+        );
+      _correct = savedAnswers.where((answer) => answer.isCorrect).length;
+      _wrong = savedAnswers.where((answer) => !answer.isCorrect).length;
+      _mistakes
+        ..clear()
+        ..addAll(
+          queue.where((question) => _answers[question.id] == false),
+        );
     });
   }
 
@@ -374,43 +421,10 @@ class _CitizenshipTrainingPageState
   void _retryMistakes() => setState(() {
     _queue = [..._mistakes]..shuffle();
     _mistakes.clear();
+    _answers.clear();
     _index = 0;
     _selected = null;
     _correct = 0;
     _wrong = 0;
   });
-}
-
-class _TrainingComplete extends StatelessWidget {
-  const _TrainingComplete({
-    required this.total,
-    required this.mistakes,
-    required this.onRetry,
-  });
-  final int total;
-  final int mistakes;
-  final VoidCallback? onRetry;
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.emoji_events_outlined, size: 72),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.lidTrainingComplete,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          Text(context.l10n.lidTrainingSummary(total, mistakes)),
-          if (onRetry != null)
-            OutlinedButton(
-              onPressed: onRetry,
-              child: Text(context.l10n.retryMistakes),
-            ),
-        ],
-      ),
-    ),
-  );
 }

@@ -166,7 +166,7 @@
   "lidSequentialMode": "جميع الأسئلة بالترتيب",
   "lidSequentialModeDescription": "الأسئلة العامة وأسئلة الولاية المحددة",
   "lidExamSimulation": "محاكاة الاختبار",
-  "lidExamSimulationDescription": "اختبار في ظروف واقعية",
+  "lidExamSimulationDescription": "33 سؤالًا مختارًا عشوائيًا",
   "lidFederalState": "الولاية الاتحادية",
   "lidSelectFederalState": "اختر الولاية الاتحادية",
   "lidStartExam": "بدء الاختبار",

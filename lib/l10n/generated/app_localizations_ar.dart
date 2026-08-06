@@ -511,7 +511,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lidExamSimulation => 'محاكاة الاختبار';
 
   @override
-  String get lidExamSimulationDescription => 'اختبار في ظروف واقعية';
+  String get lidExamSimulationDescription => '33 سؤالًا مختارًا عشوائيًا';
 
   @override
   String get lidFederalState => 'الولاية الاتحادية';

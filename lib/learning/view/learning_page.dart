@@ -4,6 +4,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/dashboard_block.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class LearningPage extends StatelessWidget {
   const LearningPage({super.key});
@@ -11,7 +12,7 @@ class LearningPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: AppSpacing.pageInsets,
+      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
       children: [
         DashboardBlock(
           icon: Icons.menu_book_outlined,

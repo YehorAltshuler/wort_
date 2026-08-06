@@ -530,8 +530,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lidExamSimulation => 'Prüfungssimulation';
 
   @override
-  String get lidExamSimulationDescription =>
-      'Prüfung unter realistischen Bedingungen';
+  String get lidExamSimulationDescription => '33 zufällig ausgewählte Fragen';
 
   @override
   String get lidFederalState => 'Bundesland';

@@ -17,6 +17,7 @@ import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
 import 'package:wort_flutter/settings/widgets/settings_section.dart';
 import 'package:wort_flutter/settings/widgets/sync_catalog_dialog.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/selection_bottom_sheet.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -38,7 +39,7 @@ class SettingsPage extends ConsumerWidget {
     }
 
     return ListView(
-      padding: AppSpacing.pageInsets,
+      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
       children: [
         SettingsSection(
           title: context.l10n.generalSettingsSection,
@@ -199,12 +200,6 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ),
               onTap: () => _showContentCatalogDialog(context, ref),
-              trailing: contentSync.isLoading
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh),
             ),
           ],
         ),
@@ -213,7 +208,7 @@ class SettingsPage extends ConsumerWidget {
           title: context.l10n.lidSettingsSection,
           children: [
             SettingsRow(
-              icon: Icons.sync,
+              icon: Icons.cloud_sync_outlined,
               title: context.l10n.lidCatalogTitle,
               subtitle: Text(
                 _catalogStatus(
@@ -229,19 +224,12 @@ class SettingsPage extends ConsumerWidget {
                 questionCount:
                     metadata?.questionCount ?? questions.value?.length ?? 0,
               ),
-              trailing: sync.isLoading
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh),
             ),
             SettingsRow(
               icon: Icons.restart_alt,
               title: context.l10n.lidResetProgress,
               subtitle: Text(context.l10n.lidResetProgressMessage),
               onTap: () => _resetCitizenshipProgress(context, ref),
-              trailing: const Icon(Icons.delete_outline),
             ),
           ],
         ),

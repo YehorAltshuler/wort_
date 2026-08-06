@@ -38,7 +38,7 @@ class _VerticalIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _indicatorColor(context, article);
+    final palette = _indicatorPalette(context, article);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -46,14 +46,17 @@ class _VerticalIndicator extends StatelessWidget {
           width: 5,
           height: 28,
           decoration: BoxDecoration(
-            color: color,
+            color: palette.foreground,
             borderRadius: BorderRadius.circular(99),
           ),
         ),
         const SizedBox(width: 6),
         Text(
-          article,
-          style: TextStyle(color: color, fontWeight: FontWeight.w700),
+          _indicatorLabel(article),
+          style: TextStyle(
+            color: palette.foreground,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );
@@ -67,29 +70,72 @@ class _BadgeIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _indicatorColor(context, article);
+    final palette = _indicatorPalette(context, article);
     return Container(
-      constraints: const BoxConstraints(minWidth: 38, minHeight: 28),
+      constraints: BoxConstraints(
+        minWidth: article == 'plural' ? 34 : 38,
+        minHeight: 28,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
+        color: palette.background,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        article,
-        style: TextStyle(color: color, fontWeight: FontWeight.w700),
+        _indicatorLabel(article),
+        style: TextStyle(
+          color: palette.foreground,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
 }
 
-Color _indicatorColor(BuildContext context, String article) {
+({Color foreground, Color background}) _indicatorPalette(
+  BuildContext context,
+  String article,
+) {
   final dark = Theme.of(context).brightness == Brightness.dark;
-  return switch (article) {
-    'der' => dark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
-    'die' => dark ? const Color(0xFFF472B6) : const Color(0xFFDB2777),
-    'das' => dark ? const Color(0xFF4ADE80) : const Color(0xFF15803D),
-    _ => dark ? const Color(0xFFC4B5FD) : const Color(0xFF7C3AED),
+  return switch ((dark, article)) {
+    (false, 'der') => (
+      foreground: const Color(0xFF3F729B),
+      background: const Color(0xFFE5EFF7),
+    ),
+    (false, 'die') => (
+      foreground: const Color(0xFFB23689),
+      background: const Color(0xFFF8E5F2),
+    ),
+    (false, 'das') => (
+      foreground: const Color(0xFF4F815B),
+      background: const Color(0xFFE7F1E9),
+    ),
+    (false, 'plural') => (
+      foreground: const Color(0xFF997126),
+      background: const Color(0xFFF6EEDC),
+    ),
+    (true, 'der') => (
+      foreground: const Color(0xFF83B3D8),
+      background: const Color(0xFF182A38),
+    ),
+    (true, 'die') => (
+      foreground: const Color(0xFFEC75CB),
+      background: const Color(0xFF35172E),
+    ),
+    (true, 'das') => (
+      foreground: const Color(0xFF87BE91),
+      background: const Color(0xFF1C3021),
+    ),
+    (true, 'plural') => (
+      foreground: const Color(0xFFD8B466),
+      background: const Color(0xFF332A17),
+    ),
+    _ => (
+      foreground: Theme.of(context).colorScheme.onSurfaceVariant,
+      background: Theme.of(context).colorScheme.surfaceContainerHighest,
+    ),
   };
 }
+
+String _indicatorLabel(String article) => article == 'plural' ? 'Pl.' : article;

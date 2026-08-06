@@ -75,7 +75,7 @@ class _SessionSetupPageState extends ConsumerState<SessionSetupPage> {
                   filter.apply(items).isNotEmpty,
             );
             return ListView(
-              padding: AppSpacing.pageInsets,
+              padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
               children: [
                 Text(
                   context.l10n.viewWords,

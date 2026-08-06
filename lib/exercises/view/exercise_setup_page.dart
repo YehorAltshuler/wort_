@@ -30,7 +30,7 @@ class _ExerciseSetupPageState extends State<ExerciseSetupPage> {
       appBar: AppBar(title: Text(context.l10n.sessionSetupTitle)),
       body: ResponsiveContent(
         child: ListView(
-          padding: AppSpacing.pageInsets,
+          padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
           children: [
             Text(
               context.l10n.difficultyTitle,

@@ -1,6 +1,3 @@
-import 'dart:math' as math;
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 abstract final class AppBreakpoints {
@@ -12,6 +9,18 @@ class ResponsiveContent extends StatefulWidget {
   const ResponsiveContent({required this.child, super.key});
 
   final Widget child;
+
+  static EdgeInsets insets(BuildContext context, EdgeInsets base) {
+    final overflow =
+        (MediaQuery.sizeOf(context).width - AppBreakpoints.maxContentWidth) / 2;
+    final extra = overflow > 0 ? overflow : 0.0;
+    return EdgeInsets.fromLTRB(
+      base.left + extra,
+      base.top,
+      base.right + extra,
+      base.bottom,
+    );
+  }
 
   @override
   State<ResponsiveContent> createState() => _ResponsiveContentState();
@@ -28,52 +37,16 @@ class _ResponsiveContentState extends State<ResponsiveContent> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) => Scrollbar(
-        controller: _scrollController,
-        child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(
-            scrollbars: false,
-          ),
-          child: PrimaryScrollController(
-            controller: _scrollController,
-            automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: _ScrollGutter(controller: _scrollController)),
-                SizedBox(
-                  width: math.min(
-                    constraints.maxWidth,
-                    AppBreakpoints.maxContentWidth,
-                  ),
-                  height: constraints.maxHeight,
-                  child: widget.child,
-                ),
-                Expanded(child: _ScrollGutter(controller: _scrollController)),
-              ],
-            ),
-          ),
+    return Scrollbar(
+      controller: _scrollController,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: PrimaryScrollController(
+          controller: _scrollController,
+          automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
+          child: SizedBox.expand(child: widget.child),
         ),
       ),
     );
   }
-}
-
-class _ScrollGutter extends StatelessWidget {
-  const _ScrollGutter({required this.controller});
-
-  final ScrollController controller;
-
-  @override
-  Widget build(BuildContext context) => Listener(
-    behavior: HitTestBehavior.opaque,
-    onPointerSignal: (event) {
-      if (event is! PointerScrollEvent || !controller.hasClients) return;
-      GestureBinding.instance.pointerSignalResolver.register(event, (_) {
-        controller.position.pointerScroll(event.scrollDelta.dy);
-      });
-    },
-    child: const SizedBox.expand(),
-  );
 }

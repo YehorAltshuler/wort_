@@ -167,7 +167,7 @@
   "lidSequentialMode": "Все вопросы по порядку",
   "lidSequentialModeDescription": "Общие вопросы и вопросы выбранной земли",
   "lidExamSimulation": "Симуляция экзамена",
-  "lidExamSimulationDescription": "Экзамен в реалистичных условиях",
+  "lidExamSimulationDescription": "33 случайных вопроса из актуального каталога",
   "lidFederalState": "Федеральная земля",
   "lidSelectFederalState": "Выберите федеральную землю",
   "lidStartExam": "Начать экзамен",

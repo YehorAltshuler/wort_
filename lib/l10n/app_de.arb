@@ -166,7 +166,7 @@
   "lidSequentialMode": "Alle Fragen der Reihe nach",
   "lidSequentialModeDescription": "Allgemeine Fragen und Fragen zum ausgewählten Bundesland",
   "lidExamSimulation": "Prüfungssimulation",
-  "lidExamSimulationDescription": "Prüfung unter realistischen Bedingungen",
+  "lidExamSimulationDescription": "33 zufällig ausgewählte Fragen",
   "lidFederalState": "Bundesland",
   "lidSelectFederalState": "Bundesland auswählen",
   "lidStartExam": "Prüfung starten",

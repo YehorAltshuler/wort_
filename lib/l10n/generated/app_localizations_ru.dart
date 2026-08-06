@@ -518,7 +518,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get lidExamSimulation => 'Симуляция экзамена';
 
   @override
-  String get lidExamSimulationDescription => 'Экзамен в реалистичных условиях';
+  String get lidExamSimulationDescription =>
+      '33 случайных вопроса из актуального каталога';
 
   @override
   String get lidFederalState => 'Федеральная земля';

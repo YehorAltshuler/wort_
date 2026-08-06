@@ -15,10 +15,12 @@ import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
+import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_chip_group.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
+import 'package:wort_flutter/widgets/training_completion_view.dart';
 import 'package:wort_flutter/widgets/training_content_layout.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
@@ -146,12 +148,17 @@ class _SessionPageState extends ConsumerState<SessionPage> {
               return Center(child: Text(context.l10n.noWords));
             }
             if (_index >= queue.length) {
-              return _CompletionView(
+              return TrainingCompletionView(
+                title: context.l10n.knowledgeCheckComplete,
                 correct: _correct,
-                wrong: _wrong,
-                hasMistakes: _mistakes.isNotEmpty,
-                onRetry: _retryMistakes,
-                onClose: () => context.pop(),
+                incorrect: _wrong,
+                total: queue.length,
+                secondaryAction: _mistakes.isEmpty
+                    ? null
+                    : TrainingCompletionAction(
+                        label: context.l10n.retryMistakes,
+                        onPressed: _retryMistakes,
+                      ),
               );
             }
             final word = queue[_index];
@@ -194,7 +201,13 @@ class _SessionPageState extends ConsumerState<SessionPage> {
   Widget? _buildBottomBar(List<CourseWord> allWords) {
     final queue = _queue;
     if (queue == null) return null;
-    if (queue.isEmpty || _index >= queue.length) return null;
+    if (queue.isEmpty) return null;
+    if (_index >= queue.length) {
+      return BottomActionButton(
+        label: context.l10n.backToModule,
+        onPressed: () => context.pop(),
+      );
+    }
     final word = queue[_index];
     final exercise = _exerciseFor(
       word,
@@ -422,53 +435,4 @@ class _SessionTrainingContent extends StatelessWidget {
             onSubmitted: onInputSubmitted,
           ),
   );
-}
-
-class _CompletionView extends StatelessWidget {
-  const _CompletionView({
-    required this.correct,
-    required this.wrong,
-    required this.hasMistakes,
-    required this.onRetry,
-    required this.onClose,
-  });
-
-  final int correct;
-  final int wrong;
-  final bool hasMistakes;
-  final VoidCallback onRetry;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.emoji_events_outlined, size: 72),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.knowledgeCheckComplete,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            Text('${context.l10n.correctAnswer}: $correct'),
-            Text('${context.l10n.wrongAnswer}: $wrong'),
-            const SizedBox(height: 24),
-            if (hasMistakes)
-              OutlinedButton(
-                onPressed: onRetry,
-                child: Text(context.l10n.retryMistakes),
-              ),
-            FilledButton(
-              onPressed: onClose,
-              child: Text(context.l10n.backToModule),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

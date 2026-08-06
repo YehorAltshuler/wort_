@@ -9,6 +9,7 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/dashboard_block.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/section_header.dart';
 import 'package:wort_flutter/widgets/text_input_dialog.dart';
 
@@ -21,7 +22,7 @@ class CollectionsPage extends ConsumerWidget {
     final progress =
         ref.watch(learningProgressProvider).value ?? const LearningProgress();
     return ListView(
-      padding: AppSpacing.pageInsets,
+      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
       children: [
         collections.when(
           loading: () => const Center(child: CircularProgressIndicator()),

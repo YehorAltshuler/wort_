@@ -37,7 +37,7 @@ class SettingsRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.trailing,
+    this.trailing,
     this.iconColor,
     this.onTap,
     super.key,
@@ -46,7 +46,7 @@ class SettingsRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final Widget subtitle;
-  final Widget trailing;
+  final Widget? trailing;
   final Color? iconColor;
   final VoidCallback? onTap;
 

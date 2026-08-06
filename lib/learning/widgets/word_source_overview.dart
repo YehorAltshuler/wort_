@@ -5,6 +5,7 @@ import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/progress_stat_card.dart';
+import 'package:wort_flutter/widgets/responsive_content.dart';
 
 class WordSourceOverview extends StatelessWidget {
   const WordSourceOverview({
@@ -37,7 +38,7 @@ class WordSourceOverview extends StatelessWidget {
         )
         .toList(growable: false);
     return ListView(
-      padding: AppSpacing.pageInsets,
+      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
       children: [
         _SourceContextCard(title: title, subtitle: subtitle, icon: icon),
         const SizedBox(height: 12),

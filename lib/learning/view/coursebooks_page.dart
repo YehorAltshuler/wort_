@@ -27,7 +27,7 @@ class CoursebooksPage extends ConsumerWidget {
                 .where((item) => item.id != AppRoute.lidVocabularyBookId)
                 .toList(growable: false);
             return ListView.separated(
-              padding: AppSpacing.pageInsets,
+              padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
               itemCount: books.length,
               separatorBuilder: (context, index) => const SizedBox(height: 14),
               itemBuilder: (context, index) => SizedBox(

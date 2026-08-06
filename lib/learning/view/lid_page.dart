@@ -15,7 +15,7 @@ class LidPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Leben in Deutschland')),
       body: ResponsiveContent(
         child: ListView(
-          padding: AppSpacing.pageInsets,
+          padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
           children: [
             DashboardBlockGrid(
               children: [

@@ -119,7 +119,7 @@ class _StatisticsOverview extends StatelessWidget {
         : incorrect / available.length;
 
     return ListView(
-      padding: AppSpacing.pageInsets,
+      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
       children: [
         OverallProgressCard(
           title: context.l10n.lidTitle,

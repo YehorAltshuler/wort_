@@ -24,7 +24,7 @@ class ExercisesPage extends ConsumerWidget {
             child: Text(context.l10n.courseLoadError),
           ),
           data: (value) => ListView(
-            padding: AppSpacing.pageInsets,
+            padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
             children: [
               _ExerciseCard(
                 title: value.catalog.title,

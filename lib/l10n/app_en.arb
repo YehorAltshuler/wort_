@@ -166,7 +166,7 @@
   "lidSequentialMode": "All questions in order",
   "lidSequentialModeDescription": "General questions and questions for the selected state",
   "lidExamSimulation": "Exam simulation",
-  "lidExamSimulationDescription": "Exam under realistic conditions",
+  "lidExamSimulationDescription": "33 randomly selected questions",
   "lidFederalState": "Federal state",
   "lidSelectFederalState": "Select federal state",
   "lidStartExam": "Start exam",

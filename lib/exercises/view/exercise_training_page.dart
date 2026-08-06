@@ -3,15 +3,18 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
+import 'package:wort_flutter/widgets/bottom_action_button.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
 import 'package:wort_flutter/widgets/training_answer_chip_group.dart';
 import 'package:wort_flutter/widgets/training_bottom_bar.dart';
+import 'package:wort_flutter/widgets/training_completion_view.dart';
 import 'package:wort_flutter/widgets/training_content_layout.dart';
 import 'package:wort_flutter/widgets/training_progress_indicator.dart';
 
@@ -42,6 +45,7 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
   String? _firstOptionsKey;
   int _correct = 0;
   int _wrong = 0;
+  final List<FixedPrepositionVerb> _mistakes = [];
 
   @override
   void initState() {
@@ -90,12 +94,22 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
           return Scaffold(
             appBar: AppBar(),
             body: ResponsiveContent(
-              child: Center(
-                child: Text(
-                  context.l10n.knowledgeCheckComplete,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
+              child: TrainingCompletionView(
+                title: context.l10n.knowledgeCheckComplete,
+                correct: _correct,
+                incorrect: _wrong,
+                total: queue.length,
+                secondaryAction: _mistakes.isEmpty
+                    ? null
+                    : TrainingCompletionAction(
+                        label: context.l10n.retryMistakes,
+                        onPressed: _retryMistakes,
+                      ),
               ),
+            ),
+            bottomNavigationBar: BottomActionButton(
+              label: context.l10n.finishAction,
+              onPressed: () => context.pop(),
             ),
           );
         }
@@ -141,6 +155,7 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
         _correct++;
       } else {
         _wrong++;
+        if (!_mistakes.contains(word)) _mistakes.add(word);
       }
     });
     unawaited(
@@ -195,6 +210,19 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
       _firstOptionsKey = null;
     });
   }
+
+  void _retryMistakes() => setState(() {
+    _queue = [..._mistakes]..shuffle(Random());
+    _mistakes.clear();
+    _index = 0;
+    _correct = 0;
+    _wrong = 0;
+    _firstAnswer = null;
+    _caseAnswer = null;
+    _result = null;
+    _firstOptions = null;
+    _firstOptionsKey = null;
+  });
 
   List<String> _options(String correct, Iterable<String> alternatives) {
     final wrong = alternatives
