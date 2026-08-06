@@ -117,7 +117,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get languageTitle => 'Language';
+  String get languageTitle => 'Interface language';
+
+  @override
+  String get nativeLanguageTitle => 'Native language';
 
   @override
   String get themeTitle => 'Theme';
@@ -127,6 +130,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageEnglish => 'English';
+
+  @override
+  String get languageGerman => 'Deutsch';
 
   @override
   String get languageArabic => 'العربية';

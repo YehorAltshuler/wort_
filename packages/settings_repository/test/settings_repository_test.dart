@@ -24,6 +24,12 @@ void main() {
     );
 
     expect(settings.language, AppLanguage.arabic);
+    expect(
+      settings.nativeLanguage,
+      NativeLanguage.arabic,
+      reason:
+          'Existing installations keep their previous translation language.',
+    );
     expect(settings.theme, ThemePreference.dark);
   });
 
@@ -35,6 +41,7 @@ void main() {
     );
 
     expect(settings.language, AppLanguage.russian);
+    expect(settings.nativeLanguage, NativeLanguage.russian);
     expect(settings.theme, ThemePreference.system);
     expect(settings.textSize, TextSizePreference.standard);
   });
@@ -43,10 +50,12 @@ void main() {
     when(() => client.writeString(any(), any())).thenAnswer((_) async {});
 
     await repository.setLanguage(AppLanguage.english);
+    await repository.setNativeLanguage(NativeLanguage.russian);
     await repository.setTheme(ThemePreference.light);
     await repository.setTextSize(TextSizePreference.extraLarge);
 
     verify(() => client.writeString('appLanguage', 'en')).called(1);
+    verify(() => client.writeString('nativeLanguage', 'ru')).called(1);
     verify(() => client.writeString('themePreference', 'light')).called(1);
     verify(
       () => client.writeString('textSizePreference', 'extraLarge'),
@@ -64,6 +73,21 @@ void main() {
     );
 
     expect(settings.textSize, TextSizePreference.large);
+  });
+
+  test('loads native language independently from interface language', () async {
+    when(() => client.readString(any())).thenAnswer((_) async => null);
+    when(() => client.readString('appLanguage')).thenAnswer((_) async => 'en');
+    when(
+      () => client.readString('nativeLanguage'),
+    ).thenAnswer((_) async => 'ar');
+
+    final settings = await repository.load(
+      fallbackLanguage: AppLanguage.russian,
+    );
+
+    expect(settings.language, AppLanguage.english);
+    expect(settings.nativeLanguage, NativeLanguage.arabic);
   });
 }
 

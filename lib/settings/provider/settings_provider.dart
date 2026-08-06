@@ -29,6 +29,17 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
     }
   }
 
+  Future<void> setNativeLanguage(NativeLanguage language) async {
+    final current = state.value;
+    if (current == null || current.nativeLanguage == language) return;
+    state = AsyncData(current.copyWith(nativeLanguage: language));
+    try {
+      await ref.read(settingsRepositoryProvider).setNativeLanguage(language);
+    } on Object catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+    }
+  }
+
   Future<void> setTheme(ThemePreference theme) async {
     final current = state.value;
     if (current == null || current.theme == theme) return;

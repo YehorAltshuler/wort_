@@ -2,6 +2,7 @@ import 'package:preferences_client/preferences_client.dart';
 import 'package:settings_repository/src/app_language.dart';
 import 'package:settings_repository/src/app_settings.dart';
 import 'package:settings_repository/src/color_palette.dart';
+import 'package:settings_repository/src/native_language.dart';
 import 'package:settings_repository/src/noun_indicator_version.dart';
 import 'package:settings_repository/src/text_size_preference.dart';
 import 'package:settings_repository/src/theme_preference.dart';
@@ -11,6 +12,7 @@ class SettingsRepository {
     : _client = client;
 
   static const _languageKey = 'appLanguage';
+  static const _nativeLanguageKey = 'nativeLanguage';
   static const _themeKey = 'themePreference';
   static const _paletteKey = 'colorPalette';
   static const _nounIndicatorKey = 'nounIndicatorVersion';
@@ -27,11 +29,16 @@ class SettingsRepository {
       _client.readString(_nounIndicatorKey),
       _client.readString(_bundeslandKey),
       _client.readString(_textSizeKey),
+      _client.readString(_nativeLanguageKey),
     ]);
+    final interfaceLanguage = values[0] == null
+        ? fallbackLanguage
+        : AppLanguage.fromCode(values[0]);
     return AppSettings(
-      language: values[0] == null
-          ? fallbackLanguage
-          : AppLanguage.fromCode(values[0]),
+      language: interfaceLanguage,
+      nativeLanguage: values[6] == null
+          ? NativeLanguage.fromAppLanguage(interfaceLanguage)
+          : NativeLanguage.fromCode(values[6]),
       theme: _themeFromName(values[1]),
       palette: _paletteFromName(values[2]),
       nounIndicator: _nounIndicatorFromName(values[3]),
@@ -42,6 +49,10 @@ class SettingsRepository {
 
   Future<void> setLanguage(AppLanguage language) {
     return _client.writeString(_languageKey, language.code);
+  }
+
+  Future<void> setNativeLanguage(NativeLanguage language) {
+    return _client.writeString(_nativeLanguageKey, language.code);
   }
 
   Future<void> setTheme(ThemePreference theme) {

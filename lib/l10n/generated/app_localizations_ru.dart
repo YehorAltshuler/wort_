@@ -118,7 +118,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsTitle => 'Настройки';
 
   @override
-  String get languageTitle => 'Язык';
+  String get languageTitle => 'Язык интерфейса';
+
+  @override
+  String get nativeLanguageTitle => 'Родной язык';
 
   @override
   String get themeTitle => 'Тема';
@@ -128,6 +131,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get languageEnglish => 'English';
+
+  @override
+  String get languageGerman => 'Deutsch';
 
   @override
   String get languageArabic => 'العربية';

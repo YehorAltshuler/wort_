@@ -9,6 +9,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/collections/widgets/collection_actions.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/learning/domain/training_exercise.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
@@ -157,7 +158,7 @@ class _SessionPageState extends ConsumerState<SessionPage> {
             final exercise = _exerciseFor(
               word,
               allWords,
-              Localizations.localeOf(context).languageCode,
+              context.nativeLanguageCode,
             );
             final articleExercise =
                 word.type == CourseWordType.noun &&
@@ -198,7 +199,7 @@ class _SessionPageState extends ConsumerState<SessionPage> {
     final exercise = _exerciseFor(
       word,
       allWords,
-      Localizations.localeOf(context).languageCode,
+      context.nativeLanguageCode,
     );
     final inputReady =
         exercise is InputExercise && _answerController.text.trim().isNotEmpty;

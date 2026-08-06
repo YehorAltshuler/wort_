@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 import 'package:wort_flutter/widgets/training_answer_chip.dart';
@@ -104,7 +105,7 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
         final correctFirst = hard
             ? word.preposition
             : word.translationFor(
-                Localizations.localeOf(context).languageCode,
+                context.nativeLanguageCode,
               );
         return _ExerciseTrainingScaffold(
           word: word,
@@ -129,7 +130,7 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
   }
 
   void _check(FixedPrepositionVerb word, bool hard) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final languageCode = context.nativeLanguageCode;
     final correctFirst = hard
         ? word.preposition
         : word.translationFor(languageCode);
@@ -165,7 +166,7 @@ class _ExerciseTrainingPageState extends ConsumerState<ExerciseTrainingPage> {
     FixedPrepositionVerb word,
     bool hard,
   ) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final languageCode = context.nativeLanguageCode;
     final key = '${word.verb}:$hard:$languageCode';
     if (_firstOptionsKey != key) {
       _firstOptionsKey = key;

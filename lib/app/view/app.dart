@@ -8,6 +8,7 @@ import 'package:wort_flutter/app/router/app_router.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
 import 'package:wort_flutter/content/content_provider.dart';
 import 'package:wort_flutter/l10n/generated/app_localizations.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/theme/wort_theme.dart';
 
@@ -62,6 +63,10 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       ),
       themeMode: _themeMode(settings?.theme ?? ThemePreference.system),
       locale: Locale(settings?.language.code ?? 'en'),
+      builder: (context, child) => NativeLanguageScope(
+        languageCode: settings?.nativeLanguage.code ?? 'en',
+        child: child!,
+      ),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

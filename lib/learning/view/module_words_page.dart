@@ -6,6 +6,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/collections/provider/collections_provider.dart';
 import 'package:wort_flutter/collections/widgets/collection_actions.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/learning/provider/course_provider.dart';
 import 'package:wort_flutter/learning/provider/course_word_filter.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
@@ -93,7 +94,7 @@ class _WordRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final languageCode = context.nativeLanguageCode;
     return WordListTile(
       title: word.term,
       subtitle: word.translationsFor(languageCode).join(', '),

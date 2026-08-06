@@ -113,7 +113,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsTitle => 'الإعدادات';
 
   @override
-  String get languageTitle => 'اللغة';
+  String get languageTitle => 'لغة الواجهة';
+
+  @override
+  String get nativeLanguageTitle => 'اللغة الأم';
 
   @override
   String get themeTitle => 'المظهر';
@@ -123,6 +126,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get languageEnglish => 'English';
+
+  @override
+  String get languageGerman => 'Deutsch';
 
   @override
   String get languageArabic => 'العربية';

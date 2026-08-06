@@ -1,6 +1,7 @@
 enum AppLanguage {
   russian('ru'),
   english('en'),
+  german('de'),
   arabic('ar');
 
   const AppLanguage(this.code);
@@ -9,6 +10,7 @@ enum AppLanguage {
 
   static AppLanguage fromCode(String? code) => switch (code) {
     'ru' => russian,
+    'de' => german,
     'ar' => arabic,
     _ => english,
   };

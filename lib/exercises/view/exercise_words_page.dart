@@ -6,6 +6,7 @@ import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/exercises/domain/exercise_models.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/learning/provider/learning_progress_provider.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/adaptive_stat_card_row.dart';
@@ -270,7 +271,7 @@ class _ExerciseWordList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final languageCode = context.nativeLanguageCode;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xl,

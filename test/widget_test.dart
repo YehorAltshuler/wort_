@@ -57,6 +57,7 @@ void main() {
     ).thenAnswer(
       (_) async => const AppSettings(
         language: AppLanguage.russian,
+        nativeLanguage: NativeLanguage.russian,
         theme: ThemePreference.system,
       ),
     );

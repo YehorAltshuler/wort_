@@ -63,6 +63,28 @@ class SettingsPage extends ConsumerWidget {
               },
               trailing: const Icon(Icons.chevron_right_rounded),
             ),
+            SettingsRow(
+              icon: Icons.translate_rounded,
+              title: context.l10n.nativeLanguageTitle,
+              subtitle: Text(
+                _nativeLanguageLabel(context, settings.nativeLanguage),
+              ),
+              onTap: () async {
+                final language = await _selectOption(
+                  context,
+                  context.l10n.nativeLanguageTitle,
+                  NativeLanguage.values,
+                  (value) => _nativeLanguageLabel(context, value),
+                  settings.nativeLanguage,
+                );
+                if (language != null) {
+                  await ref
+                      .read(settingsProvider.notifier)
+                      .setNativeLanguage(language);
+                }
+              },
+              trailing: const Icon(Icons.chevron_right_rounded),
+            ),
             if (supportsApkDownload)
               SettingsRow(
                 icon: Icons.android,
@@ -232,9 +254,19 @@ class SettingsPage extends ConsumerWidget {
     return switch (language) {
       AppLanguage.russian => context.l10n.languageRussian,
       AppLanguage.english => context.l10n.languageEnglish,
+      AppLanguage.german => context.l10n.languageGerman,
       AppLanguage.arabic => context.l10n.languageArabic,
     };
   }
+
+  String _nativeLanguageLabel(
+    BuildContext context,
+    NativeLanguage language,
+  ) => switch (language) {
+    NativeLanguage.russian => context.l10n.languageRussian,
+    NativeLanguage.english => context.l10n.languageEnglish,
+    NativeLanguage.arabic => context.l10n.languageArabic,
+  };
 
   Future<T?> _selectOption<T>(
     BuildContext context,

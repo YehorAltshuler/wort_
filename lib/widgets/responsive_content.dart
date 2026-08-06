@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 abstract final class AppBreakpoints {
@@ -37,20 +38,42 @@ class _ResponsiveContentState extends State<ResponsiveContent> {
           child: PrimaryScrollController(
             controller: _scrollController,
             automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SizedBox(
-                width: math.min(
-                  constraints.maxWidth,
-                  AppBreakpoints.maxContentWidth,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _ScrollGutter(controller: _scrollController)),
+                SizedBox(
+                  width: math.min(
+                    constraints.maxWidth,
+                    AppBreakpoints.maxContentWidth,
+                  ),
+                  height: constraints.maxHeight,
+                  child: widget.child,
                 ),
-                height: constraints.maxHeight,
-                child: widget.child,
-              ),
+                Expanded(child: _ScrollGutter(controller: _scrollController)),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+class _ScrollGutter extends StatelessWidget {
+  const _ScrollGutter({required this.controller});
+
+  final ScrollController controller;
+
+  @override
+  Widget build(BuildContext context) => Listener(
+    behavior: HitTestBehavior.opaque,
+    onPointerSignal: (event) {
+      if (event is! PointerScrollEvent || !controller.hasClients) return;
+      GestureBinding.instance.pointerSignalResolver.register(event, (_) {
+        controller.position.pointerScroll(event.scrollDelta.dy);
+      });
+    },
+    child: const SizedBox.expand(),
+  );
 }

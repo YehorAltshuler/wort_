@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:wort_flutter/app/router/app_routes.dart';
 import 'package:wort_flutter/exercises/provider/exercises_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
 
@@ -13,7 +14,7 @@ class ExercisesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final exercise = ref.watch(fixedPrepositionExerciseProvider);
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final languageCode = context.nativeLanguageCode;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.exercisesTitle)),
       body: ResponsiveContent(

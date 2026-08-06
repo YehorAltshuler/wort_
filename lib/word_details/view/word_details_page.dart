@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wort_flutter/collections/widgets/collection_actions.dart';
 import 'package:wort_flutter/dictionary/provider/noun_gender_provider.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
+import 'package:wort_flutter/l10n/native_language_scope.dart';
 import 'package:wort_flutter/settings/widgets/noun_indicator.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 import 'package:wort_flutter/widgets/responsive_content.dart';
@@ -50,7 +51,7 @@ class _WordDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final languageCode = context.nativeLanguageCode;
     final localized = lexeme.localizations[languageCode];
     final senses = localized?.senses.isNotEmpty ?? false
         ? localized!.senses

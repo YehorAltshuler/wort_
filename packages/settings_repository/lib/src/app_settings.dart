@@ -1,5 +1,6 @@
 import 'package:settings_repository/src/app_language.dart';
 import 'package:settings_repository/src/color_palette.dart';
+import 'package:settings_repository/src/native_language.dart';
 import 'package:settings_repository/src/noun_indicator_version.dart';
 import 'package:settings_repository/src/text_size_preference.dart';
 import 'package:settings_repository/src/theme_preference.dart';
@@ -7,6 +8,7 @@ import 'package:settings_repository/src/theme_preference.dart';
 class AppSettings {
   const AppSettings({
     required this.language,
+    required this.nativeLanguage,
     required this.theme,
     this.palette = ColorPalette.pink,
     this.nounIndicator = NounIndicatorVersion.v2,
@@ -15,6 +17,7 @@ class AppSettings {
   });
 
   final AppLanguage language;
+  final NativeLanguage nativeLanguage;
   final ThemePreference theme;
   final ColorPalette palette;
   final NounIndicatorVersion nounIndicator;
@@ -23,6 +26,7 @@ class AppSettings {
 
   AppSettings copyWith({
     AppLanguage? language,
+    NativeLanguage? nativeLanguage,
     ThemePreference? theme,
     ColorPalette? palette,
     NounIndicatorVersion? nounIndicator,
@@ -31,6 +35,7 @@ class AppSettings {
   }) {
     return AppSettings(
       language: language ?? this.language,
+      nativeLanguage: nativeLanguage ?? this.nativeLanguage,
       theme: theme ?? this.theme,
       palette: palette ?? this.palette,
       nounIndicator: nounIndicator ?? this.nounIndicator,
