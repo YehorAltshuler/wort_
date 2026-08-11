@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider.dart';
 import 'package:wort_flutter/citizenship_test/widgets/adaptive_image_grid.dart';
+import 'package:wort_flutter/citizenship_test/widgets/fullscreen_image_viewer.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/theme/app_spacing.dart';
 
@@ -36,9 +39,15 @@ class CitizenshipQuestionImage extends ConsumerWidget {
               : value.length == 1
               ? SizedBox(
                   width: double.infinity,
-                  child: _QuestionImageCard(
-                    key: ValueKey('$questionId:${value.single.position}'),
-                    bytes: value.single.bytes,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 340),
+                    child: _QuestionImageCard(
+                      key: ValueKey('$questionId:${value.single.position}'),
+                      bytes: value.single.bytes,
+                      heroTag:
+                          'citizenship-image-$questionId-'
+                          '${value.single.position}',
+                    ),
                   ),
                 )
               : CitizenshipAdaptiveImageGrid(
@@ -61,11 +70,13 @@ class _QuestionImageCard extends StatelessWidget {
   const _QuestionImageCard({
     required this.bytes,
     this.label,
+    this.heroTag,
     super.key,
   });
 
   final Uint8List bytes;
   final String? label;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -77,45 +88,117 @@ class _QuestionImageCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
-      child: label == null
-          ? Image.memory(
-              bytes,
-              width: double.infinity,
-              fit: BoxFit.fitWidth,
-              cacheWidth: cacheWidth,
-              errorBuilder: (context, error, stackTrace) =>
-                  const _UnavailableImage(),
-            )
-          : Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Image.memory(
-                      bytes,
-                      width: double.infinity,
-                      fit: BoxFit.contain,
-                      cacheWidth: cacheWidth,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const _UnavailableImage(),
+      child: InkWell(
+        onTap: label == null
+            ? () => _showFullscreenImage(context, bytes, heroTag!)
+            : null,
+        child: label == null
+            ? SizedBox(
+                height: 340,
+                child: _FittedQuestionImage(
+                  bytes: bytes,
+                  cacheWidth: cacheWidth,
+                  heroTag: heroTag,
+                ),
+              )
+            : Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Image.memory(
+                        bytes,
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                        cacheWidth: cacheWidth,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const _UnavailableImage(),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      label!,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelLarge,
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        label!,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
+
+  void _showFullscreenImage(
+    BuildContext context,
+    Uint8List bytes,
+    String heroTag,
+  ) {
+    unawaited(
+      Navigator.of(context, rootNavigator: true).push(
+        FullscreenImageViewerRoute(
+          imageProvider: MemoryImage(bytes),
+          heroTag: heroTag,
+        ),
+      ),
+    );
+  }
+}
+
+class _FittedQuestionImage extends StatelessWidget {
+  const _FittedQuestionImage({
+    required this.bytes,
+    required this.cacheWidth,
+    this.heroTag,
+  });
+
+  final Uint8List bytes;
+  final int cacheWidth;
+  final String? heroTag;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      ImageFiltered(
+        imageFilter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Transform.scale(
+          scale: 1.12,
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            cacheWidth: cacheWidth,
+            errorBuilder: (context, error, stackTrace) =>
+                const _UnavailableImage(),
+          ),
+        ),
+      ),
+      ColoredBox(color: Colors.black.withValues(alpha: 0.32)),
+      if (heroTag case final tag?)
+        Hero(
+          tag: tag,
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.contain,
+            cacheWidth: cacheWidth,
+            errorBuilder: (context, error, stackTrace) =>
+                const _UnavailableImage(),
+          ),
+        )
+      else
+        Image.memory(
+          bytes,
+          fit: BoxFit.contain,
+          cacheWidth: cacheWidth,
+          errorBuilder: (context, error, stackTrace) =>
+              const _UnavailableImage(),
+        ),
+    ],
+  );
 }
 
 class _UnavailableImage extends StatelessWidget {

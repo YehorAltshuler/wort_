@@ -40,7 +40,7 @@ TrainingExercise createExercise({
   Random? random,
 }) {
   final translations = word.translationsFor(languageCode);
-  final translation = translations.firstOrNull ?? word.term;
+  final translation = _singleTranslation(word, translations) ?? word.term;
   if (difficulty == TrainingDifficulty.hard) {
     final answer = word.type == CourseWordType.noun && word.article.isNotEmpty
         ? '${word.article.join('/')} ${word.term}'
@@ -72,9 +72,21 @@ TrainingExercise createExercise({
     answers: [translation],
     wrongAnswers: words
         .where((item) => item.id != word.id)
-        .map((item) => item.translationsFor(languageCode).firstOrNull ?? ''),
+        .map(
+          (item) =>
+              _singleTranslation(item, item.translationsFor(languageCode)) ??
+              '',
+        ),
     random: random,
   );
+}
+
+String? _singleTranslation(CourseWord word, List<String> translations) {
+  final translation = translations.firstOrNull;
+  if (translation == null || !word.id.startsWith('leben-in-deutschland:')) {
+    return translation;
+  }
+  return translation.split(';').first.trim();
 }
 
 ChoiceExercise _choice({

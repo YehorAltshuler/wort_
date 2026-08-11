@@ -9,6 +9,7 @@ import 'package:wort_flutter/citizenship_test/provider/citizenship_test_provider
 import 'package:wort_flutter/citizenship_test/provider/citizenship_training_session_provider.dart';
 import 'package:wort_flutter/citizenship_test/widgets/citizenship_answer_bottom_bar.dart';
 import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_exercise.dart';
+import 'package:wort_flutter/citizenship_test/widgets/citizenship_question_list_sheet.dart';
 import 'package:wort_flutter/l10n/l10n.dart';
 import 'package:wort_flutter/settings/provider/settings_provider.dart';
 import 'package:wort_flutter/widgets/async_value_view.dart';
@@ -211,42 +212,12 @@ class _CitizenshipTrainingPageState
       title: context.l10n.lidQuestionList,
       maxHeightFactor: 0.75,
       builder: (sheetContext) => Consumer(
-        builder: (context, ref, _) {
-          final progress =
-              ref.watch(citizenshipProgressProvider).value ?? const [];
-          final progressById = {
-            for (final item in progress) item.questionId: item,
-          };
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 16),
-            itemCount: queue.length,
-            itemBuilder: (context, index) {
-              final status = progressById[queue[index].id];
-              final answered = status?.lastSelectedAnswer != null;
-              final color = !answered
-                  ? Theme.of(context).colorScheme.surfaceContainerHighest
-                  : status!.isMastered
-                  ? TrainingAnswerChip.correctColor(context)
-                  : Theme.of(context).colorScheme.error;
-              return ListTile(
-                selected: index == training.index,
-                leading: CircleAvatar(
-                  backgroundColor: color.withValues(alpha: 0.16),
-                  foregroundColor: color,
-                  child: Text('${index + 1}'),
-                ),
-                title: Text(queue[index].text, maxLines: 2),
-                trailing: answered
-                    ? Icon(
-                        status!.isMastered ? Icons.check_circle : Icons.cancel,
-                        color: color,
-                      )
-                    : const Icon(Icons.radio_button_unchecked),
-                onTap: () => Navigator.pop(sheetContext, index),
-              );
-            },
-          );
-        },
+        builder: (context, ref, _) => CitizenshipQuestionListSheet(
+          questions: queue,
+          currentIndex: training.index,
+          progress: ref.watch(citizenshipProgressProvider).value ?? const [],
+          onSelected: (index) => Navigator.pop(sheetContext, index),
+        ),
       ),
     );
     if (selected == null || !mounted) return;

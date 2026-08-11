@@ -1320,6 +1320,24 @@ abstract class AppLocalizations {
   /// **'Список вопросов'**
   String get lidQuestionList;
 
+  /// No description provided for @lidQuestionNumberInput.
+  ///
+  /// In ru, this message translates to:
+  /// **'Номер вопроса'**
+  String get lidQuestionNumberInput;
+
+  /// No description provided for @lidQuestionNumberInvalid.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите число от 1 до {max}'**
+  String lidQuestionNumberInvalid(int max);
+
+  /// No description provided for @lidGoToQuestion.
+  ///
+  /// In ru, this message translates to:
+  /// **'Перейти к вопросу'**
+  String get lidGoToQuestion;
+
   /// No description provided for @lidResetProgress.
   ///
   /// In ru, this message translates to:

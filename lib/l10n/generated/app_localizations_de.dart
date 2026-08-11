@@ -675,6 +675,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lidQuestionList => 'Fragenliste';
 
   @override
+  String get lidQuestionNumberInput => 'Fragennummer';
+
+  @override
+  String lidQuestionNumberInvalid(int max) {
+    return 'Gib eine Zahl von 1 bis $max ein';
+  }
+
+  @override
+  String get lidGoToQuestion => 'Zur Frage springen';
+
+  @override
   String get lidResetProgress => 'Antwortstatistik zurücksetzen';
 
   @override

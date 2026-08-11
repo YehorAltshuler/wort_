@@ -653,6 +653,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lidQuestionList => 'قائمة الأسئلة';
 
   @override
+  String get lidQuestionNumberInput => 'رقم السؤال';
+
+  @override
+  String lidQuestionNumberInvalid(int max) {
+    return 'أدخل رقمًا من 1 إلى $max';
+  }
+
+  @override
+  String get lidGoToQuestion => 'الانتقال إلى السؤال';
+
+  @override
   String get lidResetProgress => 'إعادة تعيين إحصاءات الإجابات';
 
   @override

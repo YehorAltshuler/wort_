@@ -39,6 +39,40 @@ void main() {
     expect(exercise.check('дом'), isTrue);
   });
 
+  test('LID vocabulary choices show only one semicolon-separated meaning', () {
+    const lidWord = CourseWord(
+      id: 'leben-in-deutschland:module0.json:0',
+      type: CourseWordType.other,
+      term: 'abhängig',
+      translations: {
+        'ru': ['зависимый; подвластный'],
+      },
+    );
+    const lidOther = CourseWord(
+      id: 'leben-in-deutschland:module0.json:1',
+      type: CourseWordType.other,
+      term: 'Armee',
+      translations: {
+        'ru': ['армия; войско'],
+      },
+    );
+
+    final exercise =
+        createExercise(
+              word: lidWord,
+              words: const [lidWord, lidOther],
+              difficulty: TrainingDifficulty.easy,
+              languageCode: 'ru',
+              random: Random(1),
+            )
+            as ChoiceExercise;
+
+    expect(exercise.options, contains('зависимый'));
+    expect(exercise.options, contains('армия'));
+    expect(exercise.options.every((option) => !option.contains(';')), isTrue);
+    expect(exercise.check('зависимый'), isTrue);
+  });
+
   test('medium noun exercise checks the article', () {
     final exercise = createExercise(
       word: noun,
