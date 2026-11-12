@@ -21,19 +21,25 @@ class CollectionsPage extends ConsumerWidget {
     final collections = ref.watch(collectionsProvider);
     final progress =
         ref.watch(learningProgressProvider).value ?? const LearningProgress();
-    return ListView(
-      padding: ResponsiveContent.insets(context, AppSpacing.pageInsets),
-      children: [
-        collections.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Text(context.l10n.collectionsLoadError),
-          data: (items) => _CollectionBlocks(
-            items: items,
-            progress: progress,
-            onCreate: () => _createList(context, ref),
+    final pageInsets = ResponsiveContent.insets(context, AppSpacing.pageInsets);
+    return Scaffold(
+      body: ListView(
+        padding: pageInsets.copyWith(bottom: pageInsets.bottom + 88),
+        children: [
+          collections.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) =>
+                Text(context.l10n.collectionsLoadError),
+            data: (items) =>
+                _CollectionBlocks(items: items, progress: progress),
           ),
-        ),
-      ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _createList(context, ref),
+        icon: const Icon(Icons.create_new_folder_outlined),
+        label: Text(context.l10n.newList),
+      ),
     );
   }
 
@@ -55,12 +61,10 @@ class _CollectionBlocks extends StatelessWidget {
   const _CollectionBlocks({
     required this.items,
     required this.progress,
-    required this.onCreate,
   });
 
   final List<WordCollection> items;
   final LearningProgress progress;
-  final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
@@ -83,22 +87,33 @@ class _CollectionBlocks extends StatelessWidget {
           title: context.l10n.customLists,
           trailing: Text('${lists.length}'),
         ),
-        DashboardBlockGrid(
-          children: [
-            for (final list in lists)
-              DashboardBlock(
-                icon: Icons.folder_outlined,
-                title: list.name,
-                subtitle: _progressLabel(context, list),
-                progress: _progressValue(list),
-                onTap: () => context.push(AppRoute.collection(list.id)),
+        for (var index = 0; index < lists.length; index += 2) ...[
+          if (index + 1 < lists.length)
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: _listCard(context, lists[index])),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: _listCard(context, lists[index + 1])),
+                ],
               ),
-            DashboardAddBlock(label: context.l10n.newList, onTap: onCreate),
-          ],
-        ),
+            )
+          else
+            _listCard(context, lists[index]),
+          if (index + 2 < lists.length) const SizedBox(height: AppSpacing.md),
+        ],
       ],
     );
   }
+
+  Widget _listCard(BuildContext context, WordCollection list) => DashboardBlock(
+    icon: Icons.folder_outlined,
+    title: list.name,
+    subtitle: _progressLabel(context, list),
+    progress: _progressValue(list),
+    onTap: () => context.push(AppRoute.collection(list.id)),
+  );
 
   double _progressValue(WordCollection collection) {
     if (collection.wordIds.isEmpty) return 0;

@@ -71,7 +71,7 @@ TrainingExercise createExercise({
     question: word.term,
     answers: [translation],
     wrongAnswers: words
-        .where((item) => item.id != word.id)
+        .where((item) => item.type == word.type && item.id != word.id)
         .map(
           (item) =>
               _singleTranslation(item, item.translationsFor(languageCode)) ??
@@ -99,8 +99,9 @@ ChoiceExercise _choice({
   final wrong = wrongAnswers
       .where((value) => value.isNotEmpty && value != correct)
       .toSet()
-      .take(3);
-  final options = [correct, ...wrong]..shuffle(random);
+      .toList()
+    ..shuffle(random);
+  final options = [correct, ...wrong.take(3)]..shuffle(random);
   return ChoiceExercise(
     question: question,
     correctAnswers: answers,

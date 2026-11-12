@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,13 +61,8 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   void _selectPage(int index) {
     if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
-    unawaited(
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-      ),
-    );
+
+    _pageController.jumpToPage(index);
   }
 
   void _handlePageChanged(int index) {

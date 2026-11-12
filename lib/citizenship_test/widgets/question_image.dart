@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -138,12 +137,10 @@ class _QuestionImageCard extends StatelessWidget {
     Uint8List bytes,
     String heroTag,
   ) {
-    unawaited(
-      Navigator.of(context, rootNavigator: true).push(
-        FullscreenImageViewerRoute(
-          imageProvider: MemoryImage(bytes),
-          heroTag: heroTag,
-        ),
+    Navigator.of(context, rootNavigator: true).push(
+      FullscreenImageViewerRoute(
+        imageProvider: MemoryImage(bytes),
+        heroTag: heroTag,
       ),
     );
   }

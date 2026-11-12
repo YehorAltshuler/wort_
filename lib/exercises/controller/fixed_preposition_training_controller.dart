@@ -133,11 +133,9 @@ class FixedPrepositionTrainingController extends ChangeNotifier {
   }
 
   List<String> _options(String correct, Iterable<String> alternatives) {
-    final wrong = alternatives
-        .where((value) => value != correct)
-        .toSet()
-        .take(3);
-    return [correct, ...wrong]..shuffle(_random);
+    final wrong = alternatives.where((value) => value != correct).toSet().toList()
+      ..shuffle(_random);
+    return [correct, ...wrong.take(3)]..shuffle(_random);
   }
 
   static List<FixedPrepositionVerb> _filteredWords(

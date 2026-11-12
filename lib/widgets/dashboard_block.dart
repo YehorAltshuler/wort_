@@ -88,7 +88,11 @@ class DashboardBlock extends StatelessWidget {
                     color: colors.secondaryContainer,
                     borderRadius: BorderRadius.circular(11),
                   ),
-                  child: Icon(icon, color: colors.primary, size: 21),
+                  child: Icon(
+                    icon,
+                    color: colors.primary,
+                    size: 21,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -108,7 +112,10 @@ class DashboardBlock extends StatelessWidget {
                 ),
                 if (progress case final progress?) ...[
                   const SizedBox(height: 14),
-                  LinearProgressIndicator(value: progress, minHeight: 4),
+                  LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 4,
+                  ),
                 ],
                 const SizedBox(height: 8),
                 Text(
