@@ -4,6 +4,11 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to publish after a manual build
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -22,7 +27,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.9'
           cache: true
+      - run: flutter --version
       - run: flutter pub get
       - run: flutter build apk --release --flavor native
       - name: Prepare APK
@@ -33,14 +40,16 @@ jobs:
           path: wort.apk
           if-no-files-found: error
       - name: Publish tagged release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" wort.apk --clobber
+          release_tag="${RELEASE_TAG:-$GITHUB_REF_NAME}"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" wort.apk --clobber
           else
-            gh release create "$GITHUB_REF_NAME" wort.apk \
+            gh release create "$release_tag" wort.apk \
               --generate-notes \
-              --title "wort_ $GITHUB_REF_NAME"
+              --title "wort_ $release_tag"
           fi
